@@ -5,66 +5,101 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
+
     tools:context=".DrawCanvas">
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_above="@+id/toolBar">
+
+        <com.KDB.exam.canvasView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
+    </RelativeLayout>
 
     <LinearLayout
         android:id="@+id/toolBar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:gravity="center"
+        android:layout_alignParentBottom="true"
         android:background="@drawable/toolbar_background"
-        >
+        android:gravity="center"
+        android:orientation="horizontal">
+
         <ImageButton
             android:id="@+id/redColor"
-            android:layout_width="50dp"
-            android:layout_height="50dp"
-            android:layout_margin="10dp"
-            android:onClick="setColor"
-            android:background="@drawable/red_background"/>
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:layout_margin="5dp"
+            android:background="@drawable/red_background"
+            android:onClick="btn"
+            tools:ignore="SpeakableTextPresentCheck" />
+
         <ImageButton
             android:id="@+id/blueColor"
-            android:layout_width="50dp"
-            android:layout_height="50dp"
-            android:layout_margin="10dp"
-            android:onClick="setColor"
-            android:background="@drawable/blue_background"/>
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:layout_margin="5dp"
+            android:background="@drawable/blue_background"
+            android:onClick="btn"
+            tools:ignore="TouchTargetSizeCheck" />
+
         <ImageButton
             android:id="@+id/greenColor"
-            android:layout_width="50dp"
-            android:layout_height="50dp"
-            android:layout_margin="10dp"
-            android:onClick="setColor"
-            android:background="@drawable/green_background"/>
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:layout_margin="5dp"
+            android:background="@drawable/green_background"
+            android:onClick="btn" />
+
         <ImageButton
             android:id="@+id/blackColor"
-            android:layout_width="50dp"
-            android:layout_height="50dp"
-            android:layout_margin="10dp"
-            android:onClick="setColor"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:layout_margin="5dp"
+            android:background="@drawable/black_background"
 
-            android:background="@drawable/black_background"/>
+            android:onClick="btn"
+            tools:ignore="TouchTargetSizeCheck" />
+
         <ImageButton
             android:id="@+id/clear"
-            android:layout_width="50dp"
-            android:layout_height="50dp"
-            android:layout_margin="10dp"
-            android:onClick="setColor"
-            android:background="@drawable/clear_background"/>
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:layout_margin="5dp"
+            android:background="@drawable/broom"
+            android:onClick="btn"
+            tools:ignore="SpeakableTextPresentCheck" />
+
+        <ImageButton
+            android:id="@+id/undo"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:layout_margin="5dp"
+            android:background="@drawable/arrow_u_left_top"
+            android:onClick="btn" />
+
+        <ImageButton
+            android:id="@+id/redo"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:layout_margin="5dp"
+            android:background="@drawable/arrow_u_right_top"
+            android:onClick="btn"
+            tools:ignore="TouchTargetSizeCheck" />
+        <ImageButton
+            android:id="@+id/eraser"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:layout_margin="5dp"
+            android:background="@drawable/eraser"
+            android:onClick="btn"
+            tools:ignore="SpeakableTextPresentCheck" />
 
     </LinearLayout>
-<!--    <com.KDB.exam.canvasView-->
-<!--        android:layout_width="match_parent"-->
-<!--        android:layout_height="match_parent"/>-->
-    <RelativeLayout
+    <FrameLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_below="@+id/toolBar">
-    <com.KDB.exam.canvasView
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"/>
+        android:layout_height="match_parent">
 
-    </RelativeLayout>
-
-
+    </FrameLayout>
 </RelativeLayout>
