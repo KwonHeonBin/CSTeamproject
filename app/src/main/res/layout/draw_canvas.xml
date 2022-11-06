@@ -27,40 +27,57 @@
         android:orientation="horizontal">
 
         <ImageButton
-            android:id="@+id/redColor"
-            android:layout_width="30dp"
-            android:layout_height="30dp"
-            android:layout_margin="5dp"
-            android:background="@drawable/red_background"
-            android:onClick="btn"
-            tools:ignore="SpeakableTextPresentCheck" />
-
-        <ImageButton
-            android:id="@+id/blueColor"
-            android:layout_width="30dp"
-            android:layout_height="30dp"
-            android:layout_margin="5dp"
-            android:background="@drawable/blue_background"
-            android:onClick="btn"
-            tools:ignore="TouchTargetSizeCheck" />
-
-        <ImageButton
-            android:id="@+id/greenColor"
-            android:layout_width="30dp"
-            android:layout_height="30dp"
-            android:layout_margin="5dp"
-            android:background="@drawable/green_background"
-            android:onClick="btn" />
-
-        <ImageButton
-            android:id="@+id/blackColor"
+            android:id="@+id/Color"
             android:layout_width="30dp"
             android:layout_height="30dp"
             android:layout_margin="5dp"
             android:background="@drawable/black_background"
-
             android:onClick="btn"
-            tools:ignore="TouchTargetSizeCheck" />
+            tools:ignore="SpeakableTextPresentCheck" />
+
+<!--        <ImageButton-->
+<!--            android:id="@+id/blueColor"-->
+<!--            android:layout_width="30dp"-->
+<!--            android:layout_height="30dp"-->
+<!--            android:layout_margin="5dp"-->
+<!--            android:background="@drawable/blue_background"-->
+<!--            android:onClick="btn"-->
+<!--            tools:ignore="TouchTargetSizeCheck" />-->
+
+<!--        <ImageButton-->
+<!--            android:id="@+id/greenColor"-->
+<!--            android:layout_width="30dp"-->
+<!--            android:layout_height="30dp"-->
+<!--            android:layout_margin="5dp"-->
+<!--            android:background="@drawable/green_background"-->
+<!--            android:onClick="btn" />-->
+
+<!--        <ImageButton-->
+<!--            android:id="@+id/blackColor"-->
+<!--            android:layout_width="30dp"-->
+<!--            android:layout_height="30dp"-->
+<!--            android:layout_margin="5dp"-->
+<!--            android:background="@drawable/black_background"-->
+
+<!--            android:onClick="btn"-->
+<!--            tools:ignore="TouchTargetSizeCheck" />-->
+        <ImageButton
+            android:id="@+id/shape"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:layout_margin="5dp"
+            android:background="@drawable/minus_thick"
+            android:onClick="btn"
+            tools:ignore="SpeakableTextPresentCheck" />
+        <ImageButton
+            android:id="@+id/background"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:layout_margin="5dp"
+            android:background="@drawable/checkbox_blank_outline"
+            android:onClick="btn"
+            tools:ignore="SpeakableTextPresentCheck"
+            />
 
         <ImageButton
             android:id="@+id/clear"
@@ -93,6 +110,14 @@
             android:layout_height="30dp"
             android:layout_margin="5dp"
             android:background="@drawable/eraser"
+            android:onClick="btn"
+            tools:ignore="SpeakableTextPresentCheck" />
+        <ImageButton
+            android:id="@+id/magnet"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:layout_margin="5dp"
+            android:background="@drawable/magnet"
             android:onClick="btn"
             tools:ignore="SpeakableTextPresentCheck" />
 

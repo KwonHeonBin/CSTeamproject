@@ -1,21 +1,21 @@
 package com.KDB.exam
 
-import android.graphics.Bitmap
-import android.graphics.Canvas
+
 import android.graphics.Color
 import android.graphics.Paint
 import android.graphics.Path
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.util.Log
 import android.view.View
-import android.widget.Button
 import android.widget.Toast
+import com.KDB.exam.canvasView.Companion.backgroundMode
 import com.KDB.exam.canvasView.Companion.currentBrush
 import com.KDB.exam.canvasView.Companion.eraser
+import com.KDB.exam.canvasView.Companion.isMagnetMode
 import com.KDB.exam.canvasView.Companion.mode
 import com.KDB.exam.canvasView.Companion.pathList
 import com.KDB.exam.canvasView.Companion.reStroke
+import com.KDB.exam.canvasView.Companion.shapeMode
 import com.KDB.exam.canvasView.Companion.unStroke
 import com.KDB.exam.databinding.DrawCanvasBinding
 
@@ -50,30 +50,49 @@ class DrawCanvas : AppCompatActivity() {
 
     fun btn (view: View){       // set color fun
         when(view){
-            drawCanvasBinding.redColor->{
-                Toast.makeText(this,"red",Toast.LENGTH_SHORT).show()
-                paintBrush.color= Color.RED
-                currentColor(paintBrush.color)
+            drawCanvasBinding.Color->{
+                when(paintBrush.color){
+                    Color.RED->{
+                        Toast.makeText(this,"blue",Toast.LENGTH_SHORT).show()
+                        paintBrush.color= Color.BLUE
+                        drawCanvasBinding.Color.setBackgroundResource(R.drawable.blue_background)
+                    }
+                    Color.BLUE->{
+                        Toast.makeText(this,"green",Toast.LENGTH_SHORT).show()
+                        paintBrush.color= Color.GREEN
+                        drawCanvasBinding.Color.setBackgroundResource(R.drawable.green_background)
+                    }
+                    Color.GREEN->{
+                        Toast.makeText(this,"black",Toast.LENGTH_SHORT).show()
+                        paintBrush.color= Color.BLACK
+                        drawCanvasBinding.Color.setBackgroundResource(R.drawable.black_background)
+                    }
+                    Color.BLACK->{
+                        Toast.makeText(this,"red",Toast.LENGTH_SHORT).show()
+                        paintBrush.color= Color.RED
+                        drawCanvasBinding.Color.setBackgroundResource(R.drawable.red_background)
+                    }
+                }
                 mode=1
             }
-            drawCanvasBinding.blueColor->{
-                Toast.makeText(this,"blue",Toast.LENGTH_SHORT).show()
-                paintBrush.color= Color.BLUE
-                currentColor(paintBrush.color)
-                mode=1
-            }
-            drawCanvasBinding.blackColor->{
-                Toast.makeText(this,"black",Toast.LENGTH_SHORT).show()
-                paintBrush.color= Color.BLACK
-                currentColor(paintBrush.color)
-                mode=1
-            }
-            drawCanvasBinding.greenColor->{
-                Toast.makeText(this,"green",Toast.LENGTH_SHORT).show()
-                paintBrush.color= Color.GREEN
-                currentColor(paintBrush.color)
-                mode=1
-            }
+//            drawCanvasBinding.blueColor->{
+//                Toast.makeText(this,"blue",Toast.LENGTH_SHORT).show()
+//                paintBrush.color= Color.BLUE
+//                currentColor(paintBrush.color)
+//                mode=1
+//            }
+//            drawCanvasBinding.blackColor->{
+//                Toast.makeText(this,"black",Toast.LENGTH_SHORT).show()
+//                paintBrush.color= Color.BLACK
+//                currentColor(paintBrush.color)
+//                mode=1
+//            }
+//            drawCanvasBinding.greenColor->{
+//                Toast.makeText(this,"green",Toast.LENGTH_SHORT).show()
+//                paintBrush.color= Color.GREEN
+//                currentColor(paintBrush.color)
+//                mode=1
+//            }
             drawCanvasBinding.clear->{        // reset list
                 Toast.makeText(this,"clear",Toast.LENGTH_SHORT).show()
                 //var box=pathList.clone() as ArrayList<Stroke>
@@ -81,6 +100,55 @@ class DrawCanvas : AppCompatActivity() {
                 btnActiveCheck()
                 path.reset()
                 pathList.clear()
+            }
+            drawCanvasBinding.shape->{
+                when(shapeMode){
+                    1->{
+                        drawCanvasBinding.shape.setBackgroundResource(R.drawable.checkbox_blank_outline)
+                        shapeMode=2
+                    }
+                    2->{
+                        drawCanvasBinding.shape.setBackgroundResource(R.drawable.checkbox_blank)
+                        shapeMode=3
+                    }
+                    3->{
+                        drawCanvasBinding.shape.setBackgroundResource(R.drawable.circle_outline)
+                        shapeMode=4
+                    }
+                    4->{
+                        drawCanvasBinding.shape.setBackgroundResource(R.drawable.circle)
+                        shapeMode=5
+                    }
+                    5->{
+                        drawCanvasBinding.shape.setBackgroundResource(R.drawable.triangle_outline)
+                        shapeMode=6
+                    }
+                    6->{
+                        drawCanvasBinding.shape.setBackgroundResource(R.drawable.triangle)
+                        shapeMode=7
+                    }
+                    7->{
+                        drawCanvasBinding.shape.setBackgroundResource(R.drawable.minus_thick)
+                        shapeMode=1
+                    }
+                }
+                mode=3
+            }
+            drawCanvasBinding.background->{
+                when(backgroundMode){
+                    1->{
+                        drawCanvasBinding.background.setBackgroundResource(R.drawable.grid)
+                        backgroundMode=2
+                    }
+                    2->{
+                        drawCanvasBinding.background.setBackgroundResource(R.drawable.reorder_horizontal)
+                        backgroundMode=3
+                    }
+                    3->{
+                        drawCanvasBinding.background.setBackgroundResource(R.drawable.checkbox_blank_outline)
+                        backgroundMode=1
+                    }
+                }
             }
             drawCanvasBinding.undo->{
                 if(unStroke.isNotEmpty()){
@@ -107,6 +175,9 @@ class DrawCanvas : AppCompatActivity() {
                     1-> eraser.mode=0
                 }
                 Toast.makeText(this,if(eraser.mode==0) "stroke" else "area",Toast.LENGTH_SHORT).show()
+            }
+            drawCanvasBinding.magnet->{
+                isMagnetMode=!isMagnetMode
             }
         }
     }

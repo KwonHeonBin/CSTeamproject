@@ -11,7 +11,9 @@ import com.KDB.exam.DrawCanvas.Companion.drawCanvasBinding
 import com.KDB.exam.DrawCanvas.Companion.paintBrush
 import com.KDB.exam.DrawCanvas.Companion.path
 import com.samsung.android.sdk.penremote.SpenUnitManager
+import kotlin.math.cos
 import kotlin.math.pow
+import kotlin.math.sin
 import kotlin.math.sqrt
 
 class canvasView : View {
@@ -28,35 +30,37 @@ class canvasView : View {
     var params:ViewGroup.LayoutParams?=null
     var posX:Float=-100f
     var posY:Float=-100f
+    var startPosX=-100f
+    var startPosY=-100f
     var stroke=Stroke()
-
     var box=ArrayList<Stroke>()
     var canvas:Canvas= Canvas()
-    var canvasWidth=-1
-    var canvasHeight=-1
+//    var canvasWidth=-1
+//    var canvasHeight=-1
 
     var commonBrush:Paint=Paint().apply {
         color=Color.BLACK
         strokeWidth=3f
         style=Paint.Style.STROKE
     }
-    var eraserBrush:Paint= Paint().apply {
-        color=Color.WHITE
-        strokeWidth=eraser.radius
+    var backgroundBrush:Paint=Paint().apply {
+        color=Color.BLACK
+        strokeWidth=3f
         style=Paint.Style.STROKE
-        isAntiAlias=true
-        xfermode=PorterDuffXfermode(PorterDuff.Mode.CLEAR)
     }
-
     companion object{
         var pathList=ArrayList<Stroke>()
         var unStroke=ArrayList<ArrayList<Stroke>>()
         var reStroke=ArrayList<ArrayList<Stroke>>()
         var currentBrush=Color.BLACK
         var penManager: SpenUnitManager? = null
-        var mode:Int=1      // 1-> penMode  2-> eraser
+        var mode:Int=1      // 1-> penMode  2-> eraser  3-> shape
         //var canvasBitmap:Bitmap?=null
+        var shapeMode=1     // 1-> line 2-> circle 3-> filledCircle 4-> rect 5-> filledRect 6-> triangle 7-> filledTriangle
+        var backgroundMode=1    // 1-> none 2-> grid 3-> underBar 3
+        var bgGap:Int=100
         var eraser=Eraser(20f, Pair(-100f,-100f),1)
+        var isMagnetMode:Boolean=false
     }
 
     private fun init(){
@@ -80,6 +84,7 @@ class canvasView : View {
         this.canvas=canvas
         //canvasBitmap?.let { canvas.drawBitmap(it,0F,0F, paintBrush) }
         drawStroke()
+        drawBackGround(bgGap)
         when(mode){
             2-> {
                 drawEraser()
@@ -95,14 +100,28 @@ class canvasView : View {
         posY=event.y
         when(event.action){
             MotionEvent.ACTION_DOWN->{
-                actionForMode(mode,MotionEvent.ACTION_DOWN)
+                startPosX=event.x
+                startPosY=event.y
+                when(mode){
+                    1->{ penDrawing(MotionEvent.ACTION_DOWN) }
+                    2->{ eraserDrawing(MotionEvent.ACTION_DOWN) }
+                    3->{ shapeDrawing(MotionEvent.ACTION_DOWN) }
+                }
                 return true
             }
             MotionEvent.ACTION_MOVE->{
-                actionForMode(mode,MotionEvent.ACTION_MOVE)
+                when(mode){
+                    1->{ penDrawing(MotionEvent.ACTION_MOVE) }
+                    2->{ eraserDrawing(MotionEvent.ACTION_MOVE) }
+                    3->{ shapeDrawing(MotionEvent.ACTION_MOVE) }
+                }
             }
             MotionEvent.ACTION_UP->{
-                actionForMode(mode,MotionEvent.ACTION_UP)
+                when(mode){
+                    1->{ penDrawing(MotionEvent.ACTION_UP) }
+                    2->{ eraserDrawing(MotionEvent.ACTION_UP) }
+                    3->{ shapeDrawing(MotionEvent.ACTION_UP) }
+                }
                 return false
             }
             else -> return false
@@ -110,7 +129,6 @@ class canvasView : View {
         postInvalidate()            // UI thread call invalidate()
         return false
     }
-
     private fun drawStroke(){
         for (i in pathList){
             var path=Path()
@@ -123,67 +141,116 @@ class canvasView : View {
         }
     }
 
-    fun actionForMode(mode:Int,action:Int){
+    private fun penDrawing(action:Int){
         when(action){
-            0->{        // action_down
-                when(mode){
-                    1->{
-                        box= pathList.clone() as ArrayList<Stroke>
-                        stroke=Stroke()
-                        path.moveTo(posX,posY)        // start point
-                        stroke.brush.set(paintBrush)
-                        stroke.point.add(Pair(posX,posY))
-                        pathList.add(stroke)
-                    }
-                    2->{
-                        if(eraser.mode==1){
-                            box= pathList.clone() as ArrayList<Stroke>
-                        }
-                    }
-
-                }
-
-
+            0->{    // down
+                box= pathList.clone() as ArrayList<Stroke>
+                stroke=Stroke()
+                path.moveTo(posX,posY)        // start point
+                stroke.brush.set(paintBrush)
+                stroke.point.add(Pair(posX,posY))
+                pathList.add(stroke)
             }
-            2->{        // action_move
-                when(mode){
-                    1->{
-                        stroke.point.add(Pair(posX,posY))
-                    }
-                    2->{
-                        //erase()
-                    }
-                }
-
+            2->{    // move
+                stroke.point.add(Pair(posX,posY))
             }
-            1->{        //action_up
-                when(mode){
-                    1->{
-
-                        //if(!reStroke.isEmpty()){ unStroke.add(reStroke.removeLast().clone() as ArrayList<Stroke>) }
-                        unStroke.add(box.clone() as ArrayList<Stroke>)
-                        box.clear()
-                        stroke.point.add(Pair(posX,posY))
-                        stroke.interploation()
-                        resetPos()
-                        if(!drawCanvasBinding.undo.isEnabled){drawCanvasBinding.undo.isEnabled=true}
-                    }
-                    2->{
-                        resetPos()
-                        if(box!= pathList){ unStroke.add(box.clone() as ArrayList<Stroke>) }
-                    }
-                }
-
+            1->{    // up
+                unStroke.add(box.clone() as ArrayList<Stroke>)
+                box.clear()
+                stroke.point.add(Pair(posX,posY))
+                stroke.interploation()
+                resetPos()
+                if(!drawCanvasBinding.undo.isEnabled){drawCanvasBinding.undo.isEnabled=true}
             }
         }
-
     }
+    private fun eraserDrawing(action:Int){
+        when(action){
+            0->{
+                if(eraser.mode==1){
+                    box= pathList.clone() as ArrayList<Stroke>
+                }
+            }
+            2->{
 
-    fun drawEraser() {
+            }
+            1->{
+                resetPos()
+                if(box!= pathList){ unStroke.add(box.clone() as ArrayList<Stroke>) }
+            }
+        }
+    }
+    private fun shapeDrawing(action:Int){
+        when(action){
+            0->{
+                box= pathList.clone() as ArrayList<Stroke>
+                stroke=Stroke()
+                path.moveTo(posX,posY)        // start point
+                stroke.brush.set(paintBrush)
+                stroke.point.add(Pair(posX,posY))
+                when (shapeMode) {
+                    1 -> {      // line
+                        stroke.point.add(Pair(posX,posY))
+                    }
+                    2, 3 -> {   // rect
+                        stroke.point.add(Pair(posX,posY))
+                        stroke.point.add(Pair(posX,posY))
+                        stroke.point.add(Pair(posX,posY))
+                        stroke.point.add(Pair(posX,posY))
+                        if(shapeMode==3){stroke.brush.style=Paint.Style.FILL}
+                    }
+                    4, 5 -> {   // circle
+                        for (i in 0..50){stroke.point.add(Pair(posX,posY))}
+                        if(shapeMode==5){stroke.brush.style=Paint.Style.FILL}
+                    }
+                    6, 7 -> {   //triangle
+                        stroke.point.add(Pair(posX,posY))
+                        stroke.point.add(Pair(posX,posY))
+                        stroke.point.add(Pair(posX,posY))
+                        if(shapeMode==7){stroke.brush.style=Paint.Style.FILL}
+                    }
+                }
+                pathList.add(stroke)
+            }
+            2->{
+                when(shapeMode){
+                    1->{        // line
+                        stroke.point[1]=Pair(posX,posY)
+                    }
+                    2,3->{      // rect
+                        stroke.point[1]=Pair(startPosX,posY)
+                        stroke.point[2]=Pair(posX,posY)
+                        stroke.point[3]=Pair(posX,startPosY)
+                        stroke.point[4]=Pair(startPosX,startPosY)
+                    }
+                    4,5->{      // circle
+                        for (i in 0 until stroke.point.size){
+                            stroke.point[i]=Pair(
+                                startPosX+((posX-startPosX)* cos(i*(360/stroke.point.size).toDouble())).toFloat(),
+                                startPosY+((posY-startPosY)* sin(i*(360/stroke.point.size).toDouble())).toFloat())
+                        }
+                    }
+                    6,7->{      // triangle
+                        stroke.point[1]=Pair((2*startPosX)-posX,posY)
+                        stroke.point[2]=Pair(posX,posY)
+                        stroke.point[3]=Pair(startPosX,startPosY)
+                    }
+                }
+            }
+            1->{
+                unStroke.add(box.clone() as ArrayList<Stroke>)
+                box.clear()
+                stroke.interploation()
+                resetPos()
+                if(!drawCanvasBinding.undo.isEnabled){drawCanvasBinding.undo.isEnabled=true}
+            }
+        }
+    }
+    private fun drawEraser() {
         eraser.pos=Pair(posX,posY)
         canvas.drawCircle(eraser.pos.first,eraser.pos.second,eraser.radius,commonBrush)
     }
-    fun resetPos(){
+    private fun resetPos(){
         posX=-100f
         posY=-100f
     }
@@ -226,6 +293,26 @@ class canvasView : View {
                             return
                         }
                     }
+                }
+            }
+        }
+    }
+    private fun drawBackGround(gap:Int){
+        when(backgroundMode){
+            1->{
+
+            }
+            2->{
+                for (i in 0..(canvas.height/gap)){   // horizontal line
+                    canvas.drawLine(0f,(i*gap).toFloat(),canvas.width.toFloat(),(i*gap).toFloat(),backgroundBrush)
+                }
+                for (i in 0..(canvas.width/gap)){      //vertical line
+                    canvas.drawLine((i*gap).toFloat(),0f,(i*gap).toFloat(),canvas.height.toFloat(),backgroundBrush)
+                }
+            }
+            3->{
+                for (i in 0..(canvas.height/gap)){   // horizontal line
+                    canvas.drawLine(0f,(i*gap).toFloat(),canvas.width.toFloat(),(i*gap).toFloat(),backgroundBrush)
                 }
             }
         }
