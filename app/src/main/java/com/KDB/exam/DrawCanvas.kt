@@ -178,6 +178,8 @@ class DrawCanvas : AppCompatActivity() {
             }
             drawCanvasBinding.magnet->{
                 isMagnetMode=!isMagnetMode
+                Toast.makeText(this,if(isMagnetMode) "magnet" else "noMagnet",Toast.LENGTH_SHORT).show()
+
             }
         }
     }

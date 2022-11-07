@@ -11,10 +11,7 @@ import com.KDB.exam.DrawCanvas.Companion.drawCanvasBinding
 import com.KDB.exam.DrawCanvas.Companion.paintBrush
 import com.KDB.exam.DrawCanvas.Companion.path
 import com.samsung.android.sdk.penremote.SpenUnitManager
-import kotlin.math.cos
-import kotlin.math.pow
-import kotlin.math.sin
-import kotlin.math.sqrt
+import kotlin.math.*
 
 class canvasView : View {
 
@@ -33,6 +30,7 @@ class canvasView : View {
     var startPosX=-100f
     var startPosY=-100f
     var stroke=Stroke()
+    var magneticDegree:Float=0.2f
     var box=ArrayList<Stroke>()
     var canvas:Canvas= Canvas()
 //    var canvasWidth=-1
@@ -88,7 +86,7 @@ class canvasView : View {
         when(mode){
             2-> {
                 drawEraser()
-                erase()
+                //erase()
             }
         }
         invalidate()
@@ -130,15 +128,21 @@ class canvasView : View {
         return false
     }
     private fun drawStroke(){
-        for (i in pathList){
+        val list= pathList.iterator()
+        while (list.hasNext()){
+            val box=list.next()
             var path=Path()
-            path.moveTo(i.point.first().first,i.point.first().second)
-            for (j in 1..i.point.size-1){
-                path.lineTo(i.point[j].first,i.point[j].second)
+            if(box.point.isNotEmpty()){
+                path.moveTo(box.point.first().first,box.point.first().second)
+                for (j in 1..box.point.size-1){
+                    path.lineTo(box.point[j].first,box.point[j].second)
+                }
+                canvas.drawPath(path,box.brush)
+                invalidate()                //refresh View      -> if any line exist, call onDraw infinitely
             }
-            canvas.drawPath(path,i.brush)
-            invalidate()                //refresh View      -> if any line exist, call onDraw infinitely
+            //else{pathList.remove(box)}
         }
+
     }
 
     private fun penDrawing(action:Int){
@@ -156,57 +160,83 @@ class canvasView : View {
             }
             1->{    // up
                 unStroke.add(box.clone() as ArrayList<Stroke>)
+                if(reStroke.isNotEmpty()){ reStroke.clear()}
                 box.clear()
                 stroke.point.add(Pair(posX,posY))
-                stroke.interploation()
+                stroke.point=interpolation(stroke.point,stroke.maxDistPerPoint)
                 resetPos()
                 if(!drawCanvasBinding.undo.isEnabled){drawCanvasBinding.undo.isEnabled=true}
             }
         }
     }
     private fun eraserDrawing(action:Int){
+
         when(action){
             0->{
                 if(eraser.mode==1){
                     box= pathList.clone() as ArrayList<Stroke>
                 }
+                eraser.pos=Pair(posX,posY)
+                erase(eraser.pos)
             }
             2->{
-
+                var box=ArrayList<Pair<Float,Float>>()
+                box.add(eraser.pos)
+                box.add(Pair(posX,posY))
+                eraser.pos=Pair(posX,posY)
+                box=interpolation(box,30f)
+                for (i in box){erase(i)}
             }
             1->{
+                erase(Pair(posX,posY))
                 resetPos()
-                if(box!= pathList){ unStroke.add(box.clone() as ArrayList<Stroke>) }
+                eraser.pos=Pair(posX,posY)
+                if(box!= pathList){
+                    unStroke.add(box.clone() as ArrayList<Stroke>)
+                    if(reStroke.isNotEmpty()){ reStroke.clear()}
+                }
             }
         }
     }
     private fun shapeDrawing(action:Int){
+        var magneticPosX:Float=0f
+        var magneticPosY:Float=0f
+        if(backgroundMode==2 && isMagnetMode){
+            magneticPosX=magnetic(posX)
+            magneticPosY=magnetic(posY)
+            startPosX=magnetic(startPosX,true)
+            startPosY=magnetic(startPosY,true)
+        }
+        else{
+            magneticPosX=posX
+            magneticPosY=posY
+        }
         when(action){
             0->{
                 box= pathList.clone() as ArrayList<Stroke>
                 stroke=Stroke()
-                path.moveTo(posX,posY)        // start point
+                path.moveTo(startPosX,startPosY)        // start point
                 stroke.brush.set(paintBrush)
-                stroke.point.add(Pair(posX,posY))
+                stroke.point.add(Pair(startPosX,startPosY))
                 when (shapeMode) {
                     1 -> {      // line
-                        stroke.point.add(Pair(posX,posY))
+                        stroke.point.add(Pair(startPosX,startPosY))
                     }
                     2, 3 -> {   // rect
-                        stroke.point.add(Pair(posX,posY))
-                        stroke.point.add(Pair(posX,posY))
-                        stroke.point.add(Pair(posX,posY))
-                        stroke.point.add(Pair(posX,posY))
+                        stroke.point.add(Pair(startPosX,startPosY))
+                        stroke.point.add(Pair(startPosX,startPosY))
+                        stroke.point.add(Pair(startPosX,startPosY))
+                        stroke.point.add(Pair(startPosX,startPosY))
                         if(shapeMode==3){stroke.brush.style=Paint.Style.FILL}
                     }
                     4, 5 -> {   // circle
-                        for (i in 0..50){stroke.point.add(Pair(posX,posY))}
+                        for (i in 0..50){stroke.point.add(Pair(startPosX,startPosY))}
                         if(shapeMode==5){stroke.brush.style=Paint.Style.FILL}
                     }
                     6, 7 -> {   //triangle
-                        stroke.point.add(Pair(posX,posY))
-                        stroke.point.add(Pair(posX,posY))
-                        stroke.point.add(Pair(posX,posY))
+                        stroke.point.add(Pair(startPosX,startPosY))
+                        stroke.point.add(Pair(startPosX,startPosY))
+                        stroke.point.add(Pair(startPosX,startPosY))
                         if(shapeMode==7){stroke.brush.style=Paint.Style.FILL}
                     }
                 }
@@ -215,40 +245,52 @@ class canvasView : View {
             2->{
                 when(shapeMode){
                     1->{        // line
-                        stroke.point[1]=Pair(posX,posY)
+                        stroke.point[1]=Pair(magneticPosX,magneticPosY)
                     }
                     2,3->{      // rect
-                        stroke.point[1]=Pair(startPosX,posY)
-                        stroke.point[2]=Pair(posX,posY)
-                        stroke.point[3]=Pair(posX,startPosY)
+                        stroke.point[1]=Pair(startPosX,magneticPosY)
+                        stroke.point[2]=Pair(magneticPosX,magneticPosY)
+                        stroke.point[3]=Pair(magneticPosX,startPosY)
                         stroke.point[4]=Pair(startPosX,startPosY)
                     }
                     4,5->{      // circle
                         for (i in 0 until stroke.point.size){
                             stroke.point[i]=Pair(
-                                startPosX+((posX-startPosX)* cos(i*(360/stroke.point.size).toDouble())).toFloat(),
-                                startPosY+((posY-startPosY)* sin(i*(360/stroke.point.size).toDouble())).toFloat())
+                                startPosX+((magneticPosX-startPosX)* cos(i*(360/stroke.point.size).toDouble())).toFloat(),
+                                startPosY+((magneticPosY-startPosY)* sin(i*(360/stroke.point.size).toDouble())).toFloat())
                         }
                     }
                     6,7->{      // triangle
-                        stroke.point[1]=Pair((2*startPosX)-posX,posY)
-                        stroke.point[2]=Pair(posX,posY)
+                        stroke.point[1]=Pair((2*startPosX)-magneticPosX,magneticPosY)
+                        stroke.point[2]=Pair(magneticPosX,magneticPosY)
                         stroke.point[3]=Pair(startPosX,startPosY)
                     }
                 }
             }
             1->{
-                unStroke.add(box.clone() as ArrayList<Stroke>)
-                box.clear()
-                stroke.interploation()
-                resetPos()
-                if(!drawCanvasBinding.undo.isEnabled){drawCanvasBinding.undo.isEnabled=true}
+                if(stroke.point[0]!=stroke.point[1]){
+                    unStroke.add(box.clone() as ArrayList<Stroke>)
+                    if(reStroke.isNotEmpty()){ reStroke.clear()}
+                    box.clear()
+                    stroke.point=interpolation(stroke.point,stroke.maxDistPerPoint)
+                    resetPos()
+                    if(!drawCanvasBinding.undo.isEnabled){drawCanvasBinding.undo.isEnabled=true}
+                }
             }
         }
     }
-    private fun drawEraser() {
-        eraser.pos=Pair(posX,posY)
-        canvas.drawCircle(eraser.pos.first,eraser.pos.second,eraser.radius,commonBrush)
+    private fun magnetic(point:Float, isForce:Boolean=false):Float{
+        var magX:Float=0f;
+        var degree:Float=magneticDegree
+        if(isForce){degree=0.5f}
+        if(abs(point% bgGap) <= bgGap*degree) {
+            magX=((point/ bgGap).toInt()* bgGap).toFloat()
+        }
+        else if(abs(point% bgGap)> bgGap*(1f-degree)){
+            magX=(((point/ bgGap).toInt()+1)* bgGap).toFloat()
+        }
+        else {magX=point}
+        return magX
     }
     private fun resetPos(){
         posX=-100f
@@ -257,12 +299,16 @@ class canvasView : View {
     private fun saveCanvas(){
         unStroke.add(pathList.clone() as ArrayList<Stroke>)
     }
-    private fun erase() {
+    private fun drawEraser() {
+
+        canvas.drawCircle(eraser.pos.first,eraser.pos.second,eraser.radius,commonBrush)
+    }
+    private fun erase(point:Pair<Float,Float>) {
         for (st in pathList) {
             for ((i, j) in st.point) {
                 var distance = sqrt(
-                    (eraser.pos.first - i).pow(2) +
-                            (eraser.pos.second - j).pow(2))
+                    (point.first - i).pow(2) +
+                            (point.second - j).pow(2))
                 if (distance <= eraser.radius) {
                     when (eraser.mode) {
                         0 -> {    // stroke delete
@@ -316,6 +362,23 @@ class canvasView : View {
                 }
             }
         }
+    }
+    fun interpolation(point:ArrayList<Pair<Float,Float>>, dist:Float):ArrayList<Pair<Float,Float>>{
+        var i=0
+        while(i<point.size-1){
+            //Log.d("asd","size: "+point.size.toString()+"    "+i.toString())
+            var diff= sqrt(
+                abs(point[i].first-point[i+1].first).pow(2)
+                        +abs(point[i].second-point[i+1].second).pow(2))
+            //Log.d("asd","before:  "+i.toString()+"   "+diff.toString())
+            if(diff>dist){
+                var pos=Pair((point[i].first+point[i+1].first)/2,(point[i].second+point[i+1].second)/2)
+                point.add(i+1,pos)
+                continue
+            }
+            i++
+        }
+        return point
     }
 }
 

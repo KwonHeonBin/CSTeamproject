@@ -30,20 +30,4 @@ class Stroke : Cloneable {
         brush.strokeWidth=8f
         brush.strokeCap=Paint.Cap.ROUND
     }
-    fun interploation(){
-        var i=0
-        while(i<point.size-1){
-            //Log.d("asd","size: "+point.size.toString()+"    "+i.toString())
-            var diff= sqrt(
-                abs(point[i].first-point[i+1].first).pow(2)
-                    +abs(point[i].second-point[i+1].second).pow(2))
-            //Log.d("asd","before:  "+i.toString()+"   "+diff.toString())
-            if(diff>maxDistPerPoint){
-                var pos=Pair((point[i].first+point[i+1].first)/2,(point[i].second+point[i+1].second)/2)
-                point.add(i+1,pos)
-                continue
-            }
-            i++
-        }
-    }
 }
