@@ -1,4 +1,4 @@
-package com.example.composeacttest
+package com.example.composeacttest.data
 
 // 데이터 클래스를 위한 모델 클래스 선언
 // 모델 클래스란, 데이터를 저장하고 가져오는 역활을 하는 클래스이다.
