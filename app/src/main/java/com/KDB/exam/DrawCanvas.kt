@@ -29,7 +29,7 @@ class DrawCanvas : AppCompatActivity() {
             color= currentBrush
             style=Paint.Style.STROKE
             strokeJoin=Paint.Join.ROUND
-            strokeWidth=8f
+            strokeWidth=10f
             strokeCap=Paint.Cap.ROUND
         }
         lateinit var drawCanvasBinding: DrawCanvasBinding
@@ -75,24 +75,7 @@ class DrawCanvas : AppCompatActivity() {
                 }
                 mode=1
             }
-//            drawCanvasBinding.blueColor->{
-//                Toast.makeText(this,"blue",Toast.LENGTH_SHORT).show()
-//                paintBrush.color= Color.BLUE
-//                currentColor(paintBrush.color)
-//                mode=1
-//            }
-//            drawCanvasBinding.blackColor->{
-//                Toast.makeText(this,"black",Toast.LENGTH_SHORT).show()
-//                paintBrush.color= Color.BLACK
-//                currentColor(paintBrush.color)
-//                mode=1
-//            }
-//            drawCanvasBinding.greenColor->{
-//                Toast.makeText(this,"green",Toast.LENGTH_SHORT).show()
-//                paintBrush.color= Color.GREEN
-//                currentColor(paintBrush.color)
-//                mode=1
-//            }
+
             drawCanvasBinding.clear->{        // reset list
                 Toast.makeText(this,"clear",Toast.LENGTH_SHORT).show()
                 //var box=pathList.clone() as ArrayList<Stroke>
@@ -181,6 +164,14 @@ class DrawCanvas : AppCompatActivity() {
                 Toast.makeText(this,if(isMagnetMode) "magnet" else "noMagnet",Toast.LENGTH_SHORT).show()
 
             }
+            drawCanvasBinding.cursor->{
+                mode=4
+                Toast.makeText(this,"cursor",Toast.LENGTH_SHORT).show()
+            }
+            drawCanvasBinding.wrap->{
+                mode=5
+                Toast.makeText(this,"wrap",Toast.LENGTH_SHORT).show()
+            }
         }
     }
     private fun currentColor(color:Int){
@@ -196,7 +187,6 @@ class DrawCanvas : AppCompatActivity() {
             reStroke.isNotEmpty() -> {drawCanvasBinding.redo.isEnabled=true}
             else -> {drawCanvasBinding.redo.isEnabled=false}
         }
-        //return btnActiveCheck()
     }
 
 }

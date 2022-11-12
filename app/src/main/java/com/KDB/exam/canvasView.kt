@@ -13,6 +13,7 @@ import com.KDB.exam.DrawCanvas.Companion.path
 import com.samsung.android.sdk.penremote.SpenUnitManager
 import kotlin.math.*
 
+
 class canvasView : View {
 
     constructor(context: Context) : this(context, null){
@@ -33,6 +34,7 @@ class canvasView : View {
     var magneticDegree:Float=0.2f
     var box=ArrayList<Stroke>()
     var canvas:Canvas= Canvas()
+    var wrapArea=ArrayList<Pair<Float,Float>>()
 //    var canvasWidth=-1
 //    var canvasHeight=-1
 
@@ -41,18 +43,38 @@ class canvasView : View {
         strokeWidth=3f
         style=Paint.Style.STROKE
     }
+    var outLineBrush:Paint=Paint().apply {
+        color=Color.RED
+        alpha=150
+        strokeWidth=3f
+        isAntiAlias=true
+        style=Paint.Style.STROKE
+    }
+    var boxBrush:Paint=Paint().apply {
+        color=Color.RED
+        alpha=100
+        strokeWidth=3f
+        style=Paint.Style.STROKE
+    }
     var backgroundBrush:Paint=Paint().apply {
         color=Color.BLACK
         strokeWidth=3f
         style=Paint.Style.STROKE
     }
+    var wrapBrush:Paint=Paint().apply {
+        color=Color.BLACK
+        strokeWidth=3f
+        style=Paint.Style.STROKE
+        pathEffect= DashPathEffect(floatArrayOf(10f, 20f), 0f)
+    }
     companion object{
         var pathList=ArrayList<Stroke>()
         var unStroke=ArrayList<ArrayList<Stroke>>()
         var reStroke=ArrayList<ArrayList<Stroke>>()
+        var checkedStroke=ArrayList<Stroke>()
         var currentBrush=Color.BLACK
         var penManager: SpenUnitManager? = null
-        var mode:Int=1      // 1-> penMode  2-> eraser  3-> shape
+        var mode:Int=1      // 1-> penMode  2-> eraser  3-> shape  4-> cursor  5-> wrap
         //var canvasBitmap:Bitmap?=null
         var shapeMode=1     // 1-> line 2-> circle 3-> filledCircle 4-> rect 5-> filledRect 6-> triangle 7-> filledTriangle
         var backgroundMode=1    // 1-> none 2-> grid 3-> underBar 3
@@ -62,12 +84,7 @@ class canvasView : View {
     }
 
     private fun init(){
-        setupPen()
         params=ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,ViewGroup.LayoutParams.WRAP_CONTENT)
-
-    }
-    private fun setupPen(){
-
     }
 
 //    override fun onSizeChanged(w: Int, h: Int, oldw: Int, oldh: Int) {
@@ -81,16 +98,18 @@ class canvasView : View {
         super.onDraw(canvas)
         this.canvas=canvas
         //canvasBitmap?.let { canvas.drawBitmap(it,0F,0F, paintBrush) }
-        drawStroke()
         drawBackGround(bgGap)
         when(mode){
-            2-> {
-                drawEraser()
-                //erase()
+            2-> { drawEraser() }
+            4->{ drawOutline(checkedStroke) }
+            5->{
+                wrapAreaDrawing()
+                drawOutline(checkedStroke)
             }
         }
+        drawStroke()
+        refreshState()
         invalidate()
-
     }
 
     override fun onTouchEvent(event: MotionEvent): Boolean {
@@ -104,6 +123,8 @@ class canvasView : View {
                     1->{ penDrawing(MotionEvent.ACTION_DOWN) }
                     2->{ eraserDrawing(MotionEvent.ACTION_DOWN) }
                     3->{ shapeDrawing(MotionEvent.ACTION_DOWN) }
+                    4->{strokeClick(MotionEvent.ACTION_DOWN)}
+                    5->{wrapDrawing(MotionEvent.ACTION_DOWN)}
                 }
                 return true
             }
@@ -112,6 +133,8 @@ class canvasView : View {
                     1->{ penDrawing(MotionEvent.ACTION_MOVE) }
                     2->{ eraserDrawing(MotionEvent.ACTION_MOVE) }
                     3->{ shapeDrawing(MotionEvent.ACTION_MOVE) }
+                    4->{}
+                    5->{wrapDrawing(MotionEvent.ACTION_MOVE)}
                 }
             }
             MotionEvent.ACTION_UP->{
@@ -119,6 +142,8 @@ class canvasView : View {
                     1->{ penDrawing(MotionEvent.ACTION_UP) }
                     2->{ eraserDrawing(MotionEvent.ACTION_UP) }
                     3->{ shapeDrawing(MotionEvent.ACTION_UP) }
+                    4->{}
+                    5->{wrapDrawing(MotionEvent.ACTION_UP)}
                 }
                 return false
             }
@@ -140,17 +165,14 @@ class canvasView : View {
                 canvas.drawPath(path,box.brush)
                 invalidate()                //refresh View      -> if any line exist, call onDraw infinitely
             }
-            //else{pathList.remove(box)}
         }
 
     }
-
     private fun penDrawing(action:Int){
         when(action){
             0->{    // down
                 box= pathList.clone() as ArrayList<Stroke>
                 stroke=Stroke()
-                path.moveTo(posX,posY)        // start point
                 stroke.brush.set(paintBrush)
                 stroke.point.add(Pair(posX,posY))
                 pathList.add(stroke)
@@ -279,6 +301,53 @@ class canvasView : View {
             }
         }
     }
+    private fun wrapDrawing(action: Int){
+        when(action){
+            0->{    // down
+                wrapArea.add(Pair(posX,posY))
+            }
+            2->{    // move
+                wrapArea.add(Pair(posX,posY))
+            }
+            1->{    // up
+                wrapArea=unInterpolation(wrapArea)
+                wrapArea.clear()
+            }
+        }
+    }
+    private fun wrapAreaDrawing(){
+        val list= wrapArea.iterator()
+        var path=Path()
+        if(wrapArea.isNotEmpty()){path.moveTo(wrapArea.first().first,wrapArea.first().second)}
+        else{return}
+        while (list.hasNext()){
+            val box=list.next()
+            path.lineTo(box.first,box.second)
+            canvas.drawPath(path,wrapBrush)
+        }
+
+    }
+    private fun strokeClick(action:Int){
+        when(action){
+            0->{    // down
+                for (i in pathList){
+                    for(j in i.point){
+                        if(getDst(Pair(posX,posY),j)<20f && !checkedStroke.contains(i)){
+                            checkedStroke.clear()
+                            checkedStroke.add(i)
+                            return
+                        }
+                    }
+                }
+            }
+            2->{    // move
+
+            }
+            1->{    // up
+
+            }
+        }
+    }
     private fun magnetic(point:Float, isForce:Boolean=false):Float{
         var magX:Float=0f;
         var degree:Float=magneticDegree
@@ -300,15 +369,12 @@ class canvasView : View {
         unStroke.add(pathList.clone() as ArrayList<Stroke>)
     }
     private fun drawEraser() {
-
         canvas.drawCircle(eraser.pos.first,eraser.pos.second,eraser.radius,commonBrush)
     }
     private fun erase(point:Pair<Float,Float>) {
         for (st in pathList) {
-            for ((i, j) in st.point) {
-                var distance = sqrt(
-                    (point.first - i).pow(2) +
-                            (point.second - j).pow(2))
+            for (i in st.point) {
+                var distance = getDst(point,i)
                 if (distance <= eraser.radius) {
                     when (eraser.mode) {
                         0 -> {    // stroke delete
@@ -317,7 +383,7 @@ class canvasView : View {
                             return
                         }
                         1 -> {    // point delete
-                            var index=st.point.indexOf(Pair(i,j))
+                            var index=st.point.indexOf(i)
                             if(index in 1..st.point.size-2){
                                 var path1=Stroke()
                                 var path2=Stroke()
@@ -334,7 +400,7 @@ class canvasView : View {
                                 pathList.remove(st)
                                 return
                             }
-                            st.point.remove(Pair(i,j))
+                            st.point.remove(i)
                             if(st.point.isEmpty()){ pathList.remove(st)}
                             return
                         }
@@ -363,15 +429,10 @@ class canvasView : View {
             }
         }
     }
-    fun interpolation(point:ArrayList<Pair<Float,Float>>, dist:Float):ArrayList<Pair<Float,Float>>{
+    private fun interpolation(point:ArrayList<Pair<Float,Float>>, dist:Float):ArrayList<Pair<Float,Float>>{
         var i=0
         while(i<point.size-1){
-            //Log.d("asd","size: "+point.size.toString()+"    "+i.toString())
-            var diff= sqrt(
-                abs(point[i].first-point[i+1].first).pow(2)
-                        +abs(point[i].second-point[i+1].second).pow(2))
-            //Log.d("asd","before:  "+i.toString()+"   "+diff.toString())
-            if(diff>dist){
+            if(getDst(point[i],point[i+1])>dist){
                 var pos=Pair((point[i].first+point[i+1].first)/2,(point[i].second+point[i+1].second)/2)
                 point.add(i+1,pos)
                 continue
@@ -379,6 +440,60 @@ class canvasView : View {
             i++
         }
         return point
+    }
+    private fun getDst(p1:Pair<Float,Float>,p2:Pair<Float,Float>):Float{
+        var dst=sqrt(
+            abs(p1.first-p2.first).pow(2)
+                    +abs(p1.second-p2.second).pow(2))
+        return dst
+    }
+    private fun isIn(points: ArrayList<Pair<Float, Float>>,stroke:Stroke):Boolean{
+        var crossPoint=0
+        for (i in 0 until stroke.point.size){
+            for(j in 0 until points.size-1){
+                val dif=(points[j+1].second-points[j].second)/							(points[j+1].first-points[j].first)
+                val yPoint=dif*(stroke.point[i].first-points[j].first)+points[j].second
+                if(yPoint>=min(points[j].second,points[j+1].second) &&
+                    yPoint<=max(points[j].second,points[j+1].second)){
+                    if(yPoint>=stroke.point[i].second){crossPoint+=1}
+                }
+            }
+            if(crossPoint%2==1){return true}
+        }
+        return false
+    }
+    private fun unInterpolation(points: ArrayList<Pair<Float,Float>>):ArrayList<Pair<Float,Float>> {
+        var i=0
+        while(i < points.size-1){
+            while(getDst(points[i],points[i+1])<40f){
+                points.remove(points[i+1])
+                if(i==points.size-2){break}
+            }
+            i++
+        }
+        return points
+    }
+    private fun drawOutline(stroke:ArrayList<Stroke>){
+        for (i in stroke){
+            var path=Path()
+            if(i.point.isNotEmpty()){
+                path.moveTo(i.point.first().first,i.point.first().second)
+                for (j in 1 until i.point.size){
+                    path.lineTo(i.point[j].first,i.point[j].second)
+                }
+                outLineBrush.strokeWidth=(i.brush.strokeWidth+5f)
+                canvas.drawPath(path,outLineBrush)
+            }
+        }
+        if(stroke.isNotEmpty()){
+            canvas.drawRect(stroke.minOf { it.point.minOf { it.first }},
+                stroke.minOf { it.point.minOf { it.second }},
+                stroke.maxOf { it.point.maxOf { it.first }},
+                stroke.maxOf { it.point.maxOf { it.second }},boxBrush)
+        }
+    }
+    private fun refreshState(){
+        if(mode!=4&&mode!=5){ checkedStroke.clear()}
     }
 }
 
