@@ -51,6 +51,10 @@ class DrawCanvas : AppCompatActivity() {
     fun btn (view: View){       // set color fun
         when(view){
             drawCanvasBinding.Color->{
+                if(mode!=1){
+                    mode=1
+                    return
+                }
                 when(paintBrush.color){
                     Color.RED->{
                         Toast.makeText(this,"blue",Toast.LENGTH_SHORT).show()
@@ -73,7 +77,6 @@ class DrawCanvas : AppCompatActivity() {
                         drawCanvasBinding.Color.setBackgroundResource(R.drawable.red_background)
                     }
                 }
-                mode=1
             }
 
             drawCanvasBinding.clear->{        // reset list
@@ -85,6 +88,10 @@ class DrawCanvas : AppCompatActivity() {
                 pathList.clear()
             }
             drawCanvasBinding.shape->{
+                if(mode!=3){
+                    mode=3
+                    return
+                }
                 when(shapeMode){
                     1->{
                         drawCanvasBinding.shape.setBackgroundResource(R.drawable.checkbox_blank_outline)
@@ -115,7 +122,6 @@ class DrawCanvas : AppCompatActivity() {
                         shapeMode=1
                     }
                 }
-                mode=3
             }
             drawCanvasBinding.background->{
                 when(backgroundMode){
@@ -152,7 +158,10 @@ class DrawCanvas : AppCompatActivity() {
                 }
             }
             drawCanvasBinding.eraser->{
-                mode=2
+                if(mode!=2){
+                    mode=2
+                    return
+                }
                 when(eraser.mode){
                     0-> eraser.mode=1
                     1-> eraser.mode=0

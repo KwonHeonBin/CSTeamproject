@@ -35,25 +35,15 @@ class canvasView : View {
     var box=ArrayList<Stroke>()
     var canvas:Canvas= Canvas()
     var wrapArea=ArrayList<Pair<Float,Float>>()
+    var wrapAreaBox=SelectedBox(0f,0f,0f,0f)
 //    var canvasWidth=-1
 //    var canvasHeight=-1
 
-    var commonBrush:Paint=Paint().apply {
-        color=Color.BLACK
-        strokeWidth=3f
-        style=Paint.Style.STROKE
-    }
     var outLineBrush:Paint=Paint().apply {
         color=Color.RED
-        alpha=150
+        alpha=80
         strokeWidth=3f
         isAntiAlias=true
-        style=Paint.Style.STROKE
-    }
-    var boxBrush:Paint=Paint().apply {
-        color=Color.RED
-        alpha=100
-        strokeWidth=3f
         style=Paint.Style.STROKE
     }
     var backgroundBrush:Paint=Paint().apply {
@@ -71,7 +61,6 @@ class canvasView : View {
         var pathList=ArrayList<Stroke>()
         var unStroke=ArrayList<ArrayList<Stroke>>()
         var reStroke=ArrayList<ArrayList<Stroke>>()
-        var checkedStroke=ArrayList<Stroke>()
         var currentBrush=Color.BLACK
         var penManager: SpenUnitManager? = null
         var mode:Int=1      // 1-> penMode  2-> eraser  3-> shape  4-> cursor  5-> wrap
@@ -81,6 +70,15 @@ class canvasView : View {
         var bgGap:Int=100
         var eraser=Eraser(20f, Pair(-100f,-100f),1)
         var isMagnetMode:Boolean=false
+        fun getDst(p1:Pair<Float,Float>,p2:Pair<Float,Float>):Float{
+            var dst=sqrt(
+                abs(p1.first-p2.first).pow(2)
+                        +abs(p1.second-p2.second).pow(2))
+            return dst
+        }
+        fun saveCanvas(){
+            unStroke.add(pathList.clone() as ArrayList<Stroke>)
+        }
     }
 
     private fun init(){
@@ -99,20 +97,23 @@ class canvasView : View {
         this.canvas=canvas
         //canvasBitmap?.let { canvas.drawBitmap(it,0F,0F, paintBrush) }
         drawBackGround(bgGap)
-        when(mode){
-            2-> { drawEraser() }
-            4->{ drawOutline(checkedStroke) }
+        drawStroke()
+        when(mode){     // draw after stroke
+            2-> { eraser.drawEraser(canvas) }
+            4->{ drawOutline(wrapAreaBox.checkedStroke) }
             5->{
                 wrapAreaDrawing()
-                drawOutline(checkedStroke)
+                drawOutline(wrapAreaBox.checkedStroke)
             }
         }
-        drawStroke()
+
         refreshState()
         invalidate()
     }
 
     override fun onTouchEvent(event: MotionEvent): Boolean {
+        var dx:Float=event.x-posX
+        var dy:Float=event.y-posY
         posX=event.x
         posY=event.y
         when(event.action){
@@ -123,7 +124,13 @@ class canvasView : View {
                     1->{ penDrawing(MotionEvent.ACTION_DOWN) }
                     2->{ eraserDrawing(MotionEvent.ACTION_DOWN) }
                     3->{ shapeDrawing(MotionEvent.ACTION_DOWN) }
-                    4->{strokeClick(MotionEvent.ACTION_DOWN)}
+                    4->{
+                        if(wrapAreaBox.checkedStroke.isEmpty()){strokeClick(MotionEvent.ACTION_DOWN)}
+                        else{
+                            wrapAreaBox.clickedPoint=wrapAreaBox.clickPosCheck(startPosX,startPosY)
+                            if(wrapAreaBox.clickedPoint==0){strokeClick(MotionEvent.ACTION_DOWN)}
+                        }
+                    }
                     5->{wrapDrawing(MotionEvent.ACTION_DOWN)}
                 }
                 return true
@@ -133,7 +140,7 @@ class canvasView : View {
                     1->{ penDrawing(MotionEvent.ACTION_MOVE) }
                     2->{ eraserDrawing(MotionEvent.ACTION_MOVE) }
                     3->{ shapeDrawing(MotionEvent.ACTION_MOVE) }
-                    4->{}
+                    4->{stretchWrapAreaBox(Pair(dx,dy))}
                     5->{wrapDrawing(MotionEvent.ACTION_MOVE)}
                 }
             }
@@ -192,14 +199,13 @@ class canvasView : View {
         }
     }
     private fun eraserDrawing(action:Int){
-
         when(action){
             0->{
                 if(eraser.mode==1){
                     box= pathList.clone() as ArrayList<Stroke>
                 }
                 eraser.pos=Pair(posX,posY)
-                erase(eraser.pos)
+                eraser.erase(eraser.pos)
             }
             2->{
                 var box=ArrayList<Pair<Float,Float>>()
@@ -207,10 +213,10 @@ class canvasView : View {
                 box.add(Pair(posX,posY))
                 eraser.pos=Pair(posX,posY)
                 box=interpolation(box,30f)
-                for (i in box){erase(i)}
+                for (i in box){ eraser.erase(i)}
             }
             1->{
-                erase(Pair(posX,posY))
+                eraser.erase(Pair(posX,posY))
                 resetPos()
                 eraser.pos=Pair(posX,posY)
                 if(box!= pathList){
@@ -330,22 +336,50 @@ class canvasView : View {
     private fun strokeClick(action:Int){
         when(action){
             0->{    // down
-                for (i in pathList){
-                    for(j in i.point){
-                        if(getDst(Pair(posX,posY),j)<20f && !checkedStroke.contains(i)){
-                            checkedStroke.clear()
-                            checkedStroke.add(i)
-                            return
+                if(wrapAreaBox.checkedStroke.isEmpty()){
+                    for (i in pathList){
+                        for(j in i.point){
+                            if(getDst(Pair(posX,posY),j)<20f && !wrapAreaBox.checkedStroke.contains(i)){
+                                wrapAreaBox.checkedStroke.clear()
+                                wrapAreaBox.setPoint(i.point.minOf { it.first },
+                                    i.point.minOf { it.second },
+                                    i.point.maxOf { it.first },
+                                    i.point.maxOf { it.second })
+                                var strokeBox=ArrayList<Pair<Float,Float>>()
+                                for (k in i.point){
+                                    var scaleX=(k.first-wrapAreaBox.upperLPoint.first)/(wrapAreaBox.upperRPoint.first-wrapAreaBox.upperLPoint.first)
+                                    var scaleY=(k.second-wrapAreaBox.upperRPoint.second)/(wrapAreaBox.underRPoint.second-wrapAreaBox.upperRPoint.second)
+                                    strokeBox.add(Pair(scaleX,scaleY))
+                                }
+                                wrapAreaBox.scaleOfPoints.add(strokeBox)
+                                wrapAreaBox.checkedStroke.add(i)
+                                return
+                            }
                         }
+                    }
+                }
+                else{
+                    wrapAreaBox.clickedPoint=wrapAreaBox.clickPosCheck(startPosX,startPosY)
+                    if(wrapAreaBox.clickedPoint==0){
+                        wrapAreaBox.checkedStroke.clear()
+                        strokeClick(MotionEvent.ACTION_DOWN)
                     }
                 }
             }
             2->{    // move
+                if(wrapAreaBox.checkedStroke.isNotEmpty()){
 
+                }
             }
             1->{    // up
 
             }
+        }
+    }
+    private fun stretchWrapAreaBox(dst:Pair<Float,Float>){
+        if(wrapAreaBox.checkedStroke.isNotEmpty()){
+            wrapAreaBox.moveBox(dst)
+            wrapAreaBox.setStrokeScale()
         }
     }
     private fun magnetic(point:Float, isForce:Boolean=false):Float{
@@ -364,50 +398,6 @@ class canvasView : View {
     private fun resetPos(){
         posX=-100f
         posY=-100f
-    }
-    private fun saveCanvas(){
-        unStroke.add(pathList.clone() as ArrayList<Stroke>)
-    }
-    private fun drawEraser() {
-        canvas.drawCircle(eraser.pos.first,eraser.pos.second,eraser.radius,commonBrush)
-    }
-    private fun erase(point:Pair<Float,Float>) {
-        for (st in pathList) {
-            for (i in st.point) {
-                var distance = getDst(point,i)
-                if (distance <= eraser.radius) {
-                    when (eraser.mode) {
-                        0 -> {    // stroke delete
-                            saveCanvas()
-                            pathList.remove(st)
-                            return
-                        }
-                        1 -> {    // point delete
-                            var index=st.point.indexOf(i)
-                            if(index in 1..st.point.size-2){
-                                var path1=Stroke()
-                                var path2=Stroke()
-                                path1.brush=st.brush
-                                path2.brush=st.brush
-                                for (i in 0..index-1){
-                                    path1.point.add(st.point[i])
-                                }
-                                for (i in index+1..st.point.size-1){
-                                    path2.point.add(st.point[i])
-                                }
-                                pathList.add(path1)
-                                pathList.add(path2)
-                                pathList.remove(st)
-                                return
-                            }
-                            st.point.remove(i)
-                            if(st.point.isEmpty()){ pathList.remove(st)}
-                            return
-                        }
-                    }
-                }
-            }
-        }
     }
     private fun drawBackGround(gap:Int){
         when(backgroundMode){
@@ -440,12 +430,6 @@ class canvasView : View {
             i++
         }
         return point
-    }
-    private fun getDst(p1:Pair<Float,Float>,p2:Pair<Float,Float>):Float{
-        var dst=sqrt(
-            abs(p1.first-p2.first).pow(2)
-                    +abs(p1.second-p2.second).pow(2))
-        return dst
     }
     private fun isIn(points: ArrayList<Pair<Float, Float>>,stroke:Stroke):Boolean{
         var crossPoint=0
@@ -486,14 +470,15 @@ class canvasView : View {
             }
         }
         if(stroke.isNotEmpty()){
-            canvas.drawRect(stroke.minOf { it.point.minOf { it.first }},
-                stroke.minOf { it.point.minOf { it.second }},
-                stroke.maxOf { it.point.maxOf { it.first }},
-                stroke.maxOf { it.point.maxOf { it.second }},boxBrush)
+//            wrapAreaBox.setPoint(stroke.minOf { it.point.minOf { it.first }},
+//                                stroke.minOf { it.point.minOf { it.second }},
+//                                stroke.maxOf { it.point.maxOf { it.first }},
+//                                stroke.maxOf { it.point.maxOf { it.second }})
+            wrapAreaBox.drawRect(canvas)
         }
     }
     private fun refreshState(){
-        if(mode!=4&&mode!=5){ checkedStroke.clear()}
+        if(mode!=4&&mode!=5){ wrapAreaBox.checkedStroke.clear()}
     }
 }
 
