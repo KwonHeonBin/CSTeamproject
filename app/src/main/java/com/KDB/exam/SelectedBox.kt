@@ -86,6 +86,18 @@ class SelectedBox {
         else {return 0}        // None
     }
     fun setStrokeScale(){
+        scaleOfPoints.clear()
+        var strokeBox=ArrayList<Pair<Float,Float>>()
+        for (i in checkedStroke){
+            for (j in i.point){
+                var scaleX=(j.first-upperLPoint.first)/(upperRPoint.first-upperLPoint.first)
+                var scaleY=(j.second-upperRPoint.second)/(underRPoint.second-upperRPoint.second)
+                strokeBox.add(Pair(scaleX,scaleY))
+            }
+        }
+        scaleOfPoints.add(strokeBox)
+    }
+    fun applyScale(){
         for (i in 0 until checkedStroke.size){
             for (j in 0 until checkedStroke[i].point.size){
                 checkedStroke[i].point[j]=Pair(((upperRPoint.first-upperLPoint.first)*scaleOfPoints[i][j].first)+upperLPoint.first,
@@ -93,6 +105,7 @@ class SelectedBox {
             }
         }
     }
+
     fun moveBox(dst:Pair<Float,Float>){
         when(clickedPoint){
             1->{    // set size of XY upperL
@@ -139,5 +152,18 @@ class SelectedBox {
             }
         }
         setMidPoint()
+    }
+    fun clearBox(){
+        clickedPoint=0
+        checkedStroke.clear()
+        scaleOfPoints.clear()
+        upperLPoint=Pair(0f,0f)
+        upperRPoint=Pair(0f,0f)
+        underLPoint=Pair(0f,0f)
+        underRPoint=Pair(0f,0f)
+        upperMPoint=Pair(0f,0f)
+        underMPoint=Pair(0f,0f)
+        midLPoint=Pair(0f,0f)
+        midRPoint=Pair(0f,0f)
     }
 }

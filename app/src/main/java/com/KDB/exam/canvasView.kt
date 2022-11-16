@@ -35,7 +35,7 @@ class canvasView : View {
     var box=ArrayList<Stroke>()
     var canvas:Canvas= Canvas()
     var wrapArea=ArrayList<Pair<Float,Float>>()
-    var wrapAreaBox=SelectedBox(0f,0f,0f,0f)
+
 //    var canvasWidth=-1
 //    var canvasHeight=-1
 
@@ -69,6 +69,7 @@ class canvasView : View {
         var backgroundMode=1    // 1-> none 2-> grid 3-> underBar 3
         var bgGap:Int=100
         var eraser=Eraser(20f, Pair(-100f,-100f),1)
+        var wrapAreaBox=SelectedBox(0f,0f,0f,0f)
         var isMagnetMode:Boolean=false
         fun getDst(p1:Pair<Float,Float>,p2:Pair<Float,Float>):Float{
             var dst=sqrt(
@@ -106,7 +107,6 @@ class canvasView : View {
                 drawOutline(wrapAreaBox.checkedStroke)
             }
         }
-
         refreshState()
         invalidate()
     }
@@ -149,7 +149,7 @@ class canvasView : View {
                     1->{ penDrawing(MotionEvent.ACTION_UP) }
                     2->{ eraserDrawing(MotionEvent.ACTION_UP) }
                     3->{ shapeDrawing(MotionEvent.ACTION_UP) }
-                    4->{}
+                    4->{ setPointForCheckedStroke()}
                     5->{wrapDrawing(MotionEvent.ACTION_UP)}
                 }
                 return false
@@ -316,7 +316,7 @@ class canvasView : View {
                 wrapArea.add(Pair(posX,posY))
             }
             1->{    // up
-                wrapArea=unInterpolation(wrapArea)
+                wrapArea=unInterpolation(wrapArea,40f)
                 wrapArea.clear()
             }
         }
@@ -342,17 +342,11 @@ class canvasView : View {
                             if(getDst(Pair(posX,posY),j)<20f && !wrapAreaBox.checkedStroke.contains(i)){
                                 wrapAreaBox.checkedStroke.clear()
                                 wrapAreaBox.setPoint(i.point.minOf { it.first },
-                                    i.point.minOf { it.second },
-                                    i.point.maxOf { it.first },
-                                    i.point.maxOf { it.second })
-                                var strokeBox=ArrayList<Pair<Float,Float>>()
-                                for (k in i.point){
-                                    var scaleX=(k.first-wrapAreaBox.upperLPoint.first)/(wrapAreaBox.upperRPoint.first-wrapAreaBox.upperLPoint.first)
-                                    var scaleY=(k.second-wrapAreaBox.upperRPoint.second)/(wrapAreaBox.underRPoint.second-wrapAreaBox.upperRPoint.second)
-                                    strokeBox.add(Pair(scaleX,scaleY))
-                                }
-                                wrapAreaBox.scaleOfPoints.add(strokeBox)
+                                                     i.point.minOf { it.second },
+                                                     i.point.maxOf { it.first },
+                                                     i.point.maxOf { it.second })
                                 wrapAreaBox.checkedStroke.add(i)
+                                wrapAreaBox.setStrokeScale()
                                 return
                             }
                         }
@@ -361,25 +355,34 @@ class canvasView : View {
                 else{
                     wrapAreaBox.clickedPoint=wrapAreaBox.clickPosCheck(startPosX,startPosY)
                     if(wrapAreaBox.clickedPoint==0){
-                        wrapAreaBox.checkedStroke.clear()
+                        wrapAreaBox.clearBox()
                         strokeClick(MotionEvent.ACTION_DOWN)
                     }
                 }
             }
             2->{    // move
-                if(wrapAreaBox.checkedStroke.isNotEmpty()){
 
-                }
             }
             1->{    // up
 
             }
         }
     }
+    private fun setPointForCheckedStroke(){
+        if(wrapAreaBox.checkedStroke.isNotEmpty()&&
+            (wrapAreaBox.clickedPoint!=0&&wrapAreaBox.clickedPoint!=9)){
+            for (i in wrapAreaBox.checkedStroke){
+                unInterpolation(i.point,10f)
+                interpolation(i.point,30f)
+                wrapAreaBox.setStrokeScale()
+                Log.d("asd", wrapAreaBox.checkedStroke.first().point.size.toString())
+            }
+        }
+    }
     private fun stretchWrapAreaBox(dst:Pair<Float,Float>){
         if(wrapAreaBox.checkedStroke.isNotEmpty()){
             wrapAreaBox.moveBox(dst)
-            wrapAreaBox.setStrokeScale()
+            wrapAreaBox.applyScale()
         }
     }
     private fun magnetic(point:Float, isForce:Boolean=false):Float{
@@ -419,18 +422,6 @@ class canvasView : View {
             }
         }
     }
-    private fun interpolation(point:ArrayList<Pair<Float,Float>>, dist:Float):ArrayList<Pair<Float,Float>>{
-        var i=0
-        while(i<point.size-1){
-            if(getDst(point[i],point[i+1])>dist){
-                var pos=Pair((point[i].first+point[i+1].first)/2,(point[i].second+point[i+1].second)/2)
-                point.add(i+1,pos)
-                continue
-            }
-            i++
-        }
-        return point
-    }
     private fun isIn(points: ArrayList<Pair<Float, Float>>,stroke:Stroke):Boolean{
         var crossPoint=0
         for (i in 0 until stroke.point.size){
@@ -446,12 +437,24 @@ class canvasView : View {
         }
         return false
     }
-    private fun unInterpolation(points: ArrayList<Pair<Float,Float>>):ArrayList<Pair<Float,Float>> {
+    private fun interpolation(point:ArrayList<Pair<Float,Float>>, gap:Float):ArrayList<Pair<Float,Float>>{
+        var i=0
+        while(i<point.size-1){
+            if(getDst(point[i],point[i+1])>gap){
+                var pos=Pair((point[i].first+point[i+1].first)/2,(point[i].second+point[i+1].second)/2)
+                point.add(i+1,pos)
+                continue
+            }
+            i++
+        }
+        return point
+    }
+    private fun unInterpolation(points: ArrayList<Pair<Float,Float>>,gap:Float=40f):ArrayList<Pair<Float,Float>> {
         var i=0
         while(i < points.size-1){
-            while(getDst(points[i],points[i+1])<40f){
+            while(getDst(points[i],points[i+1])<gap){
                 points.remove(points[i+1])
-                if(i==points.size-2){break}
+                if(i==points.size-1){break}
             }
             i++
         }
@@ -477,8 +480,8 @@ class canvasView : View {
             wrapAreaBox.drawRect(canvas)
         }
     }
-    private fun refreshState(){
-        if(mode!=4&&mode!=5){ wrapAreaBox.checkedStroke.clear()}
+    fun refreshState(){
+        if(mode!=4&&mode!=5){ wrapAreaBox.clearBox()}
     }
 }
 

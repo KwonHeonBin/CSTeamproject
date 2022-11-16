@@ -17,6 +17,7 @@ import com.KDB.exam.canvasView.Companion.pathList
 import com.KDB.exam.canvasView.Companion.reStroke
 import com.KDB.exam.canvasView.Companion.shapeMode
 import com.KDB.exam.canvasView.Companion.unStroke
+import com.KDB.exam.canvasView.Companion.wrapAreaBox
 import com.KDB.exam.databinding.DrawCanvasBinding
 
 
@@ -86,6 +87,7 @@ class DrawCanvas : AppCompatActivity() {
                 btnActiveCheck()
                 path.reset()
                 pathList.clear()
+                wrapAreaBox.clearBox()
             }
             drawCanvasBinding.shape->{
                 if(mode!=3){
