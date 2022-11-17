@@ -131,7 +131,15 @@ class canvasView : View {
                             if(wrapAreaBox.clickedPoint==0){strokeClick(MotionEvent.ACTION_DOWN)}
                         }
                     }
-                    5->{wrapDrawing(MotionEvent.ACTION_DOWN)}
+                    5->{
+                        if(wrapAreaBox.checkedStroke.isEmpty()){wrapDrawing(MotionEvent.ACTION_DOWN)}
+                        else{
+                            wrapAreaBox.clickedPoint=wrapAreaBox.clickPosCheck(posX,posY)}
+                            if(wrapAreaBox.clickedPoint==0){
+                                wrapAreaBox.clearBox()
+                                wrapDrawing(MotionEvent.ACTION_DOWN)
+                            }
+                    }
                 }
                 return true
             }
@@ -141,7 +149,11 @@ class canvasView : View {
                     2->{ eraserDrawing(MotionEvent.ACTION_MOVE) }
                     3->{ shapeDrawing(MotionEvent.ACTION_MOVE) }
                     4->{stretchWrapAreaBox(Pair(dx,dy))}
-                    5->{wrapDrawing(MotionEvent.ACTION_MOVE)}
+                    5-> {
+                        if(wrapAreaBox.checkedStroke.isNotEmpty()&& wrapAreaBox.clickedPoint!=0){stretchWrapAreaBox(Pair(dx,dy))}
+                        else{wrapDrawing(MotionEvent.ACTION_MOVE)}
+                    }
+
                 }
             }
             MotionEvent.ACTION_UP->{
@@ -150,7 +162,11 @@ class canvasView : View {
                     2->{ eraserDrawing(MotionEvent.ACTION_UP) }
                     3->{ shapeDrawing(MotionEvent.ACTION_UP) }
                     4->{ setPointForCheckedStroke()}
-                    5->{wrapDrawing(MotionEvent.ACTION_UP)}
+                    5->{
+                        if(wrapAreaBox.checkedStroke.isNotEmpty()&& wrapAreaBox.clickedPoint!=0){setPointForCheckedStroke()}
+                        else{wrapDrawing(MotionEvent.ACTION_UP)}
+
+                    }
                 }
                 return false
             }
@@ -166,7 +182,7 @@ class canvasView : View {
             var path=Path()
             if(box.point.isNotEmpty()){
                 path.moveTo(box.point.first().first,box.point.first().second)
-                for (j in 1..box.point.size-1){
+                for (j in 1 until box.point.size){
                     path.lineTo(box.point[j].first,box.point[j].second)
                 }
                 canvas.drawPath(path,box.brush)
@@ -310,13 +326,24 @@ class canvasView : View {
     private fun wrapDrawing(action: Int){
         when(action){
             0->{    // down
+                wrapAreaBox.clearBox()
                 wrapArea.add(Pair(posX,posY))
             }
             2->{    // move
                 wrapArea.add(Pair(posX,posY))
             }
             1->{    // up
+                wrapArea.add(wrapArea[0])
                 wrapArea=unInterpolation(wrapArea,40f)
+                for (i in pathList){
+                    if(isIn(wrapArea,i)&& !wrapAreaBox.checkedStroke.contains(i)){
+                        wrapAreaBox.checkedStroke.add(i)
+                    }
+                }
+                //Log.d("asd", "size:  "+wrapAreaBox.checkedStroke.size.toString())
+                if(wrapAreaBox.checkedStroke.isNotEmpty()){
+                    wrapAreaBox.setBox()
+                }
                 wrapArea.clear()
             }
         }
@@ -339,14 +366,10 @@ class canvasView : View {
                 if(wrapAreaBox.checkedStroke.isEmpty()){
                     for (i in pathList){
                         for(j in i.point){
-                            if(getDst(Pair(posX,posY),j)<20f && !wrapAreaBox.checkedStroke.contains(i)){
+                            if(getDst(Pair(posX,posY),j)<20f&&!wrapAreaBox.checkedStroke.contains(i)){
                                 wrapAreaBox.checkedStroke.clear()
-                                wrapAreaBox.setPoint(i.point.minOf { it.first },
-                                                     i.point.minOf { it.second },
-                                                     i.point.maxOf { it.first },
-                                                     i.point.maxOf { it.second })
                                 wrapAreaBox.checkedStroke.add(i)
-                                wrapAreaBox.setStrokeScale()
+                                wrapAreaBox.setBox()
                                 return
                             }
                         }
@@ -375,7 +398,6 @@ class canvasView : View {
                 unInterpolation(i.point,10f)
                 interpolation(i.point,30f)
                 wrapAreaBox.setStrokeScale()
-                Log.d("asd", wrapAreaBox.checkedStroke.first().point.size.toString())
             }
         }
     }
@@ -423,18 +445,49 @@ class canvasView : View {
         }
     }
     private fun isIn(points: ArrayList<Pair<Float, Float>>,stroke:Stroke):Boolean{
-        var crossPoint=0
         for (i in 0 until stroke.point.size){
+            var crossPoint=0
             for(j in 0 until points.size-1){
-                val dif=(points[j+1].second-points[j].second)/							(points[j+1].first-points[j].first)
+                val dif=(points[j+1].second-points[j].second)/(points[j+1].first-points[j].first)
                 val yPoint=dif*(stroke.point[i].first-points[j].first)+points[j].second
-                if(yPoint>=min(points[j].second,points[j+1].second) &&
-                    yPoint<=max(points[j].second,points[j+1].second)){
-                    if(yPoint>=stroke.point[i].second){crossPoint+=1}
+                if(yPoint>=stroke.point[i].second&&
+                    stroke.point[i].first>=min(points[j].first,points[j+1].first)&&
+                    stroke.point[i].first<=max(points[j].first,points[j+1].first)){
+                    if(yPoint==points[j].second){
+                        if(j==0||j==points.size-1){
+                            val dif2=(points[1].second-points[points.size-2].second)/(points[1].first-points[points.size-2].first)
+                            val yPoint2=dif2*(stroke.point[i].first-points[1].first)+points[1].second
+                            if(yPoint2>=min(points[1].second,points[points.size-2].second)&&
+                                yPoint2<=max(points[1].second,points[points.size-2].second)){
+                                //Log.d("asd","way: 1   "+crossPoint.toString())
+                                crossPoint+=1
+                            }
+                            //else{Log.d("asd","way: 1  -> fail  "+crossPoint.toString())}
+                        }
+                        else{
+                            val dif2=(points[j+1].second-points[j-1].second)/(points[j+1].first-points[j-1].first)
+                            val yPoint2=dif2*(stroke.point[i].first-points[j+1].first)+points[j+1].second
+                            if(yPoint2>=min(points[j+1].second,points[j-1].second)&&
+                                yPoint2<=max(points[j+1].second,points[j-1].second)){
+                                crossPoint+=1
+                                //Log.d("asd","way: 2   "+crossPoint.toString()+"   YP2:  "+yPoint2.toString())
+                            }
+                            //else{Log.d("asd","way: 2  -> fail  "+crossPoint.toString())}
+                        }
+                    }
+                    else if(yPoint>min(points[j].second,points[j+1].second) &&
+                        yPoint<max(points[j].second,points[j+1].second)){
+                        crossPoint+=1
+                        //Log.d("asd","way: 3   "+crossPoint.toString())
+                    }
                 }
             }
-            if(crossPoint%2==1){return true}
+            if(crossPoint%2==1){
+                //Log.d("asd",crossPoint.toString()+" :crossPoint  ")
+                return true}
+            //Log.d("asd","reset")
         }
+        //Log.d("asd","out")
         return false
     }
     private fun interpolation(point:ArrayList<Pair<Float,Float>>, gap:Float):ArrayList<Pair<Float,Float>>{

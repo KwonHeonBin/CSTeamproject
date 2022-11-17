@@ -87,7 +87,6 @@ class DrawCanvas : AppCompatActivity() {
                 btnActiveCheck()
                 path.reset()
                 pathList.clear()
-                wrapAreaBox.clearBox()
             }
             drawCanvasBinding.shape->{
                 if(mode!=3){
@@ -184,6 +183,7 @@ class DrawCanvas : AppCompatActivity() {
                 Toast.makeText(this,"wrap",Toast.LENGTH_SHORT).show()
             }
         }
+        wrapAreaBox.clearBox()
     }
     private fun currentColor(color:Int){
         currentBrush=color      // set currentBrush to color

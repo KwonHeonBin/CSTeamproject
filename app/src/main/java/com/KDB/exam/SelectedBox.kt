@@ -87,15 +87,16 @@ class SelectedBox {
     }
     fun setStrokeScale(){
         scaleOfPoints.clear()
-        var strokeBox=ArrayList<Pair<Float,Float>>()
         for (i in checkedStroke){
+            var strokeBox=ArrayList<Pair<Float,Float>>()
             for (j in i.point){
                 var scaleX=(j.first-upperLPoint.first)/(upperRPoint.first-upperLPoint.first)
                 var scaleY=(j.second-upperRPoint.second)/(underRPoint.second-upperRPoint.second)
                 strokeBox.add(Pair(scaleX,scaleY))
             }
+            scaleOfPoints.add(strokeBox)
         }
-        scaleOfPoints.add(strokeBox)
+
     }
     fun applyScale(){
         for (i in 0 until checkedStroke.size){
@@ -105,7 +106,13 @@ class SelectedBox {
             }
         }
     }
-
+    fun setBox(){
+        setPoint(checkedStroke.minOf { it.point.minOf { it.first }},
+                 checkedStroke.minOf { it.point.minOf { it.second }},
+                 checkedStroke.maxOf{it.point.maxOf { it.first }},
+                 checkedStroke.maxOf{it.point.maxOf { it.second }})
+        setStrokeScale()
+    }
     fun moveBox(dst:Pair<Float,Float>){
         when(clickedPoint){
             1->{    // set size of XY upperL
