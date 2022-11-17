@@ -30,4 +30,9 @@ class Stroke : Cloneable {
         brush.strokeWidth=8f
         brush.strokeCap=Paint.Cap.ROUND
     }
+    public override fun clone(): Stroke {
+        val stroke = super.clone() as Stroke
+        stroke.point = ArrayList<Pair<Float,Float>>().apply{ addAll(point) }
+        return stroke
+    }
 }

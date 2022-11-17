@@ -133,12 +133,14 @@ class canvasView : View {
                     }
                     5->{
                         if(wrapAreaBox.checkedStroke.isEmpty()){wrapDrawing(MotionEvent.ACTION_DOWN)}
-                        else{
-                            wrapAreaBox.clickedPoint=wrapAreaBox.clickPosCheck(posX,posY)}
-                            if(wrapAreaBox.clickedPoint==0){
+                        else {
+                            wrapAreaBox.clickedPoint = wrapAreaBox.clickPosCheck(posX, posY)
+                            if (wrapAreaBox.clickedPoint == 0) {
                                 wrapAreaBox.clearBox()
                                 wrapDrawing(MotionEvent.ACTION_DOWN)
                             }
+                            else{ for (i in pathList){ box.add(i.clone()) } }
+                        }
                     }
                 }
                 return true
@@ -194,7 +196,7 @@ class canvasView : View {
     private fun penDrawing(action:Int){
         when(action){
             0->{    // down
-                box= pathList.clone() as ArrayList<Stroke>
+                for (i in pathList){ box.add(i.clone()) }
                 stroke=Stroke()
                 stroke.brush.set(paintBrush)
                 stroke.point.add(Pair(posX,posY))
@@ -217,9 +219,7 @@ class canvasView : View {
     private fun eraserDrawing(action:Int){
         when(action){
             0->{
-                if(eraser.mode==1){
-                    box= pathList.clone() as ArrayList<Stroke>
-                }
+                for (i in pathList){ box.add(i.clone()) }
                 eraser.pos=Pair(posX,posY)
                 eraser.erase(eraser.pos)
             }
@@ -239,6 +239,7 @@ class canvasView : View {
                     unStroke.add(box.clone() as ArrayList<Stroke>)
                     if(reStroke.isNotEmpty()){ reStroke.clear()}
                 }
+                box.clear()
             }
         }
     }
@@ -370,6 +371,8 @@ class canvasView : View {
                                 wrapAreaBox.checkedStroke.clear()
                                 wrapAreaBox.checkedStroke.add(i)
                                 wrapAreaBox.setBox()
+                                wrapAreaBox.clickedPoint=9
+                                for (i in pathList){ box.add(i.clone()) }
                                 return
                             }
                         }
@@ -400,6 +403,14 @@ class canvasView : View {
                 wrapAreaBox.setStrokeScale()
             }
         }
+        for (i in 0 until box.size){
+            if(box[i].point != pathList[i].point){
+                unStroke.add(box.clone() as ArrayList<Stroke>)
+                break
+            }
+        }
+        box.clear()
+        if(reStroke.isNotEmpty()){ reStroke.clear()}
     }
     private fun stretchWrapAreaBox(dst:Pair<Float,Float>){
         if(wrapAreaBox.checkedStroke.isNotEmpty()){
