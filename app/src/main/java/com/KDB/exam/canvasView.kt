@@ -107,7 +107,7 @@ class canvasView : View {
                 drawOutline(wrapAreaBox.checkedStroke)
             }
         }
-        refreshState()
+        //refreshState()
         invalidate()
     }
 
@@ -327,15 +327,16 @@ class canvasView : View {
     private fun wrapDrawing(action: Int){
         when(action){
             0->{    // down
+
                 wrapAreaBox.clearBox()
                 wrapArea.add(Pair(posX,posY))
             }
             2->{    // move
-                wrapArea.add(Pair(posX,posY))
+                if(!wrapArea.contains(Pair(posX,posY))){wrapArea.add(Pair(posX,posY))}
             }
             1->{    // up
-                wrapArea.add(wrapArea[0])
                 wrapArea=unInterpolation(wrapArea,40f)
+                wrapArea.add(wrapArea[0])
                 for (i in pathList){
                     if(isIn(wrapArea,i)&& !wrapAreaBox.checkedStroke.contains(i)){
                         wrapAreaBox.checkedStroke.add(i)
@@ -457,48 +458,36 @@ class canvasView : View {
     }
     private fun isIn(points: ArrayList<Pair<Float, Float>>,stroke:Stroke):Boolean{
         for (i in 0 until stroke.point.size){
-            var crossPoint=0
+            var crossreps=0
+            var dif: Float
+            var crossPoint: Float
             for(j in 0 until points.size-1){
-                val dif=(points[j+1].second-points[j].second)/(points[j+1].first-points[j].first)
-                val yPoint=dif*(stroke.point[i].first-points[j].first)+points[j].second
-                if(yPoint>=stroke.point[i].second&&
+                dif=(points[j+1].second-points[j].second)/(points[j+1].first-points[j].first)
+                crossPoint=dif*(stroke.point[i].first-points[j].first)+points[j].second
+                if(crossPoint>=stroke.point[i].second&&
                     stroke.point[i].first>=min(points[j].first,points[j+1].first)&&
-                    stroke.point[i].first<=max(points[j].first,points[j+1].first)){
-                    if(yPoint==points[j].second){
-                        if(j==0||j==points.size-1){
-                            val dif2=(points[1].second-points[points.size-2].second)/(points[1].first-points[points.size-2].first)
-                            val yPoint2=dif2*(stroke.point[i].first-points[1].first)+points[1].second
-                            if(yPoint2>=min(points[1].second,points[points.size-2].second)&&
-                                yPoint2<=max(points[1].second,points[points.size-2].second)){
-                                //Log.d("asd","way: 1   "+crossPoint.toString())
-                                crossPoint+=1
-                            }
-                            //else{Log.d("asd","way: 1  -> fail  "+crossPoint.toString())}
-                        }
-                        else{
-                            val dif2=(points[j+1].second-points[j-1].second)/(points[j+1].first-points[j-1].first)
-                            val yPoint2=dif2*(stroke.point[i].first-points[j+1].first)+points[j+1].second
-                            if(yPoint2>=min(points[j+1].second,points[j-1].second)&&
-                                yPoint2<=max(points[j+1].second,points[j-1].second)){
-                                crossPoint+=1
-                                //Log.d("asd","way: 2   "+crossPoint.toString()+"   YP2:  "+yPoint2.toString())
-                            }
-                            //else{Log.d("asd","way: 2  -> fail  "+crossPoint.toString())}
-                        }
-                    }
-                    else if(yPoint>min(points[j].second,points[j+1].second) &&
-                        yPoint<max(points[j].second,points[j+1].second)){
-                        crossPoint+=1
-                        //Log.d("asd","way: 3   "+crossPoint.toString())
-                    }
+                    stroke.point[i].first<=max(points[j].first,points[j+1].first)&&
+                    crossPoint>=min(points[j].second,points[j+1].second)&&
+                    crossPoint<=max(points[j].second,points[j+1].second)){
+                    crossreps+=1
                 }
             }
-            if(crossPoint%2==1){
-                //Log.d("asd",crossPoint.toString()+" :crossPoint  ")
-                return true}
-            //Log.d("asd","reset")
+            if(crossreps%2==1){
+                crossreps=0         // double check
+                for(j in 0 until points.size-1) {
+                    dif = (points[j + 1].second - points[j].second) / (points[j + 1].first - points[j].first)
+                    crossPoint = ((stroke.point[i].second - points[j].second) / dif) + points[j].first
+                    if (crossPoint >= stroke.point[i].first &&
+                        stroke.point[i].second >= min(points[j].second, points[j + 1].second) &&
+                        stroke.point[i].second <= max(points[j].second, points[j + 1].second) &&
+                        crossPoint >= min(points[j].first, points[j + 1].first) &&
+                        crossPoint <= max(points[j].first, points[j + 1].first)) {
+                        crossreps += 1
+                    }
+                }
+                if(crossreps%2==1){return true}
+            }
         }
-        //Log.d("asd","out")
         return false
     }
     private fun interpolation(point:ArrayList<Pair<Float,Float>>, gap:Float):ArrayList<Pair<Float,Float>>{
