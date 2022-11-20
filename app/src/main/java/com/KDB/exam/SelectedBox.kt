@@ -3,21 +3,20 @@ package com.KDB.exam
 import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.Paint
-import android.util.Log
 
 class SelectedBox {
-    var upperLPoint=Pair<Float,Float>(0f,0f)
-    var upperRPoint=Pair<Float,Float>(0f,0f)
-    var underLPoint=Pair<Float,Float>(0f,0f)
-    var underRPoint=Pair<Float,Float>(0f,0f)
-    var upperMPoint=Pair<Float,Float>(0f,0f)
-    var underMPoint=Pair<Float,Float>(0f,0f)
-    var midLPoint=Pair<Float,Float>(0f,0f)
-    var midRPoint=Pair<Float,Float>(0f,0f)
+    private var upperLPoint=Pair(0f,0f)
+    private var upperRPoint=Pair(0f,0f)
+    private var underLPoint=Pair(0f,0f)
+    private var underRPoint=Pair(0f,0f)
+    private var upperMPoint=Pair(0f,0f)
+    private var underMPoint=Pair(0f,0f)
+    private var midLPoint=Pair(0f,0f)
+    private var midRPoint=Pair(0f,0f)
     var clickedPoint:Int=0
     var checkedStroke=ArrayList<Stroke>()
-    var scaleOfPoints=ArrayList<ArrayList<Pair<Float,Float>>>()
-    var boxBrush:Paint=Paint().apply {
+    private var scaleOfPoints=ArrayList<ArrayList<Pair<Float,Float>>>()
+    private var boxBrush:Paint=Paint().apply {
         color=Color.RED
         alpha=100
         strokeWidth=3f
@@ -39,7 +38,7 @@ class SelectedBox {
     constructor(upperX:Float,upperY:Float,underX:Float,underY:Float){
         setPoint(upperX,upperY,underX,underY)
     }
-    fun setPoint(upperX:Float,upperY:Float,underX:Float,underY:Float){
+    private fun setPoint(upperX:Float,upperY:Float,underX:Float,underY:Float){
         upperLPoint=Pair(upperX,upperY)
         upperRPoint=Pair(underX,upperY)
         underLPoint=Pair(upperX,underY)
@@ -68,30 +67,47 @@ class SelectedBox {
         canvas.drawCircle(x,y,rad,circleBrush)
     }
     fun clickPosCheck(posX:Float,posY:Float):Int{
-        var pos=Pair(posX,posY)
-        if(canvasView.getDst(upperLPoint,pos)<=20f){ return 1 }    // set size of XY upperL
-        else if(canvasView.getDst(upperRPoint,pos)<=20f){ return 2 } // set size of XY upperR
-        else if(canvasView.getDst(underLPoint,pos)<=20f){ return 3 } // set size of XY underL
-        else if(canvasView.getDst(underRPoint,pos)<=20f){ return 4 } // set size of XY underR
-        else if(canvasView.getDst(midLPoint,pos)<=20f){ return 5 } // set size of X midL
-        else if(canvasView.getDst(midRPoint,pos)<=20f){ return 6 } // set size of X midR
-        else if(canvasView.getDst(underMPoint,pos)<=20f){ return 7 } //set size of Y underM
-        else if(canvasView.getDst(upperMPoint,pos)<=20f){ return 8 } // set size of Y upperM
+        val pos=Pair(posX,posY)
+        return if(canvasView.getDst(upperLPoint,pos)<=20f){
+            1
+        }    // set size of XY upperL
+        else if(canvasView.getDst(upperRPoint,pos)<=20f){
+            2
+        } // set size of XY upperR
+        else if(canvasView.getDst(underLPoint,pos)<=20f){
+            3
+        } // set size of XY underL
+        else if(canvasView.getDst(underRPoint,pos)<=20f){
+            4
+        } // set size of XY underR
+        else if(canvasView.getDst(midLPoint,pos)<=20f){
+            5
+        } // set size of X midL
+        else if(canvasView.getDst(midRPoint,pos)<=20f){
+            6
+        } // set size of X midR
+        else if(canvasView.getDst(underMPoint,pos)<=20f){
+            7
+        } //set size of Y underM
+        else if(canvasView.getDst(upperMPoint,pos)<=20f){
+            8
+        } // set size of Y upperM
         else if(pos.first>=upperLPoint.first&&
-                pos.first<=upperRPoint.first&&
-                pos.second>=upperLPoint.second&&
-                pos.second<=underRPoint.second){
-            return 9    // set pos
-        }
-        else {return 0}        // None
+            pos.first<=upperRPoint.first&&
+            pos.second>=upperLPoint.second&&
+            pos.second<=underRPoint.second){
+            9    // set pos
+        } else {
+            0
+        }        // None
     }
     fun setStrokeScale(){
         scaleOfPoints.clear()
         for (i in checkedStroke){
-            var strokeBox=ArrayList<Pair<Float,Float>>()
+            val strokeBox=ArrayList<Pair<Float,Float>>()
             for (j in i.point){
-                var scaleX=(j.first-upperLPoint.first)/(upperRPoint.first-upperLPoint.first)
-                var scaleY=(j.second-upperRPoint.second)/(underRPoint.second-upperRPoint.second)
+                val scaleX=(j.first-upperLPoint.first)/(upperRPoint.first-upperLPoint.first)
+                val scaleY=(j.second-upperRPoint.second)/(underRPoint.second-upperRPoint.second)
                 strokeBox.add(Pair(scaleX,scaleY))
             }
             scaleOfPoints.add(strokeBox)

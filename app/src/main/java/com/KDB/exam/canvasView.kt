@@ -31,7 +31,6 @@ class canvasView : View {
     var startPosX=-100f
     var startPosY=-100f
     var stroke=Stroke()
-    var magneticDegree:Float=0.2f
     var box=ArrayList<Stroke>()
     var canvas:Canvas= Canvas()
     var wrapArea=ArrayList<Pair<Float,Float>>()
@@ -244,8 +243,8 @@ class canvasView : View {
         }
     }
     private fun shapeDrawing(action:Int){
-        var magneticPosX:Float=0f
-        var magneticPosY:Float=0f
+        var magneticPosX:Float
+        var magneticPosY:Float
         if(backgroundMode==2 && isMagnetMode){
             magneticPosX=magnetic(posX)
             magneticPosY=magnetic(posY)
@@ -419,10 +418,10 @@ class canvasView : View {
             wrapAreaBox.applyScale()
         }
     }
-    private fun magnetic(point:Float, isForce:Boolean=false):Float{
-        var magX:Float=0f;
-        var degree:Float=magneticDegree
-        if(isForce){degree=0.5f}
+    private fun magnetic(point:Float, isForced:Boolean=false, degree:Float=0.2f):Float{
+        var magX:Float
+        var degree:Float=degree
+        if(isForced){degree=0.5f}
         if(abs(point% bgGap) <= bgGap*degree) {
             magX=((point/ bgGap).toInt()* bgGap).toFloat()
         }
@@ -457,7 +456,7 @@ class canvasView : View {
         }
     }
     private fun isIn(points: ArrayList<Pair<Float, Float>>,stroke:Stroke):Boolean{
-        for (i in 0 until stroke.point.size){
+        for (i in 0 until stroke.point.size-1 step (2)){
             var crossreps=0
             var dif: Float
             var crossPoint: Float
@@ -474,7 +473,7 @@ class canvasView : View {
             }
             if(crossreps%2==1){
                 crossreps=0         // double check
-                for(j in 0 until points.size-1) {
+                for(j in 0 until points.size-1 step (2)) {
                     dif = (points[j + 1].second - points[j].second) / (points[j + 1].first - points[j].first)
                     crossPoint = ((stroke.point[i].second - points[j].second) / dif) + points[j].first
                     if (crossPoint >= stroke.point[i].first &&
@@ -526,10 +525,6 @@ class canvasView : View {
             }
         }
         if(stroke.isNotEmpty()){
-//            wrapAreaBox.setPoint(stroke.minOf { it.point.minOf { it.first }},
-//                                stroke.minOf { it.point.minOf { it.second }},
-//                                stroke.maxOf { it.point.maxOf { it.first }},
-//                                stroke.maxOf { it.point.maxOf { it.second }})
             wrapAreaBox.drawRect(canvas)
         }
     }
