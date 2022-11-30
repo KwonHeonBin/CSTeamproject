@@ -39,7 +39,7 @@ class Eraser {
                                 var path2=Stroke()
                                 path1.brush=st.brush
                                 path2.brush=st.brush
-                                for (i in 0..index-1){
+                                for (i in 0 until index){
                                     path1.point.add(st.point[i])
                                 }
                                 for (i in index+1..st.point.size-1){

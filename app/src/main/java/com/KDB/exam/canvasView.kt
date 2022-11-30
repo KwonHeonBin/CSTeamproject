@@ -3,11 +3,11 @@ package com.KDB.exam
 import android.content.Context
 import android.graphics.*
 import android.util.AttributeSet
-import android.util.Log
 import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
 import com.KDB.exam.DrawCanvas.Companion.drawCanvasBinding
+import com.KDB.exam.DrawCanvas.Companion.imgList
 import com.KDB.exam.DrawCanvas.Companion.paintBrush
 import com.KDB.exam.DrawCanvas.Companion.path
 import com.samsung.android.sdk.penremote.SpenUnitManager
@@ -25,32 +25,32 @@ class canvasView : View {
     constructor(context: Context, attrs: AttributeSet?, defStyleAttr: Int) : super(context, attrs, defStyleAttr) {
         init()
     }
-    var params:ViewGroup.LayoutParams?=null
-    var posX:Float=-100f
-    var posY:Float=-100f
-    var startPosX=-100f
-    var startPosY=-100f
+    private var canvas:Canvas= Canvas()
+    private var params:ViewGroup.LayoutParams?=null
+    private var posX:Float=-100f
+    private var posY:Float=-100f
+    private var startPosX=-100f
+    private var startPosY=-100f
     var stroke=Stroke()
-    var box=ArrayList<Stroke>()
-    var canvas:Canvas= Canvas()
-    var wrapArea=ArrayList<Pair<Float,Float>>()
+    private var box=ArrayList<Stroke>()
+    private var wrapArea=ArrayList<Pair<Float,Float>>()
 
 //    var canvasWidth=-1
 //    var canvasHeight=-1
 
-    var outLineBrush:Paint=Paint().apply {
+    private var outLineBrush:Paint=Paint().apply {
         color=Color.RED
         alpha=80
         strokeWidth=3f
         isAntiAlias=true
         style=Paint.Style.STROKE
     }
-    var backgroundBrush:Paint=Paint().apply {
+    private var backgroundBrush:Paint=Paint().apply {
         color=Color.BLACK
         strokeWidth=3f
         style=Paint.Style.STROKE
     }
-    var wrapBrush:Paint=Paint().apply {
+    private var wrapBrush:Paint=Paint().apply {
         color=Color.BLACK
         strokeWidth=3f
         style=Paint.Style.STROKE
@@ -62,7 +62,7 @@ class canvasView : View {
         var reStroke=ArrayList<ArrayList<Stroke>>()
         var currentBrush=Color.BLACK
         var penManager: SpenUnitManager? = null
-        var mode:Int=1      // 1-> penMode  2-> eraser  3-> shape  4-> cursor  5-> wrap
+        var mode:Int=1      // 1-> penMode  2-> eraser  3-> shape  4-> cursor  5-> wrap  6-> image
         //var canvasBitmap:Bitmap?=null
         var shapeMode=1     // 1-> line 2-> circle 3-> filledCircle 4-> rect 5-> filledRect 6-> triangle 7-> filledTriangle
         var backgroundMode=1    // 1-> none 2-> grid 3-> underBar 3
@@ -70,11 +70,9 @@ class canvasView : View {
         var eraser=Eraser(20f, Pair(-100f,-100f),1)
         var wrapAreaBox=SelectedBox(0f,0f,0f,0f)
         var isMagnetMode:Boolean=false
-        fun getDst(p1:Pair<Float,Float>,p2:Pair<Float,Float>):Float{
-            var dst=sqrt(
-                abs(p1.first-p2.first).pow(2)
-                        +abs(p1.second-p2.second).pow(2))
-            return dst
+        fun getDst(p1: Pair<Float, Float>, p2: Pair<Float, Float>): Float {
+            return sqrt(abs(p1.first - p2.first).pow(2)
+                        + abs(p1.second - p2.second).pow(2))
         }
         fun saveCanvas(){
             unStroke.add(pathList.clone() as ArrayList<Stroke>)
@@ -111,8 +109,8 @@ class canvasView : View {
     }
 
     override fun onTouchEvent(event: MotionEvent): Boolean {
-        var dx:Float=event.x-posX
-        var dy:Float=event.y-posY
+        val dx:Float=event.x-posX
+        val dy:Float=event.y-posY
         posX=event.x
         posY=event.y
         when(event.action){
@@ -180,7 +178,7 @@ class canvasView : View {
         val list= pathList.iterator()
         while (list.hasNext()){
             val box=list.next()
-            var path=Path()
+            val path=Path()
             if(box.point.isNotEmpty()){
                 path.moveTo(box.point.first().first,box.point.first().second)
                 for (j in 1 until box.point.size){
@@ -243,8 +241,8 @@ class canvasView : View {
         }
     }
     private fun shapeDrawing(action:Int){
-        var magneticPosX:Float
-        var magneticPosY:Float
+        val magneticPosX:Float
+        val magneticPosY:Float
         if(backgroundMode==2 && isMagnetMode){
             magneticPosX=magnetic(posX)
             magneticPosY=magnetic(posY)
@@ -351,7 +349,7 @@ class canvasView : View {
     }
     private fun wrapAreaDrawing(){
         val list= wrapArea.iterator()
-        var path=Path()
+        val path=Path()
         if(wrapArea.isNotEmpty()){path.moveTo(wrapArea.first().first,wrapArea.first().second)}
         else{return}
         while (list.hasNext()){
@@ -419,16 +417,14 @@ class canvasView : View {
         }
     }
     private fun magnetic(point:Float, isForced:Boolean=false, degree:Float=0.2f):Float{
-        var magX:Float
-        var degree:Float=degree
-        if(isForced){degree=0.5f}
-        if(abs(point% bgGap) <= bgGap*degree) {
-            magX=((point/ bgGap).toInt()* bgGap).toFloat()
+        val degree:Float=if(isForced){0.5f}else{degree}
+        val magX:Float = if(abs(point% bgGap) <= bgGap*degree) {
+            ((point/ bgGap).toInt()* bgGap).toFloat()
+        } else if(abs(point% bgGap)> bgGap*(1f-degree)){
+            (((point/ bgGap).toInt()+1)* bgGap).toFloat()
+        } else {
+            point
         }
-        else if(abs(point% bgGap)> bgGap*(1f-degree)){
-            magX=(((point/ bgGap).toInt()+1)* bgGap).toFloat()
-        }
-        else {magX=point}
         return magX
     }
     private fun resetPos(){
@@ -493,7 +489,7 @@ class canvasView : View {
         var i=0
         while(i<point.size-1){
             if(getDst(point[i],point[i+1])>gap){
-                var pos=Pair((point[i].first+point[i+1].first)/2,(point[i].second+point[i+1].second)/2)
+                val pos=Pair((point[i].first+point[i+1].first)/2,(point[i].second+point[i+1].second)/2)
                 point.add(i+1,pos)
                 continue
             }
@@ -514,7 +510,7 @@ class canvasView : View {
     }
     private fun drawOutline(stroke:ArrayList<Stroke>){
         for (i in stroke){
-            var path=Path()
+            val path=Path()
             if(i.point.isNotEmpty()){
                 path.moveTo(i.point.first().first,i.point.first().second)
                 for (j in 1 until i.point.size){
@@ -530,6 +526,11 @@ class canvasView : View {
     }
     fun refreshState(){
         if(mode!=4&&mode!=5){ wrapAreaBox.clearBox()}
+    }
+    fun showImg(){
+        for (i in imgList){
+
+        }
     }
 }
 

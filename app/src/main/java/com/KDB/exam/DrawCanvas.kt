@@ -1,13 +1,22 @@
 package com.KDB.exam
 
 
+
+import android.Manifest
+import android.content.Intent
+import android.content.pm.PackageManager
 import android.graphics.Color
 import android.graphics.Paint
 import android.graphics.Path
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.provider.MediaStore
 import android.view.View
 import android.widget.Toast
+import androidx.activity.result.ActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
 import com.KDB.exam.canvasView.Companion.backgroundMode
 import com.KDB.exam.canvasView.Companion.currentBrush
 import com.KDB.exam.canvasView.Companion.eraser
@@ -34,9 +43,16 @@ class DrawCanvas : AppCompatActivity() {
             strokeCap=Paint.Cap.ROUND
         }
         lateinit var drawCanvasBinding: DrawCanvasBinding
+        var imgList=ArrayList<Image>()
     }
-
-
+    private val imageResult=registerForActivityResult(ActivityResultContracts.StartActivityForResult()){
+        result->
+        if(result.resultCode== RESULT_OK){
+            var img=Image(result,this)
+            img.showImage()
+            //imgList.add(img)
+        }
+    }
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         drawCanvasBinding = DrawCanvasBinding.inflate(layoutInflater)
@@ -182,6 +198,11 @@ class DrawCanvas : AppCompatActivity() {
                 mode=5
                 Toast.makeText(this,"wrap",Toast.LENGTH_SHORT).show()
             }
+            drawCanvasBinding.image->{
+                mode=6
+
+                openGallary()
+            }
         }
         wrapAreaBox.clearBox()
     }
@@ -198,6 +219,22 @@ class DrawCanvas : AppCompatActivity() {
             reStroke.isNotEmpty() -> {drawCanvasBinding.redo.isEnabled=true}
             else -> {drawCanvasBinding.redo.isEnabled=false}
         }
+    }
+    fun openGallary(){
+        val writePermission=ContextCompat.checkSelfPermission(this,Manifest.permission.WRITE_EXTERNAL_STORAGE)
+        val readPermission=ContextCompat.checkSelfPermission(this,Manifest.permission.READ_EXTERNAL_STORAGE)
+        if(writePermission==PackageManager.PERMISSION_DENIED||readPermission==PackageManager.PERMISSION_DENIED){
+            ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.WRITE_EXTERNAL_STORAGE,Manifest.permission.READ_EXTERNAL_STORAGE),1)
+        }
+        else{
+            val intent =Intent(Intent.ACTION_PICK)
+            intent.setDataAndType(MediaStore.Images.Media.EXTERNAL_CONTENT_URI,"image/*")
+            Toast.makeText(this,"image",Toast.LENGTH_SHORT).show()
+            imageResult.launch(intent)
+        }
+    }
+    fun setImage(result: ActivityResult, image: Image){
+
     }
 
 }
