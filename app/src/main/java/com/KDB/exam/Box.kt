@@ -3,17 +3,18 @@ package com.KDB.exam
 import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.Paint
+import android.graphics.Path
 
 open class Box {
 
     protected var upperLPoint=Pair(0f,0f)
     protected var upperRPoint=Pair(0f,0f)
-    protected var underLPoint=Pair(0f,0f)
+    private var underLPoint=Pair(0f,0f)
     protected var underRPoint=Pair(0f,0f)
-    protected var upperMPoint=Pair(0f,0f)
-    protected var underMPoint=Pair(0f,0f)
-    protected var midLPoint=Pair(0f,0f)
-    protected var midRPoint=Pair(0f,0f)
+    private var upperMPoint=Pair(0f,0f)
+    private var underMPoint=Pair(0f,0f)
+    private var midLPoint=Pair(0f,0f)
+    private var midRPoint=Pair(0f,0f)
     var clickedPoint:Int=0
 
     private var boxBrush: Paint = Paint().apply {
@@ -49,8 +50,15 @@ open class Box {
         midLPoint=Pair(upperLPoint.first,(upperLPoint.second+underLPoint.second)/2)
         midRPoint=Pair(upperRPoint.first,(upperRPoint.second+underRPoint.second)/2)
     }
-    fun drawRect(canvas: Canvas){
-        canvas.drawRect(upperLPoint.first,upperLPoint.second,underRPoint.first,underRPoint.second,boxBrush)
+    fun drawBox(canvas: Canvas){
+        var paths=Path()
+        paths.moveTo(upperLPoint.first,upperLPoint.second)
+        paths.lineTo(underLPoint.first,underLPoint.second)
+        paths.lineTo(underRPoint.first,underRPoint.second)
+        paths.lineTo(upperRPoint.first,upperRPoint.second)
+        paths.lineTo(upperLPoint.first,upperLPoint.second)
+        canvas.drawPath(paths,boxBrush)
+        //canvas.drawRect(upperLPoint.first,upperLPoint.second,underRPoint.first,underRPoint.second,boxBrush)
         drawCircle(upperLPoint.first,upperLPoint.second,10f,canvas)    // edge
         drawCircle(upperRPoint.first,upperRPoint.second,10f,canvas)
         drawCircle(underLPoint.first,underLPoint.second,10f,canvas)

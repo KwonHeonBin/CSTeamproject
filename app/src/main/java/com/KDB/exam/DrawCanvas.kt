@@ -3,15 +3,22 @@ package com.KDB.exam
 
 
 import android.Manifest
+import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Color
+import android.graphics.ImageDecoder
 import android.graphics.Paint
 import android.graphics.Path
+import android.os.Build
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.provider.MediaStore
+import android.util.DisplayMetrics
+import android.util.Log
 import android.view.View
+import android.view.WindowInsets
+import android.view.WindowManager
 import android.widget.Toast
 import androidx.activity.result.ActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -28,6 +35,7 @@ import com.KDB.exam.canvasView.Companion.shapeMode
 import com.KDB.exam.canvasView.Companion.unStroke
 import com.KDB.exam.canvasView.Companion.wrapAreaBox
 import com.KDB.exam.databinding.DrawCanvasBinding
+import kotlin.math.min
 
 
 class DrawCanvas : AppCompatActivity() {
@@ -48,11 +56,20 @@ class DrawCanvas : AppCompatActivity() {
     private val imageResult=registerForActivityResult(ActivityResultContracts.StartActivityForResult()){
         result->
         if(result.resultCode== RESULT_OK){
-            var img=Image(result,this)
-            img.showImage()
-            //imgList.add(img)
+            var img=Image(this)
+            val imgUrl=result?.data?.data
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+                img.bitmapImg=ImageDecoder.decodeBitmap(ImageDecoder.createSource(contentResolver, imgUrl!!))
+                val display = this.applicationContext?.resources?.displayMetrics
+                var ratio=if(img.bitmapImg.width>img.bitmapImg.height){min(img.bitmapImg.width.toFloat(),display?.widthPixels!!*0.8f)/img.bitmapImg.width}
+                            else{min(img.bitmapImg.height.toFloat(),display?.heightPixels!!*0.8f)/img.bitmapImg.height}
+                img.setImageSize((img.bitmapImg.width*ratio).toInt(),(img.bitmapImg.height*ratio).toInt())
+                img.setBox()
+            }
+            imgList.add(img)
         }
     }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         drawCanvasBinding = DrawCanvasBinding.inflate(layoutInflater)
@@ -229,7 +246,6 @@ class DrawCanvas : AppCompatActivity() {
         else{
             val intent =Intent(Intent.ACTION_PICK)
             intent.setDataAndType(MediaStore.Images.Media.EXTERNAL_CONTENT_URI,"image/*")
-            Toast.makeText(this,"image",Toast.LENGTH_SHORT).show()
             imageResult.launch(intent)
         }
     }

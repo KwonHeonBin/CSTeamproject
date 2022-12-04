@@ -3,6 +3,7 @@ package com.KDB.exam
 import android.content.Context
 import android.graphics.*
 import android.util.AttributeSet
+import android.util.Log
 import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
@@ -95,7 +96,9 @@ class canvasView : View {
         this.canvas=canvas
         //canvasBitmap?.let { canvas.drawBitmap(it,0F,0F, paintBrush) }
         drawBackGround(bgGap)
+        showImg()
         drawStroke()
+
         when(mode){     // draw after stroke
             2-> { eraser.drawEraser(canvas) }
             4->{ drawOutline(wrapAreaBox.checkedStroke) }
@@ -521,15 +524,16 @@ class canvasView : View {
             }
         }
         if(stroke.isNotEmpty()){
-            wrapAreaBox.drawRect(canvas)
+            wrapAreaBox.drawBox(canvas)
         }
     }
     fun refreshState(){
         if(mode!=4&&mode!=5){ wrapAreaBox.clearBox()}
     }
-    fun showImg(){
+    private fun showImg(){
         for (i in imgList){
-
+            canvas.drawBitmap(i.bitmapImg,i.pos.first,i.pos.second,null)
+            i.drawBox(canvas)
         }
     }
 }
