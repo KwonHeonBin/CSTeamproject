@@ -14,13 +14,8 @@ import android.os.Build
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.provider.MediaStore
-import android.util.DisplayMetrics
-import android.util.Log
 import android.view.View
-import android.view.WindowInsets
-import android.view.WindowManager
 import android.widget.Toast
-import androidx.activity.result.ActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
@@ -56,7 +51,7 @@ class DrawCanvas : AppCompatActivity() {
     private val imageResult=registerForActivityResult(ActivityResultContracts.StartActivityForResult()){
         result->
         if(result.resultCode== RESULT_OK){
-            var img=Image(this)
+            var img=Image(this,true)
             val imgUrl=result?.data?.data
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
                 img.bitmapImg=ImageDecoder.decodeBitmap(ImageDecoder.createSource(contentResolver, imgUrl!!))
@@ -216,9 +211,8 @@ class DrawCanvas : AppCompatActivity() {
                 Toast.makeText(this,"wrap",Toast.LENGTH_SHORT).show()
             }
             drawCanvasBinding.image->{
-                mode=6
-
-                openGallary()
+                openGallery()
+                mode=4
             }
         }
         wrapAreaBox.clearBox()
@@ -237,7 +231,7 @@ class DrawCanvas : AppCompatActivity() {
             else -> {drawCanvasBinding.redo.isEnabled=false}
         }
     }
-    fun openGallary(){
+    private fun openGallery(){
         val writePermission=ContextCompat.checkSelfPermission(this,Manifest.permission.WRITE_EXTERNAL_STORAGE)
         val readPermission=ContextCompat.checkSelfPermission(this,Manifest.permission.READ_EXTERNAL_STORAGE)
         if(writePermission==PackageManager.PERMISSION_DENIED||readPermission==PackageManager.PERMISSION_DENIED){
@@ -249,8 +243,4 @@ class DrawCanvas : AppCompatActivity() {
             imageResult.launch(intent)
         }
     }
-    fun setImage(result: ActivityResult, image: Image){
-
-    }
-
 }

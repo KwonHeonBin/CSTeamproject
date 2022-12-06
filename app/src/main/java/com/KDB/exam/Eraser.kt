@@ -42,7 +42,7 @@ class Eraser {
                                 for (i in 0 until index){
                                     path1.point.add(st.point[i])
                                 }
-                                for (i in index+1..st.point.size-1){
+                                for (i in index+1 until st.point.size){
                                     path2.point.add(st.point[i])
                                 }
                                 canvasView.pathList.add(path1)

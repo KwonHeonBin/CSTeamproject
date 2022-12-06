@@ -3,7 +3,6 @@ package com.KDB.exam
 import android.content.Context
 import android.graphics.*
 import android.util.AttributeSet
-import android.util.Log
 import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
@@ -35,6 +34,7 @@ class canvasView : View {
     var stroke=Stroke()
     private var box=ArrayList<Stroke>()
     private var wrapArea=ArrayList<Pair<Float,Float>>()
+    private var focusedImg:Image?=null
 
 //    var canvasWidth=-1
 //    var canvasHeight=-1
@@ -121,17 +121,23 @@ class canvasView : View {
                 startPosX=event.x
                 startPosY=event.y
                 when(mode){
-                    1->{ penDrawing(MotionEvent.ACTION_DOWN) }
-                    2->{ eraserDrawing(MotionEvent.ACTION_DOWN) }
-                    3->{ shapeDrawing(MotionEvent.ACTION_DOWN) }
-                    4->{
-                        if(wrapAreaBox.checkedStroke.isEmpty()){strokeClick(MotionEvent.ACTION_DOWN)}
+                    1->{ penDrawing(MotionEvent.ACTION_DOWN) }  // penMode
+                    2->{ eraserDrawing(MotionEvent.ACTION_DOWN) }   // eraseMode
+                    3->{ shapeDrawing(MotionEvent.ACTION_DOWN) }    // shapeMode
+                    4->{                                            // cursorMode
+                        if(wrapAreaBox.checkedStroke.isEmpty()&&focusedImg==null){
+                            imgClick()
+                            if(focusedImg==null){strokeClick(MotionEvent.ACTION_DOWN)}
+                        }
                         else{
                             wrapAreaBox.clickedPoint=wrapAreaBox.clickPosCheck(startPosX,startPosY)
-                            if(wrapAreaBox.clickedPoint==0){strokeClick(MotionEvent.ACTION_DOWN)}
+                            if(wrapAreaBox.clickedPoint==0){
+                                imgClick()
+                                if(focusedImg==null){strokeClick(MotionEvent.ACTION_DOWN)}
+                            }
                         }
                     }
-                    5->{
+                    5->{                                            // wrapMode
                         if(wrapAreaBox.checkedStroke.isEmpty()){wrapDrawing(MotionEvent.ACTION_DOWN)}
                         else {
                             wrapAreaBox.clickedPoint = wrapAreaBox.clickPosCheck(posX, posY)
@@ -362,7 +368,7 @@ class canvasView : View {
         }
 
     }
-    private fun strokeClick(action:Int){
+    private fun strokeClick(action:Int){    // check which stroke clicked
         when(action){
             0->{    // down
                 if(wrapAreaBox.checkedStroke.isEmpty()){
@@ -413,6 +419,23 @@ class canvasView : View {
         box.clear()
         if(reStroke.isNotEmpty()){ reStroke.clear()}
     }
+    private fun imgClick(){
+        for (i in imgList){
+            when(posX){
+                in i.pos.first..i.pos.first+i.bitmapImg.width->{
+                    when(posY){
+                        in i.pos.second..i.pos.second+i.bitmapImg.height->{
+                            if(focusedImg!=null){focusedImg!!.isFocused=false}    // swap focusedImg}
+                            focusedImg=i
+                            focusedImg!!.isFocused=true
+                            return
+                        }
+                    }
+                }
+            }
+        }
+        focusedImg=null     // if click no image, set null
+    }
     private fun stretchWrapAreaBox(dst:Pair<Float,Float>){
         if(wrapAreaBox.checkedStroke.isNotEmpty()){
             wrapAreaBox.moveBox(dst)
@@ -456,7 +479,7 @@ class canvasView : View {
     }
     private fun isIn(points: ArrayList<Pair<Float, Float>>,stroke:Stroke):Boolean{
         for (i in 0 until stroke.point.size-1 step (2)){
-            var crossreps=0
+            var crossReps=0
             var dif: Float
             var crossPoint: Float
             for(j in 0 until points.size-1){
@@ -467,11 +490,11 @@ class canvasView : View {
                     stroke.point[i].first<=max(points[j].first,points[j+1].first)&&
                     crossPoint>=min(points[j].second,points[j+1].second)&&
                     crossPoint<=max(points[j].second,points[j+1].second)){
-                    crossreps+=1
+                    crossReps+=1
                 }
             }
-            if(crossreps%2==1){
-                crossreps=0         // double check
+            if(crossReps%2==1){
+                crossReps=0         // double check
                 for(j in 0 until points.size-1 step (2)) {
                     dif = (points[j + 1].second - points[j].second) / (points[j + 1].first - points[j].first)
                     crossPoint = ((stroke.point[i].second - points[j].second) / dif) + points[j].first
@@ -480,10 +503,10 @@ class canvasView : View {
                         stroke.point[i].second <= max(points[j].second, points[j + 1].second) &&
                         crossPoint >= min(points[j].first, points[j + 1].first) &&
                         crossPoint <= max(points[j].first, points[j + 1].first)) {
-                        crossreps += 1
+                        crossReps += 1
                     }
                 }
-                if(crossreps%2==1){return true}
+                if(crossReps%2==1){return true}
             }
         }
         return false
@@ -533,7 +556,7 @@ class canvasView : View {
     private fun showImg(){
         for (i in imgList){
             canvas.drawBitmap(i.bitmapImg,i.pos.first,i.pos.second,null)
-            i.drawBox(canvas)
+            if(focusedImg==i){i.drawBox(canvas)}
         }
     }
 }

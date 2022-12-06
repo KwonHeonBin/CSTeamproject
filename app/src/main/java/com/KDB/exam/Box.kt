@@ -4,6 +4,8 @@ import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.Paint
 import android.graphics.Path
+import kotlin.math.cos
+import kotlin.math.sin
 
 open class Box {
 
@@ -16,21 +18,22 @@ open class Box {
     private var midLPoint=Pair(0f,0f)
     private var midRPoint=Pair(0f,0f)
     var clickedPoint:Int=0
+    var degree:Float=0f
 
-    private var boxBrush: Paint = Paint().apply {
+    protected var boxBrush: Paint = Paint().apply {
         color= Color.RED
         alpha=100
         strokeWidth=3f
         style= Paint.Style.STROKE
     }
-    private var circleBrush: Paint = Paint().apply {
+    protected var circleBrush: Paint = Paint().apply {
         color= Color.RED
         strokeWidth=3f
         alpha=150
         style= Paint.Style.STROKE
         isAntiAlias=true
     }
-    private var circleFillBrush: Paint = Paint().apply {
+    protected var circleFillBrush: Paint = Paint().apply {
         color= Color.WHITE
         strokeWidth=3f
         style= Paint.Style.FILL
