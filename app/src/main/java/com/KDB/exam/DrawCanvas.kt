@@ -3,7 +3,6 @@ package com.KDB.exam
 
 
 import android.Manifest
-import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Color
@@ -22,6 +21,7 @@ import androidx.core.content.ContextCompat
 import com.KDB.exam.canvasView.Companion.backgroundMode
 import com.KDB.exam.canvasView.Companion.currentBrush
 import com.KDB.exam.canvasView.Companion.eraser
+import com.KDB.exam.canvasView.Companion.focusedImg
 import com.KDB.exam.canvasView.Companion.isMagnetMode
 import com.KDB.exam.canvasView.Companion.mode
 import com.KDB.exam.canvasView.Companion.pathList
@@ -51,11 +51,11 @@ class DrawCanvas : AppCompatActivity() {
     private val imageResult=registerForActivityResult(ActivityResultContracts.StartActivityForResult()){
         result->
         if(result.resultCode== RESULT_OK){
-            var img=Image(this,true)
+
             val imgUrl=result?.data?.data
+            var img=Image(imgUrl,this,true,contentResolver)
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
-                img.bitmapImg=ImageDecoder.decodeBitmap(ImageDecoder.createSource(contentResolver, imgUrl!!))
-                val display = this.applicationContext?.resources?.displayMetrics
+                val display = this.applicationContext?.resources?.displayMetrics    // get device size
                 var ratio=if(img.bitmapImg.width>img.bitmapImg.height){min(img.bitmapImg.width.toFloat(),display?.widthPixels!!*0.8f)/img.bitmapImg.width}
                             else{min(img.bitmapImg.height.toFloat(),display?.heightPixels!!*0.8f)/img.bitmapImg.height}
                 img.setImageSize((img.bitmapImg.width*ratio).toInt(),(img.bitmapImg.height*ratio).toInt())
@@ -216,12 +216,16 @@ class DrawCanvas : AppCompatActivity() {
             }
         }
         wrapAreaBox.clearBox()
+        if(focusedImg!=null){
+            focusedImg!!.clearBox()
+            focusedImg=null
+        }
     }
     private fun currentColor(color:Int){
         currentBrush=color      // set currentBrush to color
         path=Path()     // reset path if don't use this code, change color -> change color of every line even already existed
     }
-    fun btnActiveCheck(){
+    private fun btnActiveCheck(){
         when {
             unStroke.isNotEmpty() -> {drawCanvasBinding.undo.isEnabled=true}
             else -> {drawCanvasBinding.undo.isEnabled=false}

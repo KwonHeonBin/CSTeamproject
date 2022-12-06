@@ -3,6 +3,7 @@ package com.KDB.exam
 import android.content.Context
 import android.graphics.*
 import android.util.AttributeSet
+import android.util.Log
 import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
@@ -34,7 +35,7 @@ class canvasView : View {
     var stroke=Stroke()
     private var box=ArrayList<Stroke>()
     private var wrapArea=ArrayList<Pair<Float,Float>>()
-    private var focusedImg:Image?=null
+
 
 //    var canvasWidth=-1
 //    var canvasHeight=-1
@@ -70,6 +71,7 @@ class canvasView : View {
         var bgGap:Int=100
         var eraser=Eraser(20f, Pair(-100f,-100f),1)
         var wrapAreaBox=SelectedBox(0f,0f,0f,0f)
+        var focusedImg:Image?=null
         var isMagnetMode:Boolean=false
         fun getDst(p1: Pair<Float, Float>, p2: Pair<Float, Float>): Float {
             return sqrt(abs(p1.first - p2.first).pow(2)
@@ -128,13 +130,19 @@ class canvasView : View {
                         if(wrapAreaBox.checkedStroke.isEmpty()&&focusedImg==null){
                             imgClick()
                             if(focusedImg==null){strokeClick(MotionEvent.ACTION_DOWN)}
+                            else{ focusedImg!!.clickedPoint= focusedImg!!.clickPosCheck(startPosX,startPosY)}
                         }
                         else{
-                            wrapAreaBox.clickedPoint=wrapAreaBox.clickPosCheck(startPosX,startPosY)
-                            if(wrapAreaBox.clickedPoint==0){
-                                imgClick()
-                                if(focusedImg==null){strokeClick(MotionEvent.ACTION_DOWN)}
+                            if(focusedImg!=null){
+                                focusedImg!!.clickedPoint= focusedImg!!.clickPosCheck(startPosX,startPosY)
+                                if(focusedImg!!.clickedPoint!=0){ return true}
                             }
+                            else{
+                                wrapAreaBox.clickedPoint=wrapAreaBox.clickPosCheck(startPosX,startPosY)
+                                if(wrapAreaBox.clickedPoint!=0){ return true }
+                            }
+                            strokeClick(MotionEvent.ACTION_DOWN)
+                            imgClick()
                         }
                     }
                     5->{                                            // wrapMode
@@ -437,9 +445,19 @@ class canvasView : View {
         focusedImg=null     // if click no image, set null
     }
     private fun stretchWrapAreaBox(dst:Pair<Float,Float>){
-        if(wrapAreaBox.checkedStroke.isNotEmpty()){
-            wrapAreaBox.moveBox(dst)
-            wrapAreaBox.applyScale()
+        if(sqrt(dst.first.pow(2)+dst.second.pow(2))>3f){
+            if(wrapAreaBox.checkedStroke.isNotEmpty()){
+                wrapAreaBox.moveBox(dst)
+                wrapAreaBox.applyScale()
+            }
+            else if(focusedImg!=null){
+                focusedImg!!.moveBox(dst)
+                when(focusedImg!!.clickedPoint){
+                    9->{focusedImg!!.moveImg(dst)}
+                    0->{}
+                    else->{focusedImg!!.applyImageSize() }
+                }
+            }
         }
     }
     private fun magnetic(point:Float, isForced:Boolean=false, degree:Float=0.2f):Float{

@@ -11,7 +11,7 @@ open class Box {
 
     protected var upperLPoint=Pair(0f,0f)
     protected var upperRPoint=Pair(0f,0f)
-    private var underLPoint=Pair(0f,0f)
+    protected var underLPoint=Pair(0f,0f)
     protected var underRPoint=Pair(0f,0f)
     private var upperMPoint=Pair(0f,0f)
     private var underMPoint=Pair(0f,0f)
