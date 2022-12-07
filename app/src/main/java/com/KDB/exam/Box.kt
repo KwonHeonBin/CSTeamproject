@@ -4,6 +4,8 @@ import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.Paint
 import android.graphics.Path
+import com.KDB.exam.canvasView.Companion.posX
+import com.KDB.exam.canvasView.Companion.posY
 import kotlin.math.cos
 import kotlin.math.sin
 
@@ -47,7 +49,7 @@ open class Box {
         underRPoint=Pair(underX,underY)
         setMidPoint()
     }
-    private fun setMidPoint(){
+    protected fun setMidPoint(){
         upperMPoint=Pair((upperLPoint.first+upperRPoint.first)/2,upperLPoint.second)
         underMPoint=Pair((upperLPoint.first+upperRPoint.first)/2,underLPoint.second)
         midLPoint=Pair(upperLPoint.first,(upperLPoint.second+underLPoint.second)/2)
@@ -110,7 +112,8 @@ open class Box {
             0
         }        // None
     }
-    fun moveBox(dst:Pair<Float,Float>){
+
+    open fun moveBox(dst:Pair<Float,Float>){
         when(clickedPoint){
             1->{    // set size of XY upperL
                 upperLPoint=Pair(upperLPoint.first+dst.first,upperLPoint.second+dst.second)

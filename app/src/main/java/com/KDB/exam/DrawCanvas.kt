@@ -78,6 +78,9 @@ class DrawCanvas : AppCompatActivity() {
     }
 
     fun btn (view: View){       // set color fun
+        wrapAreaBox.clearBox()
+        focusedImg?.clearBox()
+        focusedImg=null
         when(view){
             drawCanvasBinding.Color->{
                 if(mode!=1){
@@ -107,7 +110,6 @@ class DrawCanvas : AppCompatActivity() {
                     }
                 }
             }
-
             drawCanvasBinding.clear->{        // reset list
                 Toast.makeText(this,"clear",Toast.LENGTH_SHORT).show()
                 //var box=pathList.clone() as ArrayList<Stroke>
@@ -214,11 +216,6 @@ class DrawCanvas : AppCompatActivity() {
                 openGallery()
                 mode=4
             }
-        }
-        wrapAreaBox.clearBox()
-        if(focusedImg!=null){
-            focusedImg!!.clearBox()
-            focusedImg=null
         }
     }
     private fun currentColor(color:Int){

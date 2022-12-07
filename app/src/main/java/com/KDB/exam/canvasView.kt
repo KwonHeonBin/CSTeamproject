@@ -28,8 +28,7 @@ class canvasView : View {
     }
     private var canvas:Canvas= Canvas()
     private var params:ViewGroup.LayoutParams?=null
-    private var posX:Float=-100f
-    private var posY:Float=-100f
+
     private var startPosX=-100f
     private var startPosY=-100f
     var stroke=Stroke()
@@ -63,6 +62,8 @@ class canvasView : View {
         var unStroke=ArrayList<ArrayList<Stroke>>()
         var reStroke=ArrayList<ArrayList<Stroke>>()
         var currentBrush=Color.BLACK
+        var posX:Float=-100f
+        var posY:Float=-100f
         var penManager: SpenUnitManager? = null
         var mode:Int=1      // 1-> penMode  2-> eraser  3-> shape  4-> cursor  5-> wrap  6-> image
         //var canvasBitmap:Bitmap?=null
@@ -177,11 +178,13 @@ class canvasView : View {
                     1->{ penDrawing(MotionEvent.ACTION_UP) }
                     2->{ eraserDrawing(MotionEvent.ACTION_UP) }
                     3->{ shapeDrawing(MotionEvent.ACTION_UP) }
-                    4->{ setPointForCheckedStroke()}
+                    4->{
+                        setPointForCheckedStroke()
+                        setImageScale()
+                    }
                     5->{
                         if(wrapAreaBox.checkedStroke.isNotEmpty()&& wrapAreaBox.clickedPoint!=0){setPointForCheckedStroke()}
                         else{wrapDrawing(MotionEvent.ACTION_UP)}
-
                     }
                 }
                 return false
@@ -356,7 +359,6 @@ class canvasView : View {
                         wrapAreaBox.checkedStroke.add(i)
                     }
                 }
-                //Log.d("asd", "size:  "+wrapAreaBox.checkedStroke.size.toString())
                 if(wrapAreaBox.checkedStroke.isNotEmpty()){
                     wrapAreaBox.setBox()
                 }
@@ -455,10 +457,13 @@ class canvasView : View {
                 when(focusedImg!!.clickedPoint){
                     9->{focusedImg!!.moveImg(dst)}
                     0->{}
-                    else->{focusedImg!!.applyImageSize() }
+                    else->{ }
                 }
             }
         }
+    }
+    private fun setImageScale(){
+        if(focusedImg!=null && focusedImg!!.clickedPoint!=0&&focusedImg!!.clickedPoint!=9){ focusedImg!!.applyImageSize() }
     }
     private fun magnetic(point:Float, isForced:Boolean=false, degree:Float=0.2f):Float{
         val degree:Float=if(isForced){0.5f}else{degree}

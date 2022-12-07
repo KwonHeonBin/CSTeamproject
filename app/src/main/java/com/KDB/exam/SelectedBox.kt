@@ -1,5 +1,7 @@
 package com.KDB.exam
 
+import android.util.Log
+
 class SelectedBox:Box {
 
 
@@ -31,6 +33,7 @@ class SelectedBox:Box {
             }
         }
     }
+
     override fun setBox(){
         setPoint(checkedStroke.minOf { it.point.minOf { it.first }},
                  checkedStroke.minOf { it.point.minOf { it.second }},

@@ -7,12 +7,16 @@ import android.graphics.ImageDecoder
 import android.graphics.Matrix
 import android.net.Uri
 import android.os.Build
+import android.util.Log
+import androidx.core.graphics.values
 import kotlin.math.abs
 
 class Image:Box {
     var bitmapImg:Bitmap
     lateinit var oriBitmapImg:Bitmap
     private var context:Context
+    private var revX=false
+    private var revY=false
     var imgURI:Uri
     var pos=Pair(0f,0f)
     var isFocused=false
@@ -34,42 +38,65 @@ class Image:Box {
         bitmapImg=oriBitmapImg
     }
     fun setImageSize(x:Int,y:Int){
-        bitmapImg=Bitmap.createScaledBitmap(oriBitmapImg, x, y, false)
+        bitmapImg=Bitmap.createScaledBitmap(oriBitmapImg, x, y, true)
         setBox()
     }
 
     fun applyImageSize(){
+        setMatrix()
+        swapPoints()
         pos=Pair(upperLPoint.first,upperLPoint.second)
-        bitmapImg=Bitmap.createScaledBitmap(oriBitmapImg,
-            abs(upperRPoint.first-upperLPoint.first).toInt(),
-            abs(underLPoint.second-upperLPoint.second).toInt(), false)
+        bitmapImg=Bitmap.createBitmap(oriBitmapImg,0,0,
+            oriBitmapImg.width, oriBitmapImg.height,matrix, false)
+        bitmapImg=Bitmap.createScaledBitmap(bitmapImg,
+            (upperRPoint.first-upperLPoint.first).toInt(),
+            (underLPoint.second-upperLPoint.second).toInt(), true)
     }
     fun setImageRotate(degree:Float){
-
         matrix.postRotate(degree)
         bitmapImg=Bitmap.createBitmap(bitmapImg,pos.first.toInt(),pos.second.toInt(),bitmapImg.width,bitmapImg.height,matrix,true)
     }
+
     override fun setBox(){
         setPoint(pos.first,pos.second,pos.first+bitmapImg.width,pos.second+bitmapImg.height)
     }
     fun moveImg(dst:Pair<Float,Float>){
         pos= Pair(pos.first+dst.first,pos.second+dst.second)
+        bitmapImg=Bitmap.createScaledBitmap(oriBitmapImg,
+            (upperRPoint.first-upperLPoint.first).toInt(),
+            (underLPoint.second-upperLPoint.second).toInt(), true)
     }
 
     override fun clearBox() {
         isFocused=false
     }
-    fun setMatrix(){
-
-        if(upperRPoint.first-upperLPoint.first<0){
-            if(underLPoint.second-upperLPoint.second<0){matrix.setScale(-1f,-1f)}
-            else{matrix.setScale(-1f,1f)}
+    private fun setMatrix(){
+        var values=matrix.values()
+        if(upperRPoint.first<upperLPoint.first){
+            if(values[0]==-1f){ values[0]=1f }
+            else{ values[0]=-1f }
         }
-        else{
-            if(underLPoint.second-upperLPoint.second<0){matrix.setScale(1f,-1f)}
-            else{matrix.setScale(1f,1f)}
+        if(underLPoint.second<upperLPoint.second){
+            if(values[4]==-1f){ values[4]=1f }
+            else{ values[4]=-1f }
+        }
+        matrix.setValues(values)
+    }
+    private fun swapPoints(){
+        if(upperRPoint.first<upperLPoint.first){
+            upperLPoint=upperRPoint.also { upperRPoint=upperLPoint }
+            underLPoint=underRPoint.also { underRPoint=underLPoint }
+            setMidPoint()
+            clickedPoint=clickPosCheck(canvasView.posX, canvasView.posY)
+        }
+        if(underLPoint.second<upperLPoint.second){
+            upperLPoint=underLPoint.also { underLPoint=upperLPoint }
+            upperRPoint=underRPoint.also { underRPoint=upperRPoint }
+            setMidPoint()
+            clickedPoint=clickPosCheck(canvasView.posX, canvasView.posY)
         }
 
     }
+
 
 }
