@@ -1,6 +1,6 @@
 package com.KDB.exam
 
-import android.util.Log
+
 
 class SelectedBox:Box {
 

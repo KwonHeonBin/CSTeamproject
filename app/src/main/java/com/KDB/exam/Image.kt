@@ -7,26 +7,23 @@ import android.graphics.ImageDecoder
 import android.graphics.Matrix
 import android.net.Uri
 import android.os.Build
-import android.util.Log
 import androidx.core.graphics.values
-import kotlin.math.abs
 
 class Image:Box {
     var bitmapImg:Bitmap
     lateinit var oriBitmapImg:Bitmap
     private var context:Context
-    private var revX=false
-    private var revY=false
-    var imgURI:Uri
+    private var imgURI:Uri
     var pos=Pair(0f,0f)
     var isFocused=false
     var contentResolver:ContentResolver
     var matrix=Matrix()
 
 
-    constructor(uri:Uri?, context: Context, focused:Boolean,contentResolver:ContentResolver){
+    constructor(uri:Uri?, context: Context, focused:Boolean,contentResolver:ContentResolver,isImg:Boolean=true){
         this.context=context
         isFocused=focused
+        isImgBox=isImg
         imgURI=uri!!
         this.contentResolver=contentResolver
         boxBrush.strokeWidth=6f
@@ -46,9 +43,9 @@ class Image:Box {
         setMatrix()
         swapPoints()
         pos=Pair(upperLPoint.first,upperLPoint.second)
-        bitmapImg=Bitmap.createBitmap(oriBitmapImg,0,0,
+        bitmapImg=Bitmap.createBitmap(oriBitmapImg,0,0,     // apply matrix
             oriBitmapImg.width, oriBitmapImg.height,matrix, false)
-        bitmapImg=Bitmap.createScaledBitmap(bitmapImg,
+        bitmapImg=Bitmap.createScaledBitmap(bitmapImg,             // apply scale
             (upperRPoint.first-upperLPoint.first).toInt(),
             (underLPoint.second-upperLPoint.second).toInt(), true)
     }
@@ -62,9 +59,6 @@ class Image:Box {
     }
     fun moveImg(dst:Pair<Float,Float>){
         pos= Pair(pos.first+dst.first,pos.second+dst.second)
-        bitmapImg=Bitmap.createScaledBitmap(oriBitmapImg,
-            (upperRPoint.first-upperLPoint.first).toInt(),
-            (underLPoint.second-upperLPoint.second).toInt(), true)
     }
 
     override fun clearBox() {

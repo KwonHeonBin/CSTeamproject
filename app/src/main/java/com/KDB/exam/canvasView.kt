@@ -3,7 +3,6 @@ package com.KDB.exam
 import android.content.Context
 import android.graphics.*
 import android.util.AttributeSet
-import android.util.Log
 import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
@@ -26,7 +25,7 @@ class canvasView : View {
     constructor(context: Context, attrs: AttributeSet?, defStyleAttr: Int) : super(context, attrs, defStyleAttr) {
         init()
     }
-    private var canvas:Canvas= Canvas()
+    private var Focusedcanvas:Canvas= Canvas()
     private var params:ViewGroup.LayoutParams?=null
 
     private var startPosX=-100f
@@ -59,13 +58,14 @@ class canvasView : View {
     }
     companion object{
         var pathList=ArrayList<Stroke>()
+        var canvasList= ArrayList<Canvas>()
         var unStroke=ArrayList<ArrayList<Stroke>>()
         var reStroke=ArrayList<ArrayList<Stroke>>()
         var currentBrush=Color.BLACK
         var posX:Float=-100f
         var posY:Float=-100f
         var penManager: SpenUnitManager? = null
-        var mode:Int=1      // 1-> penMode  2-> eraser  3-> shape  4-> cursor  5-> wrap  6-> image
+        var mode:Int=1      // 1-> penMode  2-> eraser  3-> shape  4-> cursor  5-> wrap  6-> image 7-> hand
         //var canvasBitmap:Bitmap?=null
         var shapeMode=1     // 1-> line 2-> circle 3-> filledCircle 4-> rect 5-> filledRect 6-> triangle 7-> filledTriangle
         var backgroundMode=1    // 1-> none 2-> grid 3-> underBar 3
@@ -96,7 +96,7 @@ class canvasView : View {
 //    }
     override fun onDraw(canvas: Canvas) {
         super.onDraw(canvas)
-        this.canvas=canvas
+        this.Focusedcanvas=canvas
         //canvasBitmap?.let { canvas.drawBitmap(it,0F,0F, paintBrush) }
         drawBackGround(bgGap)
         showImg()
@@ -110,7 +110,6 @@ class canvasView : View {
                 drawOutline(wrapAreaBox.checkedStroke)
             }
         }
-        //refreshState()
         invalidate()
     }
 
@@ -204,7 +203,7 @@ class canvasView : View {
                 for (j in 1 until box.point.size){
                     path.lineTo(box.point[j].first,box.point[j].second)
                 }
-                canvas.drawPath(path,box.brush)
+                Focusedcanvas.drawPath(path,box.brush)
                 invalidate()                //refresh View      -> if any line exist, call onDraw infinitely
             }
         }
@@ -374,7 +373,7 @@ class canvasView : View {
         while (list.hasNext()){
             val box=list.next()
             path.lineTo(box.first,box.second)
-            canvas.drawPath(path,wrapBrush)
+            Focusedcanvas.drawPath(path,wrapBrush)
         }
 
     }
@@ -486,16 +485,16 @@ class canvasView : View {
 
             }
             2->{
-                for (i in 0..(canvas.height/gap)){   // horizontal line
-                    canvas.drawLine(0f,(i*gap).toFloat(),canvas.width.toFloat(),(i*gap).toFloat(),backgroundBrush)
+                for (i in 0..(Focusedcanvas.height/gap)){   // horizontal line
+                    Focusedcanvas.drawLine(0f,(i*gap).toFloat(),Focusedcanvas.width.toFloat(),(i*gap).toFloat(),backgroundBrush)
                 }
-                for (i in 0..(canvas.width/gap)){      //vertical line
-                    canvas.drawLine((i*gap).toFloat(),0f,(i*gap).toFloat(),canvas.height.toFloat(),backgroundBrush)
+                for (i in 0..(Focusedcanvas.width/gap)){      //vertical line
+                    Focusedcanvas.drawLine((i*gap).toFloat(),0f,(i*gap).toFloat(),Focusedcanvas.height.toFloat(),backgroundBrush)
                 }
             }
             3->{
-                for (i in 0..(canvas.height/gap)){   // horizontal line
-                    canvas.drawLine(0f,(i*gap).toFloat(),canvas.width.toFloat(),(i*gap).toFloat(),backgroundBrush)
+                for (i in 0..(Focusedcanvas.height/gap)){   // horizontal line
+                    Focusedcanvas.drawLine(0f,(i*gap).toFloat(),Focusedcanvas.width.toFloat(),(i*gap).toFloat(),backgroundBrush)
                 }
             }
         }
@@ -566,11 +565,11 @@ class canvasView : View {
                     path.lineTo(i.point[j].first,i.point[j].second)
                 }
                 outLineBrush.strokeWidth=(i.brush.strokeWidth+5f)
-                canvas.drawPath(path,outLineBrush)
+                Focusedcanvas.drawPath(path,outLineBrush)
             }
         }
         if(stroke.isNotEmpty()){
-            wrapAreaBox.drawBox(canvas)
+            wrapAreaBox.drawBox(Focusedcanvas)
         }
     }
     fun refreshState(){
@@ -578,8 +577,8 @@ class canvasView : View {
     }
     private fun showImg(){
         for (i in imgList){
-            canvas.drawBitmap(i.bitmapImg,i.pos.first,i.pos.second,null)
-            if(focusedImg==i){i.drawBox(canvas)}
+            Focusedcanvas.drawBitmap(i.bitmapImg,i.pos.first,i.pos.second,null)
+            if(focusedImg==i){i.drawBox(Focusedcanvas)}
         }
     }
 }

@@ -4,8 +4,6 @@ import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.Paint
 import android.graphics.Path
-import com.KDB.exam.canvasView.Companion.posX
-import com.KDB.exam.canvasView.Companion.posY
 import kotlin.math.cos
 import kotlin.math.sin
 
@@ -19,6 +17,8 @@ open class Box {
     private var underMPoint=Pair(0f,0f)
     private var midLPoint=Pair(0f,0f)
     private var midRPoint=Pair(0f,0f)
+    private var rotatePoint=Pair(0f,0f)
+    protected var isImgBox=false
     var clickedPoint:Int=0
     var degree:Float=0f
 
@@ -54,6 +54,7 @@ open class Box {
         underMPoint=Pair((upperLPoint.first+upperRPoint.first)/2,underLPoint.second)
         midLPoint=Pair(upperLPoint.first,(upperLPoint.second+underLPoint.second)/2)
         midRPoint=Pair(upperRPoint.first,(upperRPoint.second+underRPoint.second)/2)
+        rotatePoint=Pair(upperMPoint.first,upperMPoint.second+50f)
     }
     fun drawBox(canvas: Canvas){
         var paths=Path()
@@ -72,6 +73,7 @@ open class Box {
         drawCircle(midRPoint.first,midRPoint.second,10f,canvas)
         drawCircle(upperMPoint.first,upperMPoint.second,10f,canvas)
         drawCircle(underMPoint.first,underMPoint.second,10f,canvas)
+        if(isImgBox){drawCircle(rotatePoint.first,rotatePoint.second,10f,canvas)}
     }
     private fun drawCircle(x:Float, y:Float, rad:Float, canvas: Canvas){
         canvas.drawCircle(x,y,rad,circleFillBrush)
@@ -108,7 +110,11 @@ open class Box {
             pos.second>=upperLPoint.second&&
             pos.second<=underRPoint.second){
             9    // set pos
-        } else {
+        }
+        else if(isImgBox && canvasView.getDst(rotatePoint,pos)<=20f){
+            10  // set rotation
+        }
+        else {
             0
         }        // None
     }

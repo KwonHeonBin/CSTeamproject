@@ -6,6 +6,28 @@
     android:layout_height="match_parent"
     android:orientation="vertical"
     tools:context=".DrawCanvas">
+
+    <com.KDB.exam.CustomScrollView
+        android:id="@+id/scrollView"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@color/gray"
+        android:layout_above="@+id/toolBar"
+        android:overScrollMode="ifContentScrolls"
+        android:scrollbars="none"
+        >
+        <LinearLayout
+            android:id="@+id/LL"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            >
+
+
+        </LinearLayout>
+
+    </com.KDB.exam.CustomScrollView>
+
     <HorizontalScrollView
         android:id="@+id/toolBar"
         android:background="@drawable/toolbar_background"
@@ -114,19 +136,17 @@
                 android:background="@drawable/folder_image"
                 android:onClick="btn"
                 tools:ignore="SpeakableTextPresentCheck" />
+            <ImageButton
+                android:id="@+id/hand"
+                android:layout_width="20dp"
+                android:layout_height="20dp"
+                android:layout_margin="5dp"
+                android:background="@drawable/hand_back_left_outline"
+                android:onClick="btn"
+                tools:ignore="SpeakableTextPresentCheck" />
 
         </LinearLayout>
     </HorizontalScrollView>
-
-    <RelativeLayout
-        android:id="@+id/RL"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_above="@+id/toolBar">
-        <com.KDB.exam.canvasView
-            android:layout_width="match_parent"
-            android:layout_height="match_parent" />
-    </RelativeLayout>
 
 
 </RelativeLayout>

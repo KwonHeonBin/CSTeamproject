@@ -6,14 +6,15 @@ import android.Manifest
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Color
-import android.graphics.ImageDecoder
 import android.graphics.Paint
 import android.graphics.Path
 import android.os.Build
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.provider.MediaStore
+import android.util.Log
 import android.view.View
+import android.widget.LinearLayout
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.app.ActivityCompat
@@ -47,6 +48,8 @@ class DrawCanvas : AppCompatActivity() {
         }
         lateinit var drawCanvasBinding: DrawCanvasBinding
         var imgList=ArrayList<Image>()
+        lateinit var scrollView:CustomScrollView
+        lateinit var linerLayout:LinearLayout
     }
     private val imageResult=registerForActivityResult(ActivityResultContracts.StartActivityForResult()){
         result->
@@ -56,8 +59,8 @@ class DrawCanvas : AppCompatActivity() {
             var img=Image(imgUrl,this,true,contentResolver)
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
                 val display = this.applicationContext?.resources?.displayMetrics    // get device size
-                var ratio=if(img.bitmapImg.width>img.bitmapImg.height){min(img.bitmapImg.width.toFloat(),display?.widthPixels!!*0.8f)/img.bitmapImg.width}
-                            else{min(img.bitmapImg.height.toFloat(),display?.heightPixels!!*0.8f)/img.bitmapImg.height}
+                var ratio=if(img.bitmapImg.width>img.bitmapImg.height){min(img.bitmapImg.width.toFloat(),display?.widthPixels!!*0.5f)/img.bitmapImg.width}
+                            else{min(img.bitmapImg.height.toFloat(),display?.heightPixels!!*0.5f)/img.bitmapImg.height}
                 img.setImageSize((img.bitmapImg.width*ratio).toInt(),(img.bitmapImg.height*ratio).toInt())
                 img.setBox()
             }
@@ -68,6 +71,10 @@ class DrawCanvas : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         drawCanvasBinding = DrawCanvasBinding.inflate(layoutInflater)
+        scrollView= drawCanvasBinding.scrollView
+        linerLayout= drawCanvasBinding.LL
+        scrollView.layout= linerLayout
+        scrollView.addView()
         setContentView(drawCanvasBinding.root)
         supportActionBar?.hide()
     }
@@ -78,13 +85,12 @@ class DrawCanvas : AppCompatActivity() {
     }
 
     fun btn (view: View){       // set color fun
-        wrapAreaBox.clearBox()
-        focusedImg?.clearBox()
-        focusedImg=null
+        refreshState()
         when(view){
             drawCanvasBinding.Color->{
                 if(mode!=1){
                     mode=1
+                    scrollView.isScrollable=false
                     return
                 }
                 when(paintBrush.color){
@@ -121,6 +127,7 @@ class DrawCanvas : AppCompatActivity() {
             drawCanvasBinding.shape->{
                 if(mode!=3){
                     mode=3
+                    scrollView.isScrollable=false
                     return
                 }
                 when(shapeMode){
@@ -191,6 +198,7 @@ class DrawCanvas : AppCompatActivity() {
             drawCanvasBinding.eraser->{
                 if(mode!=2){
                     mode=2
+                    scrollView.isScrollable=false
                     return
                 }
                 when(eraser.mode){
@@ -202,7 +210,6 @@ class DrawCanvas : AppCompatActivity() {
             drawCanvasBinding.magnet->{
                 isMagnetMode=!isMagnetMode
                 Toast.makeText(this,if(isMagnetMode) "magnet" else "noMagnet",Toast.LENGTH_SHORT).show()
-
             }
             drawCanvasBinding.cursor->{
                 mode=4
@@ -214,10 +221,34 @@ class DrawCanvas : AppCompatActivity() {
             }
             drawCanvasBinding.image->{
                 openGallery()
+                Toast.makeText(this,"image",Toast.LENGTH_SHORT).show()
                 mode=4
+            }
+            drawCanvasBinding.hand->{
+                Log.d("asd", "hand");
+                when(scrollView.isScrollable){
+                    false->{
+                        scrollView.isScrollable=true
+                        Toast.makeText(this,"hand",Toast.LENGTH_SHORT).show()
+                        mode=7
+                    }
+                    true->{
+                        scrollView.isScrollable=false
+                        Toast.makeText(this,"pen",Toast.LENGTH_SHORT).show()
+                        mode=1
+                    }
+                }
             }
         }
     }
+
+    private fun refreshState(){
+        if(mode!=7){scrollView.isScrollable=false}
+        wrapAreaBox.clearBox()
+        focusedImg?.clearBox()
+        focusedImg=null
+    }
+
     private fun currentColor(color:Int){
         currentBrush=color      // set currentBrush to color
         path=Path()     // reset path if don't use this code, change color -> change color of every line even already existed

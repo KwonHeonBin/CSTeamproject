@@ -1,9 +1,7 @@
 package com.KDB.exam
 
 import android.graphics.Paint
-import android.graphics.Path
-import android.util.Log
-import kotlin.math.*
+
 
 
 class Stroke : Cloneable {
