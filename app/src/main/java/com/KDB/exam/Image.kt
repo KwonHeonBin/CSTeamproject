@@ -8,6 +8,8 @@ import android.graphics.Matrix
 import android.net.Uri
 import android.os.Build
 import androidx.core.graphics.values
+import com.KDB.exam.CanvasManager.Companion.posX
+import com.KDB.exam.CanvasManager.Companion.posY
 
 class Image:Box {
     var bitmapImg:Bitmap
@@ -81,13 +83,13 @@ class Image:Box {
             upperLPoint=upperRPoint.also { upperRPoint=upperLPoint }
             underLPoint=underRPoint.also { underRPoint=underLPoint }
             setMidPoint()
-            clickedPoint=clickPosCheck(canvasView.posX, canvasView.posY)
+            clickedPoint=clickPosCheck(posX, posY)
         }
         if(underLPoint.second<upperLPoint.second){
             upperLPoint=underLPoint.also { underLPoint=upperLPoint }
             upperRPoint=underRPoint.also { underRPoint=upperRPoint }
             setMidPoint()
-            clickedPoint=clickPosCheck(canvasView.posX, canvasView.posY)
+            clickedPoint=clickPosCheck(posX, posY)
         }
 
     }

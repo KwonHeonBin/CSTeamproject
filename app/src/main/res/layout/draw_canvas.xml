@@ -16,15 +16,14 @@
         android:overScrollMode="ifContentScrolls"
         android:scrollbars="none"
         >
-        <LinearLayout
+        <com.KDB.exam.CanvasManager
             android:id="@+id/LL"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
             >
 
-
-        </LinearLayout>
+        </com.KDB.exam.CanvasManager>
 
     </com.KDB.exam.CustomScrollView>
 

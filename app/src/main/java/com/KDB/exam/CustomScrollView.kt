@@ -18,12 +18,15 @@ class CustomScrollView: ScrollView {
     constructor(context: Context?) : super(context)
     constructor(context: Context?, attrs: AttributeSet?) : super(context, attrs)
     constructor(context: Context?, attrs: AttributeSet?, defStyleAttr: Int) : super(context, attrs, defStyleAttr)
+
     var isScrollable:Boolean=false
     var isAddingCanvas:Boolean=false
     var layout:LinearLayout?=null
     var startTime:Long=0
     var endTime:Long=0
-    var pages= arrayListOf<canvasView>()
+    var focusedPageId:Int=1
+    lateinit var canvasManager:CanvasManager
+
     private val addBox:TextView= TextView(context).apply {
         text="Add Screen"
         layoutParams = LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, (resources.displayMetrics.heightPixels*0.1).toInt())
@@ -52,9 +55,10 @@ class CustomScrollView: ScrollView {
                 }
             }
             MotionEvent.ACTION_UP->{
+                focusedIdCheck()
                 if(!canScrollVertically(1)&&isAddingCanvas){
                     endTime=System.currentTimeMillis()
-                    if(endTime-startTime>1200f){
+                    if(endTime-startTime>1000f){
                         Toast.makeText(context, "addView", Toast.LENGTH_SHORT).show()
                         addView()
                     }
@@ -73,10 +77,21 @@ class CustomScrollView: ScrollView {
             background=resources.getDrawable(R.color.white,null)
         }
         layout!!.addView(view)
-        pages.add(view)
+        canvasManager.pages.add(view)
+        view.page=canvasManager.pages.size
+//        Log.d("asd", canvasManager.pages.size.toString())
+//        if(canvasManager.pages.size==2){
+//            if(canvasManager.pages[0].canvas==canvasManager.pages[1].canvas){
+//                Log.d("asd", "same");
+//            }
+//            else{Log.d("asd", "diff");}
+//        }
+    }
+    private fun setPage():Int{
+        return 0
     }
     private fun getDP(value:Int):Int{ return (value*resources.displayMetrics.density).roundToInt() }
-
+    private fun focusedIdCheck(){ focusedPageId=(scrollY.toFloat()/resources.displayMetrics.heightPixels.toFloat()).roundToInt() }
     override fun onScrollChanged(l: Int, t: Int, oldl: Int, oldt: Int) {
         super.onScrollChanged(l, t, oldl, oldt)
 //        if(!canScrollVertically(1)){

@@ -4,6 +4,7 @@ import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.Paint
 import android.graphics.Path
+import com.KDB.exam.CanvasManager.Companion.getDst
 import kotlin.math.cos
 import kotlin.math.sin
 
@@ -21,6 +22,7 @@ open class Box {
     protected var isImgBox=false
     var clickedPoint:Int=0
     var degree:Float=0f
+    var id:Int=1
 
     protected var boxBrush: Paint = Paint().apply {
         color= Color.RED
@@ -81,28 +83,28 @@ open class Box {
     }
     fun clickPosCheck(posX:Float,posY:Float):Int{
         val pos=Pair(posX,posY)
-        return if(canvasView.getDst(upperLPoint,pos)<=20f){
+        return if(getDst(upperLPoint,pos)<=20f){
             1
         }    // set size of XY upperL
-        else if(canvasView.getDst(upperRPoint,pos)<=20f){
+        else if(getDst(upperRPoint,pos)<=20f){
             2
         } // set size of XY upperR
-        else if(canvasView.getDst(underLPoint,pos)<=20f){
+        else if(getDst(underLPoint,pos)<=20f){
             3
         } // set size of XY underL
-        else if(canvasView.getDst(underRPoint,pos)<=20f){
+        else if(getDst(underRPoint,pos)<=20f){
             4
         } // set size of XY underR
-        else if(canvasView.getDst(midLPoint,pos)<=20f){
+        else if(getDst(midLPoint,pos)<=20f){
             5
         } // set size of X midL
-        else if(canvasView.getDst(midRPoint,pos)<=20f){
+        else if(getDst(midRPoint,pos)<=20f){
             6
         } // set size of X midR
-        else if(canvasView.getDst(underMPoint,pos)<=20f){
+        else if(getDst(underMPoint,pos)<=20f){
             7
         } //set size of Y underM
-        else if(canvasView.getDst(upperMPoint,pos)<=20f){
+        else if(getDst(upperMPoint,pos)<=20f){
             8
         } // set size of Y upperM
         else if(pos.first>=upperLPoint.first&&
@@ -111,7 +113,7 @@ open class Box {
             pos.second<=underRPoint.second){
             9    // set pos
         }
-        else if(isImgBox && canvasView.getDst(rotatePoint,pos)<=20f){
+        else if(isImgBox && getDst(rotatePoint,pos)<=20f){
             10  // set rotation
         }
         else {

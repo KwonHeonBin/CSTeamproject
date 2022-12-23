@@ -7,7 +7,6 @@ class SelectedBox:Box {
 
     var checkedStroke=ArrayList<Stroke>()
     private var scaleOfPoints=ArrayList<ArrayList<Pair<Float,Float>>>()
-
     constructor(upperX:Float,upperY:Float,underX:Float,underY:Float){
         setPoint(upperX,upperY,underX,underY)
     }

@@ -1,5 +1,6 @@
 package com.KDB.exam
 
+import android.graphics.Canvas
 import android.graphics.Paint
 
 
@@ -8,10 +9,12 @@ class Stroke : Cloneable {
     var brush:Paint=Paint()
     var point=ArrayList<Pair<Float,Float>>()
     var maxDistPerPoint:Float=30f
+    var id:Int=0
 
-    constructor(brush:Paint,distPerPoint:Float){
+    constructor(brush:Paint,distPerPoint:Float,id:Int){
         this.brush=brush
         this.maxDistPerPoint=distPerPoint
+        this.id=id
         setupBrush()
     }
     constructor(){

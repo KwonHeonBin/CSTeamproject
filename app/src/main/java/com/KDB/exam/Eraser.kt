@@ -3,6 +3,9 @@ package com.KDB.exam
 import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.Paint
+import com.KDB.exam.CanvasManager.Companion.getDst
+import com.KDB.exam.CanvasManager.Companion.pathList
+import com.KDB.exam.CanvasManager.Companion.saveCanvas
 
 class Eraser {
     var radius:Float =5f
@@ -22,14 +25,14 @@ class Eraser {
         radius=rad
     }
     fun erase(point:Pair<Float,Float>) {
-        for (st in canvasView.pathList) {
+        for (st in pathList) {
             for (i in st.point) {
-                var distance = canvasView.getDst(point,i)
+                var distance = getDst(point,i)
                 if (distance <= radius) {
                     when (mode) {
                         0 -> {    // stroke delete
-                            canvasView.saveCanvas()
-                            canvasView.pathList.remove(st)
+                            saveCanvas()
+                            pathList.remove(st)
                             return
                         }
                         1 -> {    // point delete
@@ -45,13 +48,13 @@ class Eraser {
                                 for (i in index+1 until st.point.size){
                                     path2.point.add(st.point[i])
                                 }
-                                canvasView.pathList.add(path1)
-                                canvasView.pathList.add(path2)
-                                canvasView.pathList.remove(st)
+                                pathList.add(path1)
+                                pathList.add(path2)
+                                pathList.remove(st)
                                 return
                             }
                             st.point.remove(i)
-                            if(st.point.isEmpty()){ canvasView.pathList.remove(st)}
+                            if(st.point.isEmpty()){ pathList.remove(st)}
                             return
                         }
                     }

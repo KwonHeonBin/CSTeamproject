@@ -14,22 +14,21 @@ import android.os.Bundle
 import android.provider.MediaStore
 import android.util.Log
 import android.view.View
-import android.widget.LinearLayout
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
-import com.KDB.exam.canvasView.Companion.backgroundMode
-import com.KDB.exam.canvasView.Companion.currentBrush
-import com.KDB.exam.canvasView.Companion.eraser
-import com.KDB.exam.canvasView.Companion.focusedImg
-import com.KDB.exam.canvasView.Companion.isMagnetMode
-import com.KDB.exam.canvasView.Companion.mode
-import com.KDB.exam.canvasView.Companion.pathList
-import com.KDB.exam.canvasView.Companion.reStroke
-import com.KDB.exam.canvasView.Companion.shapeMode
-import com.KDB.exam.canvasView.Companion.unStroke
-import com.KDB.exam.canvasView.Companion.wrapAreaBox
+import com.KDB.exam.CanvasManager.Companion.backgroundMode
+import com.KDB.exam.CanvasManager.Companion.currentBrush
+import com.KDB.exam.CanvasManager.Companion.focusedImg
+import com.KDB.exam.CanvasManager.Companion.imgList
+import com.KDB.exam.CanvasManager.Companion.isMagnetMode
+import com.KDB.exam.CanvasManager.Companion.mode
+import com.KDB.exam.CanvasManager.Companion.pathList
+import com.KDB.exam.CanvasManager.Companion.reStroke
+import com.KDB.exam.CanvasManager.Companion.shapeMode
+import com.KDB.exam.CanvasManager.Companion.unStroke
+import com.KDB.exam.CanvasManager.Companion.wrapAreaBox
 import com.KDB.exam.databinding.DrawCanvasBinding
 import kotlin.math.min
 
@@ -47,9 +46,8 @@ class DrawCanvas : AppCompatActivity() {
             strokeCap=Paint.Cap.ROUND
         }
         lateinit var drawCanvasBinding: DrawCanvasBinding
-        var imgList=ArrayList<Image>()
         lateinit var scrollView:CustomScrollView
-        lateinit var linerLayout:LinearLayout
+        lateinit var linerLayout:CanvasManager
     }
     private val imageResult=registerForActivityResult(ActivityResultContracts.StartActivityForResult()){
         result->
@@ -63,6 +61,7 @@ class DrawCanvas : AppCompatActivity() {
                             else{min(img.bitmapImg.height.toFloat(),display?.heightPixels!!*0.5f)/img.bitmapImg.height}
                 img.setImageSize((img.bitmapImg.width*ratio).toInt(),(img.bitmapImg.height*ratio).toInt())
                 img.setBox()
+                img.id= scrollView.focusedPageId
             }
             imgList.add(img)
         }
@@ -74,6 +73,7 @@ class DrawCanvas : AppCompatActivity() {
         scrollView= drawCanvasBinding.scrollView
         linerLayout= drawCanvasBinding.LL
         scrollView.layout= linerLayout
+        scrollView.canvasManager= CanvasManager(this)
         scrollView.addView()
         setContentView(drawCanvasBinding.root)
         supportActionBar?.hide()
@@ -85,7 +85,7 @@ class DrawCanvas : AppCompatActivity() {
     }
 
     fun btn (view: View){       // set color fun
-        refreshState()
+
         when(view){
             drawCanvasBinding.Color->{
                 if(mode!=1){
@@ -201,11 +201,11 @@ class DrawCanvas : AppCompatActivity() {
                     scrollView.isScrollable=false
                     return
                 }
-                when(eraser.mode){
-                    0-> eraser.mode=1
-                    1-> eraser.mode=0
+                when(scrollView.canvasManager.eraser.mode){
+                    0-> scrollView.canvasManager.eraser.mode=1
+                    1-> scrollView.canvasManager.eraser.mode=0
                 }
-                Toast.makeText(this,if(eraser.mode==0) "stroke" else "area",Toast.LENGTH_SHORT).show()
+                Toast.makeText(this,if(scrollView.canvasManager.eraser.mode==0) "stroke" else "area",Toast.LENGTH_SHORT).show()
             }
             drawCanvasBinding.magnet->{
                 isMagnetMode=!isMagnetMode
@@ -225,7 +225,6 @@ class DrawCanvas : AppCompatActivity() {
                 mode=4
             }
             drawCanvasBinding.hand->{
-                Log.d("asd", "hand");
                 when(scrollView.isScrollable){
                     false->{
                         scrollView.isScrollable=true
@@ -240,6 +239,7 @@ class DrawCanvas : AppCompatActivity() {
                 }
             }
         }
+        refreshState()
     }
 
     private fun refreshState(){
