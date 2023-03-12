@@ -59,7 +59,7 @@ class canvasView : View {
         drawBackGround(canvasManager.bgGap)
         showImg()
         drawStroke()
-        when(mode){     // draw after stroke
+        when(mode){     // draw after stroke(선을 그린 후 실행)
             2-> { eraser.drawEraser(canvas) }
             4->{ drawOutline(wrapAreaBox.checkedStroke) }
             5->{
@@ -67,50 +67,50 @@ class canvasView : View {
                 drawOutline(wrapAreaBox.checkedStroke)
             }
         }
-        invalidate()
+        invalidate()    // 업데이트
     }
     override fun onTouchEvent(event: MotionEvent): Boolean {
-        val dx:Float=event.x-posX
+        val dx:Float=event.x-posX   // x,y 좌표의 변화률
         val dy:Float=event.y-posY
-        posX=event.x
+        posX=event.x    // x,y 좌표
         posY=event.y
         when(event.action){
             MotionEvent.ACTION_DOWN->{
-                canvasManager.focusedCanvas=this.canvas
-                canvasManager.startPosX=event.x
+                canvasManager.focusedCanvas=this.canvas // 현재 클릭중인 캔버스 번호 저장
+                canvasManager.startPosX=event.x         // 클릭 좌표 저장
                 canvasManager.startPosY=event.y
                 when(mode){
                     1->{ canvasManager.penDrawing(MotionEvent.ACTION_DOWN,this) }  // penMode
                     2->{ canvasManager.eraserDrawing(MotionEvent.ACTION_DOWN) }   // eraseMode
                     3->{ canvasManager.shapeDrawing(MotionEvent.ACTION_DOWN,this) }    // shapeMode
                     4->{                                            // cursorMode
-                        if(wrapAreaBox.checkedStroke.isEmpty()&&focusedImg==null){
-                            canvasManager.imgClick()
-                            if(focusedImg==null){canvasManager.strokeClick(MotionEvent.ACTION_DOWN)}
-                            else{ focusedImg!!.clickedPoint= focusedImg!!.clickPosCheck(canvasManager.startPosX,canvasManager.startPosY)}
+                        if(wrapAreaBox.checkedStroke.isEmpty()&&focusedImg==null){ // 현재 포커스 된 객체가 없을 시
+                            canvasManager.imgClick()    // 이미지 클릭 여부 확인
+                            if(focusedImg==null){canvasManager.strokeClick(MotionEvent.ACTION_DOWN)} // 선 클릭 여부 확인
+                            else{ focusedImg!!.clickedPoint= focusedImg!!.clickPosCheck(canvasManager.startPosX,canvasManager.startPosY)}// 이미지 박스 중 클릭한 점 확인
                         }
                         else{
-                            if(focusedImg!=null){
-                                focusedImg!!.clickedPoint= focusedImg!!.clickPosCheck(canvasManager.startPosX,canvasManager.startPosY)
+                            if(focusedImg!=null){// 선이 포커스 됐을 시
+                                focusedImg!!.clickedPoint= focusedImg!!.clickPosCheck(canvasManager.startPosX,canvasManager.startPosY) // 이미지 박스 중 클릭한 점 확인
                                 if(focusedImg!!.clickedPoint!=0){ return true}
                             }
-                            else{
-                                wrapAreaBox.clickedPoint=wrapAreaBox.clickPosCheck(canvasManager.startPosX,canvasManager.startPosY)
+                            else{// 이미지가 포커스 됐을 시
+                                wrapAreaBox.clickedPoint=wrapAreaBox.clickPosCheck(canvasManager.startPosX,canvasManager.startPosY) // 선 박스 중 클릭한 점 확인
                                 if(wrapAreaBox.clickedPoint!=0){ return true }
                             }
-                            canvasManager.strokeClick(MotionEvent.ACTION_DOWN)
+                            canvasManager.strokeClick(MotionEvent.ACTION_DOWN) // 클릭 좌표 업데이트
                             canvasManager.imgClick()
                         }
                     }
                     5->{                                            // wrapMode
-                        if(wrapAreaBox.checkedStroke.isEmpty()){canvasManager.wrapDrawing(MotionEvent.ACTION_DOWN)}
+                        if(wrapAreaBox.checkedStroke.isEmpty()){canvasManager.wrapDrawing(MotionEvent.ACTION_DOWN)} // 묶음 상자 비활성화 시
                         else {
-                            wrapAreaBox.clickedPoint = wrapAreaBox.clickPosCheck(posX, posY)
-                            if (wrapAreaBox.clickedPoint == 0) {
+                            wrapAreaBox.clickedPoint = wrapAreaBox.clickPosCheck(posX, posY) // 묶음상자 활성화 시
+                            if (wrapAreaBox.clickedPoint == 0) {    // 범위에서 벗어난 점 클릭 시 상자 해제
                                 wrapAreaBox.clearBox()
                                 canvasManager.wrapDrawing(MotionEvent.ACTION_DOWN)
                             }
-                            else{ for (i in pathList){ canvasManager.box.add(i.clone()) } }
+                            else{ for (i in pathList){ canvasManager.box.add(i.clone()) } } // 범위 내부 점 클릭 시
                         }
                     }
                 }
@@ -122,8 +122,8 @@ class canvasView : View {
                     2->{ canvasManager.eraserDrawing(MotionEvent.ACTION_MOVE) }
                     3->{ canvasManager.shapeDrawing(MotionEvent.ACTION_MOVE,this) }
                     4->{ canvasManager.stretchWrapAreaBox(Pair(dx,dy))}
-                    5-> {
-                        if(wrapAreaBox.checkedStroke.isNotEmpty()&& wrapAreaBox.clickedPoint!=0){canvasManager.stretchWrapAreaBox(Pair(dx,dy))}
+                    5-> {   // 올가미 모드
+                        if(wrapAreaBox.checkedStroke.isNotEmpty()&& wrapAreaBox.clickedPoint!=0){canvasManager.stretchWrapAreaBox(Pair(dx,dy))} // 올가미 모드 활성화 시
                         else{canvasManager.wrapDrawing(MotionEvent.ACTION_MOVE)}
                     }
 
@@ -151,8 +151,8 @@ class canvasView : View {
         return false
     }
 
-    private fun drawStroke(){
-        val list= pathList.iterator()
+    private fun drawStroke(){   // 선 그리시
+        val list= pathList.iterator()   // 읽기 전용
         while (list.hasNext()){
             val box=list.next()
             val path= Path()
@@ -161,7 +161,8 @@ class canvasView : View {
                 for (j in 1 until box.point.size){
                     path.lineTo(box.point[j].first,box.point[j].second)
                 }
-                if(box.id==page){ canvas.drawPath(path,box.brush) }
+                if(box.id==page){ canvas.drawPath(path,box.brush) } // path에 있는 점에 맞춰 선을 그림
+                else{Log.d("asd", "no id")}
                 invalidate()                //refresh View      -> if any line exist, call onDraw infinitely
             }
         }
@@ -198,7 +199,7 @@ class canvasView : View {
             }
         }
     }
-    private fun drawOutline(stroke:ArrayList<Stroke>){
+    private fun drawOutline(stroke:ArrayList<Stroke>){ // 선택된 선 바깥선 그리기
         for (i in stroke){
             val path= Path()
             if(i.point.isNotEmpty()){
@@ -206,7 +207,7 @@ class canvasView : View {
                 for (j in 1 until i.point.size){
                     path.lineTo(i.point[j].first,i.point[j].second)
                 }
-                canvasManager.outLineBrush.strokeWidth=(i.brush.strokeWidth+5f)
+                canvasManager.outLineBrush.strokeWidth=(i.brush.strokeWidth+5f)// 선택된 선보다 굵은 굵기로 그림
                 if(i.id==page){canvas.drawPath(path,canvasManager.outLineBrush)}
             }
         }
@@ -214,7 +215,7 @@ class canvasView : View {
             wrapAreaBox.drawBox(canvas)
         }
     }
-    private fun showImg(){
+    private fun showImg(){  // 이미지 출력
         for (i in imgList){
             if(i.id==page){
                 canvas.drawBitmap(i.bitmapImg,i.pos.first,i.pos.second,null)

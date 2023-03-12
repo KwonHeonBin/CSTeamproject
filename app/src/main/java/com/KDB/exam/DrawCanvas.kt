@@ -36,7 +36,6 @@ import kotlin.math.min
 class DrawCanvas : AppCompatActivity() {
 
     companion object{
-        var path:Path= Path()
         var paintBrush: Paint = Paint().apply {
             isAntiAlias=true // set paintBrush
             color= currentBrush
@@ -121,7 +120,6 @@ class DrawCanvas : AppCompatActivity() {
                 //var box=pathList.clone() as ArrayList<Stroke>
                 unStroke.add(pathList.clone() as ArrayList<Stroke>)
                 btnActiveCheck()
-                path.reset()
                 pathList.clear()
             }
             drawCanvasBinding.shape->{
@@ -198,6 +196,7 @@ class DrawCanvas : AppCompatActivity() {
             drawCanvasBinding.eraser->{
                 if(mode!=2){
                     mode=2
+                    Toast.makeText(this,if(scrollView.canvasManager.eraser.mode==1) "area" else "stroke",Toast.LENGTH_SHORT).show()
                     scrollView.isScrollable=false
                     return
                 }
@@ -205,7 +204,7 @@ class DrawCanvas : AppCompatActivity() {
                     0-> scrollView.canvasManager.eraser.mode=1
                     1-> scrollView.canvasManager.eraser.mode=0
                 }
-                Toast.makeText(this,if(scrollView.canvasManager.eraser.mode==0) "stroke" else "area",Toast.LENGTH_SHORT).show()
+                Toast.makeText(this,if(scrollView.canvasManager.eraser.mode==1) "area" else "stroke",Toast.LENGTH_SHORT).show()
             }
             drawCanvasBinding.magnet->{
                 isMagnetMode=!isMagnetMode
@@ -251,7 +250,6 @@ class DrawCanvas : AppCompatActivity() {
 
     private fun currentColor(color:Int){
         currentBrush=color      // set currentBrush to color
-        path=Path()     // reset path if don't use this code, change color -> change color of every line even already existed
     }
     private fun btnActiveCheck(){
         when {

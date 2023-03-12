@@ -31,17 +31,17 @@ class Image:Box {
         boxBrush.strokeWidth=6f
         circleBrush.strokeWidth=6f
         circleFillBrush.strokeWidth=6f
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) { // 이미지 원본 저장
             oriBitmapImg= ImageDecoder.decodeBitmap(ImageDecoder.createSource(contentResolver, imgURI!!))
         }
         bitmapImg=oriBitmapImg
     }
-    fun setImageSize(x:Int,y:Int){
+    fun setImageSize(x:Int,y:Int){// 이미지 사이즈 설정
         bitmapImg=Bitmap.createScaledBitmap(oriBitmapImg, x, y, true)
         setBox()
     }
 
-    fun applyImageSize(){
+    fun applyImageSize(){ // 이미지 사이즈 적용
         setMatrix()
         swapPoints()
         pos=Pair(upperLPoint.first,upperLPoint.second)
@@ -66,26 +66,26 @@ class Image:Box {
     override fun clearBox() {
         isFocused=false
     }
-    private fun setMatrix(){
+    private fun setMatrix(){ // 이미지 매트릭스 설정(적용은 구현 안 함)
         var values=matrix.values()
-        if(upperRPoint.first<upperLPoint.first){
+        if(upperRPoint.first<upperLPoint.first){// 좌우 x좌표 매트릭스상 스왑
             if(values[0]==-1f){ values[0]=1f }
             else{ values[0]=-1f }
         }
-        if(underLPoint.second<upperLPoint.second){
+        if(underLPoint.second<upperLPoint.second){// 좌우 y좌표 매트릭스상 스왑
             if(values[4]==-1f){ values[4]=1f }
             else{ values[4]=-1f }
         }
         matrix.setValues(values)
     }
     private fun swapPoints(){
-        if(upperRPoint.first<upperLPoint.first){
+        if(upperRPoint.first<upperLPoint.first){// 좌우 x좌표 스왑
             upperLPoint=upperRPoint.also { upperRPoint=upperLPoint }
             underLPoint=underRPoint.also { underRPoint=underLPoint }
             setMidPoint()
             clickedPoint=clickPosCheck(posX, posY)
         }
-        if(underLPoint.second<upperLPoint.second){
+        if(underLPoint.second<upperLPoint.second){// 좌우 y좌표 스왑
             upperLPoint=underLPoint.also { underLPoint=upperLPoint }
             upperRPoint=underRPoint.also { underRPoint=upperRPoint }
             setMidPoint()

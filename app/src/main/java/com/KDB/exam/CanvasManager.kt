@@ -25,7 +25,7 @@ class CanvasManager:LinearLayout {
 
     //var canvasBitmap:Bitmap?=null
 
-    var bgGap:Int=100
+    var bgGap:Int=100 // 배경 선 간격
 
 
     var outLineBrush: Paint = Paint().apply {
@@ -44,7 +44,7 @@ class CanvasManager:LinearLayout {
         color= Color.BLACK
         strokeWidth=3f
         style= Paint.Style.STROKE
-        pathEffect= DashPathEffect(floatArrayOf(10f, 20f), 0f)
+        pathEffect= DashPathEffect(floatArrayOf(10f, 20f), 0f)// 점선
     }
     companion object{
         var mode:Int=1      // 1-> penMode  2-> eraser  3-> shape  4-> cursor  5-> wrap  6-> image 7-> hand
@@ -72,7 +72,7 @@ class CanvasManager:LinearLayout {
 
     fun penDrawing(action:Int,canvas: canvasView){
         when(action){
-            0->{    // down
+            0->{    // down 눌렀을 시 객체 생성 밑 포인트 저장
                 for (i in pathList){ box.add(i.clone()) }
                 stroke=Stroke()
                 stroke.id=canvas.page
@@ -80,17 +80,17 @@ class CanvasManager:LinearLayout {
                 stroke.point.add(Pair(posX, posY))
                 pathList.add(stroke)
             }
-            2->{    // move
+            2->{    // move 움직었을 시 좌표 저장
                 stroke.point.add(Pair(posX, posY))
             }
-            1->{    // up
+            1->{    // up 땠을 시 선형보간 후 저장
                 unStroke.add(box.clone() as ArrayList<Stroke>)
                 if(reStroke.isNotEmpty()){ reStroke.clear()}
                 box.clear()
                 stroke.point.add(Pair(posX, posY))
                 stroke.point=interpolation(stroke.point,stroke.maxDistPerPoint)
                 resetPos()
-                if(!DrawCanvas.drawCanvasBinding.undo.isEnabled){
+                if(!DrawCanvas.drawCanvasBinding.undo.isEnabled){// 되돌리기 활성화
                     DrawCanvas.drawCanvasBinding.undo.isEnabled=true}
             }
         }
@@ -98,13 +98,14 @@ class CanvasManager:LinearLayout {
     fun eraserDrawing(action:Int){
         when(action){
             0->{
+
                 for (i in pathList){ box.add(i.clone()) }
-                eraser.pos=Pair(posX, posY)
-                eraser.erase(eraser.pos)
+                eraser.pos=Pair(posX, posY) // 지우개 좌표 저장
+                eraser.erase(eraser.pos) // 좌표를 토대로 지우기 실행
             }
             2->{
                 var box=ArrayList<Pair<Float,Float>>()
-                box.add(eraser.pos)
+                box.add(eraser.pos) // 지우개를 빠르게 움직었을 시 좌표 저장이 원할하지 않으므로 지우개에 선형보간 적용
                 box.add(Pair(posX, posY))
                 eraser.pos=Pair(posX, posY)
                 box=interpolation(box,30f)
@@ -114,7 +115,7 @@ class CanvasManager:LinearLayout {
                 eraser.erase(Pair(posX, posY))
                 resetPos()
                 eraser.pos=Pair(posX, posY)
-                if(box!= pathList){
+                if(box!= pathList){// 되돌리기 초기화
                     unStroke.add(box.clone() as ArrayList<Stroke>)
                     if(reStroke.isNotEmpty()){ reStroke.clear()}
                 }
@@ -125,7 +126,7 @@ class CanvasManager:LinearLayout {
     fun shapeDrawing(action:Int,canvas: canvasView){
         val magneticPosX:Float
         val magneticPosY:Float
-        if(backgroundMode ==2 && isMagnetMode){
+        if(backgroundMode ==2 && isMagnetMode){// 자석모드 활성화 시 실행
             magneticPosX=magnetic(posX)
             magneticPosY=magnetic(posY)
             startPosX=magnetic(startPosX,true)
@@ -139,7 +140,6 @@ class CanvasManager:LinearLayout {
             0->{
                 box= pathList.clone() as ArrayList<Stroke>
                 stroke=Stroke()
-                DrawCanvas.path.moveTo(startPosX,startPosY)        // start point
                 stroke.brush.set(DrawCanvas.paintBrush)
                 stroke.id=canvas.page
                 stroke.point.add(Pair(startPosX,startPosY))
@@ -213,21 +213,21 @@ class CanvasManager:LinearLayout {
                 wrapArea.add(Pair(posX, posY))
             }
             2->{    // move
-                if(!wrapArea.contains(Pair(posX, posY))){wrapArea.add(Pair(
+                if(!wrapArea.contains(Pair(posX, posY))){wrapArea.add(Pair(// 중복 좌표 체크
                     posX,
                     posY
                 ))}
             }
             1->{    // up
-                wrapArea=unInterpolation(wrapArea,40f)
+                wrapArea=unInterpolation(wrapArea,40f)// 최적화
                 wrapArea.add(wrapArea[0])
                 for (i in pathList){
-                    if(isIn(wrapArea,i)&& !wrapAreaBox.checkedStroke.contains(i)){
+                    if(isIn(wrapArea,i)&& !wrapAreaBox.checkedStroke.contains(i)){// 올가미에 들어가는 선들 체크
                         wrapAreaBox.checkedStroke.add(i)
                     }
                 }
                 if(wrapAreaBox.checkedStroke.isNotEmpty()){
-                    wrapAreaBox.setBox()
+                    wrapAreaBox.setBox()// 선들을 토대로 box 생성
                 }
                 wrapArea.clear()
             }
@@ -240,11 +240,8 @@ class CanvasManager:LinearLayout {
                 if(wrapAreaBox.checkedStroke.isEmpty()){
                     for (i in pathList){
                         for(j in i.point){
-                            if(getDst(
-                                    Pair(posX, posY),
-                                    j
-                                ) <20f&&!wrapAreaBox.checkedStroke.contains(i)){
-                                wrapAreaBox.checkedStroke.clear()
+                            if(getDst(Pair(posX, posY), j) <20f&&!wrapAreaBox.checkedStroke.contains(i)){// 클릭 좌표가 선택된 선들의 좌표에 들어가는지 확인
+                                wrapAreaBox.checkedStroke.clear()// 새로운 선 포커스
                                 wrapAreaBox.checkedStroke.add(i)
                                 wrapAreaBox.setBox()
                                 wrapAreaBox.clickedPoint=9
@@ -255,7 +252,7 @@ class CanvasManager:LinearLayout {
                     }
                 }
                 else{
-                    wrapAreaBox.clickedPoint= wrapAreaBox.clickPosCheck(startPosX,startPosY)
+                    wrapAreaBox.clickedPoint= wrapAreaBox.clickPosCheck(startPosX,startPosY)// 클릭된 선이 기존 포커스된 선일 시 실행
                     if(wrapAreaBox.clickedPoint==0){
                         wrapAreaBox.clearBox()
                         strokeClick(MotionEvent.ACTION_DOWN)
@@ -270,7 +267,7 @@ class CanvasManager:LinearLayout {
             }
         }
     }
-    fun setPointForCheckedStroke(){
+    fun setPointForCheckedStroke(){// 포커스된 선들의 크기 변경 시 최적화
         if(wrapAreaBox.checkedStroke.isNotEmpty()&&
             (wrapAreaBox.clickedPoint!=0&& wrapAreaBox.clickedPoint!=9)){
             for (i in wrapAreaBox.checkedStroke){
@@ -279,7 +276,7 @@ class CanvasManager:LinearLayout {
                 wrapAreaBox.setStrokeScale()
             }
         }
-        for (i in 0 until box.size){
+        for (i in 0 until box.size){// 크기 바꾸기 이전 선들 되돌리기로 저장
             if(box[i].point != pathList[i].point){
                 unStroke.add(box.clone() as ArrayList<Stroke>)
                 break
@@ -305,11 +302,11 @@ class CanvasManager:LinearLayout {
         }
         focusedImg =null     // if click no image, set null
     }
-    fun stretchWrapAreaBox(dst:Pair<Float,Float>){
-        if(sqrt(dst.first.pow(2)+dst.second.pow(2))>3f){
+    fun stretchWrapAreaBox(dst:Pair<Float,Float>){// 올가미 상자 크기 조정
+        if(sqrt(dst.first.pow(2)+dst.second.pow(2))>3f){// 특정 거리(3) 이상 이동 시 실행
             if(wrapAreaBox.checkedStroke.isNotEmpty()){
                 wrapAreaBox.moveBox(dst)
-                wrapAreaBox.applyScale()
+                wrapAreaBox.applyScale()// 배울 적용
             }
             else if(focusedImg !=null){
                 focusedImg!!.moveBox(dst)
@@ -324,7 +321,7 @@ class CanvasManager:LinearLayout {
     fun setImageScale(){
         if(focusedImg !=null && focusedImg!!.clickedPoint!=0&& focusedImg!!.clickedPoint!=9){ focusedImg!!.applyImageSize() }
     }
-    private fun magnetic(point:Float, isForced:Boolean=false, degree:Float=0.2f):Float{
+    private fun magnetic(point:Float, isForced:Boolean=false, degree:Float=0.2f):Float{// 자석 효과
         val degree:Float=if(isForced){0.5f}else{degree}
         val magX:Float = if(abs(point% bgGap) <= bgGap *degree) {
             ((point/ bgGap).toInt()* bgGap).toFloat()
@@ -376,7 +373,7 @@ class CanvasManager:LinearLayout {
         }
         return false
     }
-    private fun interpolation(point:ArrayList<Pair<Float,Float>>, gap:Float):ArrayList<Pair<Float,Float>>{
+    private fun interpolation(point:ArrayList<Pair<Float,Float>>, gap:Float):ArrayList<Pair<Float,Float>>{// 선형보간
         var i=0
         while(i<point.size-1){
             if(getDst(point[i], point[i + 1]) >gap){

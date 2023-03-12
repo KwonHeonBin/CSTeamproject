@@ -11,7 +11,7 @@ class SelectedBox:Box {
         setPoint(upperX,upperY,underX,underY)
     }
 
-    fun setStrokeScale(){
+    fun setStrokeScale(){   // 박스내부 선들의 배율 설정
         scaleOfPoints.clear()
         for (i in checkedStroke){
             val strokeBox=ArrayList<Pair<Float,Float>>()
@@ -24,7 +24,7 @@ class SelectedBox:Box {
         }
 
     }
-    fun applyScale(){
+    fun applyScale(){   // 배율 적용
         for (i in 0 until checkedStroke.size){
             for (j in 0 until checkedStroke[i].point.size){
                 checkedStroke[i].point[j]=Pair(((upperRPoint.first-upperLPoint.first)*scaleOfPoints[i][j].first)+upperLPoint.first,
@@ -33,7 +33,7 @@ class SelectedBox:Box {
         }
     }
 
-    override fun setBox(){
+    override fun setBox(){ // 박스 좌표 설정
         setPoint(checkedStroke.minOf { it.point.minOf { it.first }},
                  checkedStroke.minOf { it.point.minOf { it.second }},
                  checkedStroke.maxOf{it.point.maxOf { it.first }},
@@ -41,7 +41,7 @@ class SelectedBox:Box {
         setStrokeScale()
     }
 
-    override fun clearBox(){
+    override fun clearBox(){ // 박스 초기화
         super.clearBox()
         checkedStroke.clear()
         scaleOfPoints.clear()

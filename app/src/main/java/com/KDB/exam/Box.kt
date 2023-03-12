@@ -10,7 +10,7 @@ import kotlin.math.sin
 
 open class Box {
 
-    protected var upperLPoint=Pair(0f,0f)
+    protected var upperLPoint=Pair(0f,0f)// 박스의 좌표
     protected var upperRPoint=Pair(0f,0f)
     protected var underLPoint=Pair(0f,0f)
     protected var underRPoint=Pair(0f,0f)
@@ -20,24 +20,24 @@ open class Box {
     private var midRPoint=Pair(0f,0f)
     private var rotatePoint=Pair(0f,0f)
     protected var isImgBox=false
-    var clickedPoint:Int=0
+    var clickedPoint:Int=0// 클릭된 포인트
     var degree:Float=0f
     var id:Int=1
 
-    protected var boxBrush: Paint = Paint().apply {
+    protected var boxBrush: Paint = Paint().apply {// 박스 브러쉬
         color= Color.RED
         alpha=100
         strokeWidth=3f
         style= Paint.Style.STROKE
     }
-    protected var circleBrush: Paint = Paint().apply {
+    protected var circleBrush: Paint = Paint().apply {// 박스 좌표 브러쉬1
         color= Color.RED
         strokeWidth=3f
         alpha=150
         style= Paint.Style.STROKE
         isAntiAlias=true
     }
-    protected var circleFillBrush: Paint = Paint().apply {
+    protected var circleFillBrush: Paint = Paint().apply {// 박스 좌표 브러쉬2
         color= Color.WHITE
         strokeWidth=3f
         style= Paint.Style.FILL
@@ -51,7 +51,7 @@ open class Box {
         underRPoint=Pair(underX,underY)
         setMidPoint()
     }
-    protected fun setMidPoint(){
+    protected fun setMidPoint(){// 중간 포인트 설정
         upperMPoint=Pair((upperLPoint.first+upperRPoint.first)/2,upperLPoint.second)
         underMPoint=Pair((upperLPoint.first+upperRPoint.first)/2,underLPoint.second)
         midLPoint=Pair(upperLPoint.first,(upperLPoint.second+underLPoint.second)/2)
@@ -60,28 +60,28 @@ open class Box {
     }
     fun drawBox(canvas: Canvas){
         var paths=Path()
-        paths.moveTo(upperLPoint.first,upperLPoint.second)
+        paths.moveTo(upperLPoint.first,upperLPoint.second)// 선 그리기
         paths.lineTo(underLPoint.first,underLPoint.second)
         paths.lineTo(underRPoint.first,underRPoint.second)
         paths.lineTo(upperRPoint.first,upperRPoint.second)
         paths.lineTo(upperLPoint.first,upperLPoint.second)
         canvas.drawPath(paths,boxBrush)
         //canvas.drawRect(upperLPoint.first,upperLPoint.second,underRPoint.first,underRPoint.second,boxBrush)
-        drawCircle(upperLPoint.first,upperLPoint.second,10f,canvas)    // edge
+        drawCircle(upperLPoint.first,upperLPoint.second,10f,canvas)    // edge point 그리기1
         drawCircle(upperRPoint.first,upperRPoint.second,10f,canvas)
         drawCircle(underLPoint.first,underLPoint.second,10f,canvas)
         drawCircle(underRPoint.first,underRPoint.second,10f,canvas)
-        drawCircle(midLPoint.first,midLPoint.second,10f,canvas)    // mid point
+        drawCircle(midLPoint.first,midLPoint.second,10f,canvas)    // mid point 그리기
         drawCircle(midRPoint.first,midRPoint.second,10f,canvas)
         drawCircle(upperMPoint.first,upperMPoint.second,10f,canvas)
         drawCircle(underMPoint.first,underMPoint.second,10f,canvas)
         if(isImgBox){drawCircle(rotatePoint.first,rotatePoint.second,10f,canvas)}
     }
-    private fun drawCircle(x:Float, y:Float, rad:Float, canvas: Canvas){
+    private fun drawCircle(x:Float, y:Float, rad:Float, canvas: Canvas){// 포인트를 그릴 동그라미
         canvas.drawCircle(x,y,rad,circleFillBrush)
         canvas.drawCircle(x,y,rad,circleBrush)
     }
-    fun clickPosCheck(posX:Float,posY:Float):Int{
+    fun clickPosCheck(posX:Float,posY:Float):Int{// 클릭 좌표 확인
         val pos=Pair(posX,posY)
         return if(getDst(upperLPoint,pos)<=20f){
             1
@@ -107,7 +107,7 @@ open class Box {
         else if(getDst(upperMPoint,pos)<=20f){
             8
         } // set size of Y upperM
-        else if(pos.first>=upperLPoint.first&&
+        else if(pos.first>=upperLPoint.first&&// 범위 이외의 좌표 클릭 시
             pos.first<=upperRPoint.first&&
             pos.second>=upperLPoint.second&&
             pos.second<=underRPoint.second){
@@ -121,7 +121,7 @@ open class Box {
         }        // None
     }
 
-    open fun moveBox(dst:Pair<Float,Float>){
+    open fun moveBox(dst:Pair<Float,Float>){// 박스 조정
         when(clickedPoint){
             1->{    // set size of XY upperL
                 upperLPoint=Pair(upperLPoint.first+dst.first,upperLPoint.second+dst.second)
