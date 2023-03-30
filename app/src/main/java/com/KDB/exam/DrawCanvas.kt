@@ -53,9 +53,9 @@ class DrawCanvas : AppCompatActivity() {
         if(result.resultCode== RESULT_OK){
 
             val imgUrl=result?.data?.data
-            var img=Image(imgUrl,this,true,contentResolver)
+            val display = this.applicationContext?.resources?.displayMetrics    // get device size
+            var img=Image(imgUrl,this,true,contentResolver,Pair(20f,20f))
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
-                val display = this.applicationContext?.resources?.displayMetrics    // get device size
                 var ratio=if(img.bitmapImg.width>img.bitmapImg.height){min(img.bitmapImg.width.toFloat(),display?.widthPixels!!*0.5f)/img.bitmapImg.width}
                             else{min(img.bitmapImg.height.toFloat(),display?.heightPixels!!*0.5f)/img.bitmapImg.height}
                 img.setImageSize((img.bitmapImg.width*ratio).toInt(),(img.bitmapImg.height*ratio).toInt())

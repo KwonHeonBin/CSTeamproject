@@ -7,8 +7,8 @@ class SelectedBox:Box {
 
     var checkedStroke=ArrayList<Stroke>()
     private var scaleOfPoints=ArrayList<ArrayList<Pair<Float,Float>>>()
-    constructor(upperX:Float,upperY:Float,underX:Float,underY:Float){
-        setPoint(upperX,upperY,underX,underY)
+    constructor(upperLX:Float,upperLY:Float,underRX:Float,underRY:Float){
+        setPoint(Pair(upperLX,upperLY),Pair(underRX,upperLY),Pair(upperLX,underRY),Pair(underRX,underRY))
     }
 
     fun setStrokeScale(){   // 박스내부 선들의 배율 설정
@@ -34,10 +34,10 @@ class SelectedBox:Box {
     }
 
     override fun setBox(){ // 박스 좌표 설정
-        setPoint(checkedStroke.minOf { it.point.minOf { it.first }},
-                 checkedStroke.minOf { it.point.minOf { it.second }},
-                 checkedStroke.maxOf{it.point.maxOf { it.first }},
-                 checkedStroke.maxOf{it.point.maxOf { it.second }})
+        setPoint(Pair(checkedStroke.minOf { it.point.minOf { it.first }},checkedStroke.minOf { it.point.minOf { it.second }}),
+                 Pair(checkedStroke.maxOf{it.point.maxOf { it.first }},checkedStroke.minOf { it.point.minOf { it.second }}),
+                Pair(checkedStroke.minOf { it.point.minOf { it.first }},checkedStroke.maxOf{it.point.maxOf { it.second }}),
+                 Pair(checkedStroke.maxOf{it.point.maxOf { it.first }},checkedStroke.maxOf{it.point.maxOf { it.second }}))
         setStrokeScale()
     }
 

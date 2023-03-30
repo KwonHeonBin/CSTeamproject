@@ -66,6 +66,9 @@ class CanvasManager:LinearLayout {
                 abs(p1.first - p2.first).pow(2)
                         + abs(p1.second - p2.second).pow(2))
         }
+        fun getSize(p1:Pair<Float,Float>):Float{
+            return sqrt(p1.first.pow(2)+p1.second.pow(2))
+        }
         fun saveCanvas(){ unStroke.add(pathList.clone() as ArrayList<Stroke>) }
     }
 
@@ -233,7 +236,6 @@ class CanvasManager:LinearLayout {
             }
         }
     }
-
     fun strokeClick(action:Int){    // check which stroke clicked
         when(action){
             0->{    // down
@@ -287,31 +289,26 @@ class CanvasManager:LinearLayout {
     }
     fun imgClick(){
         for (i in imgList){
-            when(posX){
-                in i.pos.first..i.pos.first+i.bitmapImg.width->{
-                    when(posY){
-                        in i.pos.second..i.pos.second+i.bitmapImg.height->{
-                            if(focusedImg !=null){ focusedImg!!.isFocused=false}    // swap focusedImg}
-                            focusedImg =i
-                            focusedImg!!.isFocused=true
-                            return
-                        }
-                    }
-                }
+            if(i.isClicked(posX, posY)){
+                if(focusedImg !=null){ focusedImg!!.isFocused=false}    // swap focusedImg}
+                focusedImg =i
+                focusedImg!!.isFocused=true
+                return
             }
         }
         focusedImg =null     // if click no image, set null
     }
-    fun stretchWrapAreaBox(dst:Pair<Float,Float>){// 올가미 상자 크기 조정
+    fun stretchWrapAreaBox(dst:Pair<Float,Float>,pos:Pair<Float,Float>){// 올가미 상자 크기 조정
         if(sqrt(dst.first.pow(2)+dst.second.pow(2))>3f){// 특정 거리(3) 이상 이동 시 실행
             if(wrapAreaBox.checkedStroke.isNotEmpty()){
-                wrapAreaBox.moveBox(dst)
+                wrapAreaBox.moveBox(dst,pos)
                 wrapAreaBox.applyScale()// 배울 적용
             }
             else if(focusedImg !=null){
-                focusedImg!!.moveBox(dst)
+                focusedImg!!.moveBox(dst,pos)
                 when(focusedImg!!.clickedPoint){
                     9->{ focusedImg!!.moveImg(dst)}
+                    10->{ focusedImg!!.setImageRotate(focusedImg!!.degree)}
                     0->{}
                     else->{}
                 }
@@ -321,6 +318,7 @@ class CanvasManager:LinearLayout {
     fun setImageScale(){
         if(focusedImg !=null && focusedImg!!.clickedPoint!=0&& focusedImg!!.clickedPoint!=9){ focusedImg!!.applyImageSize() }
     }
+    fun setImagePosRange(){focusedImg?.setBox()}
     private fun magnetic(point:Float, isForced:Boolean=false, degree:Float=0.2f):Float{// 자석 효과
         val degree:Float=if(isForced){0.5f}else{degree}
         val magX:Float = if(abs(point% bgGap) <= bgGap *degree) {
@@ -336,7 +334,6 @@ class CanvasManager:LinearLayout {
         posX =-100f
         posY =-100f
     }
-
     private fun isIn(points: ArrayList<Pair<Float, Float>>, stroke:Stroke):Boolean{
         for (i in 0 until stroke.point.size-1 step (2)){
             var crossReps=0
@@ -396,12 +393,9 @@ class CanvasManager:LinearLayout {
         }
         return points
     }
-
     fun refreshState(){
         if(mode !=4&& mode !=5){ wrapAreaBox.clearBox()}
     }
-
-
     private fun init(){
 
     }

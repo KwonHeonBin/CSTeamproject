@@ -28,7 +28,7 @@ class canvasView : View {
     constructor(context: Context, attrs: AttributeSet?, defStyleAttr: Int) : super(context, attrs, defStyleAttr) {
         init()
     }
-    var canvas:Canvas= Canvas()
+    private var canvas:Canvas= Canvas()
     var page:Int=1
     private var canvasManager:CanvasManager= drawCanvasBinding.scrollView.canvasManager
     //private var params:ViewGroup.LayoutParams?=null
@@ -121,9 +121,10 @@ class canvasView : View {
                     1->{ canvasManager.penDrawing(MotionEvent.ACTION_MOVE,this) }
                     2->{ canvasManager.eraserDrawing(MotionEvent.ACTION_MOVE) }
                     3->{ canvasManager.shapeDrawing(MotionEvent.ACTION_MOVE,this) }
-                    4->{ canvasManager.stretchWrapAreaBox(Pair(dx,dy))}
+                    4->{ canvasManager.stretchWrapAreaBox(Pair(dx,dy),Pair(posX, posY))}
                     5-> {   // 올가미 모드
-                        if(wrapAreaBox.checkedStroke.isNotEmpty()&& wrapAreaBox.clickedPoint!=0){canvasManager.stretchWrapAreaBox(Pair(dx,dy))} // 올가미 모드 활성화 시
+                        if(wrapAreaBox.checkedStroke.isNotEmpty()&& wrapAreaBox.clickedPoint!=0){
+                            canvasManager.stretchWrapAreaBox(Pair(dx,dy),Pair(posX, posY))} // 올가미 모드 활성화 시
                         else{canvasManager.wrapDrawing(MotionEvent.ACTION_MOVE)}
                     }
 
@@ -135,8 +136,9 @@ class canvasView : View {
                     2->{ canvasManager.eraserDrawing(MotionEvent.ACTION_UP) }
                     3->{ canvasManager.shapeDrawing(MotionEvent.ACTION_UP,this) }
                     4->{
-                        canvasManager.setPointForCheckedStroke()
-                        canvasManager.setImageScale()
+                        canvasManager.setPointForCheckedStroke() // stroke의 vertex 최적화
+                        canvasManager.setImageScale()           // 이미지 크기 조정
+                        canvasManager.setImagePosRange()        // 이미지 위치 조정
                     }
                     5->{
                         if(wrapAreaBox.checkedStroke.isNotEmpty()&& wrapAreaBox.clickedPoint!=0){canvasManager.setPointForCheckedStroke()}
@@ -162,7 +164,6 @@ class canvasView : View {
                     path.lineTo(box.point[j].first,box.point[j].second)
                 }
                 if(box.id==page){ canvas.drawPath(path,box.brush) } // path에 있는 점에 맞춰 선을 그림
-                else{Log.d("asd", "no id")}
                 invalidate()                //refresh View      -> if any line exist, call onDraw infinitely
             }
         }
@@ -218,7 +219,7 @@ class canvasView : View {
     private fun showImg(){  // 이미지 출력
         for (i in imgList){
             if(i.id==page){
-                canvas.drawBitmap(i.bitmapImg,i.pos.first,i.pos.second,null)
+                canvas.drawBitmap(i.bitmapImg,i.matrix,null)
                 if(focusedImg ==i){i.drawBox(canvas)}
             }
         }

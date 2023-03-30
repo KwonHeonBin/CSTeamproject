@@ -4,9 +4,9 @@ import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.Paint
 import android.graphics.Path
+import android.util.Log
 import com.KDB.exam.CanvasManager.Companion.getDst
-import kotlin.math.cos
-import kotlin.math.sin
+import kotlin.math.*
 
 open class Box {
 
@@ -14,11 +14,13 @@ open class Box {
     protected var upperRPoint=Pair(0f,0f)
     protected var underLPoint=Pair(0f,0f)
     protected var underRPoint=Pair(0f,0f)
-    private var upperMPoint=Pair(0f,0f)
-    private var underMPoint=Pair(0f,0f)
-    private var midLPoint=Pair(0f,0f)
-    private var midRPoint=Pair(0f,0f)
-    private var rotatePoint=Pair(0f,0f)
+    protected var upperMPoint=Pair(0f,0f)
+    protected var underMPoint=Pair(0f,0f)
+    protected var midLPoint=Pair(0f,0f)
+    protected var midRPoint=Pair(0f,0f)
+    protected var rotationPoint=Pair(-100f,-100f)
+    protected var deletePoint=Pair(-100f,-100f)
+    public var midPoint=Pair(0f,0f)
     protected var isImgBox=false
     var clickedPoint:Int=0// 클릭된 포인트
     var degree:Float=0f
@@ -44,20 +46,25 @@ open class Box {
         isAntiAlias=true
     }
 
-    protected fun setPoint(upperX:Float,upperY:Float,underX:Float,underY:Float){
-        upperLPoint=Pair(upperX,upperY)
-        upperRPoint=Pair(underX,upperY)
-        underLPoint=Pair(upperX,underY)
-        underRPoint=Pair(underX,underY)
+    protected fun setPoint(upperL:Pair<Float,Float>, upperR:Pair<Float,Float>, underL:Pair<Float,Float>, underR:Pair<Float,Float>){// 박스 포인트 설정
+        upperLPoint=upperL
+        upperRPoint=upperR
+        underLPoint=underL
+        underRPoint=underR
         setMidPoint()
     }
-    protected fun setMidPoint(){// 중간 포인트 설정
-        upperMPoint=Pair((upperLPoint.first+upperRPoint.first)/2,upperLPoint.second)
-        underMPoint=Pair((upperLPoint.first+upperRPoint.first)/2,underLPoint.second)
-        midLPoint=Pair(upperLPoint.first,(upperLPoint.second+underLPoint.second)/2)
-        midRPoint=Pair(upperRPoint.first,(upperRPoint.second+underRPoint.second)/2)
-        rotatePoint=Pair(upperMPoint.first,upperMPoint.second+50f)
+    open fun setMidPoint(){// 중간 포인트 설정
+        midPoint=Pair((upperLPoint.first+underRPoint.first)/2, (upperLPoint.second+underRPoint.second)/2)
+        upperMPoint=Pair((upperLPoint.first+upperRPoint.first)/2,(upperLPoint.second+upperRPoint.second)/2)
+        underMPoint=Pair((underLPoint.first+underRPoint.first)/2,(underLPoint.second+underRPoint.second)/2)
+        midLPoint=Pair((upperLPoint.first+underLPoint.first)/2,(upperLPoint.second+underLPoint.second)/2)
+        midRPoint=Pair((upperRPoint.first+underRPoint.first)/2,(upperRPoint.second+underRPoint.second)/2)
+   }
+    protected open fun setOptionPoint(){
+//        deletePoint=Pair(upperRPoint.first-(50f),upperRPoint.second+(50f))
+//        rotationPoint=Pair(upperMPoint.first,upperMPoint.second-(50f))
     }
+
     fun drawBox(canvas: Canvas){
         var paths=Path()
         paths.moveTo(upperLPoint.first,upperLPoint.second)// 선 그리기
@@ -75,7 +82,10 @@ open class Box {
         drawCircle(midRPoint.first,midRPoint.second,10f,canvas)
         drawCircle(upperMPoint.first,upperMPoint.second,10f,canvas)
         drawCircle(underMPoint.first,underMPoint.second,10f,canvas)
-        if(isImgBox){drawCircle(rotatePoint.first,rotatePoint.second,10f,canvas)}
+        if(isImgBox){
+            drawCircle(rotationPoint.first,rotationPoint.second,10f,canvas)// rotate point
+            drawCircle(deletePoint.first,deletePoint.second,10f,canvas)// delete point
+        }
     }
     private fun drawCircle(x:Float, y:Float, rad:Float, canvas: Canvas){// 포인트를 그릴 동그라미
         canvas.drawCircle(x,y,rad,circleFillBrush)
@@ -107,21 +117,21 @@ open class Box {
         else if(getDst(upperMPoint,pos)<=20f){
             8
         } // set size of Y upperM
-        else if(pos.first>=upperLPoint.first&&// 범위 이외의 좌표 클릭 시
-            pos.first<=upperRPoint.first&&
-            pos.second>=upperLPoint.second&&
-            pos.second<=underRPoint.second){
+        else if(isImgBox && getDst(rotationPoint,pos)<=20f){
+            10
+        } // set rotation
+        else if(isClicked(pos.first,pos.second)){
             9    // set pos
         }
-        else if(isImgBox && getDst(rotatePoint,pos)<=20f){
-            10  // set rotation
-        }
+
         else {
             0
         }        // None
     }
 
-    open fun moveBox(dst:Pair<Float,Float>){// 박스 조정
+    open fun moveBox(dst:Pair<Float,Float>,pos:Pair<Float,Float>){// 박스 조정
+        val dx=dst.first*cos(degree)
+        val dy=dst.second*sin(degree)
         when(clickedPoint){
             1->{    // set size of XY upperL
                 upperLPoint=Pair(upperLPoint.first+dst.first,upperLPoint.second+dst.second)
@@ -165,10 +175,40 @@ open class Box {
                 underLPoint=Pair(underLPoint.first+dst.first,underLPoint.second+dst.second)
                 underRPoint=Pair(underRPoint.first+dst.first,underRPoint.second+dst.second)
             }
+            10->{   // set degree
+                degree=90+(Math.toDegrees(atan2(pos.second-midPoint.second,pos.first-midPoint.first).toDouble())).toFloat()
+                //degree+=((dst.first*cos(degree))+(dst.second*sin(degree)))*0.35f
+                //Log.d("asd",degree.toString())
+            }
         }
         setMidPoint()
     }
 
+    fun rotatePoint(degree:Float,point:Pair<Float,Float>,pivot:Pair<Float,Float>):Pair<Float,Float>{
+        val dTheta=Math.toRadians(degree.toDouble()).toFloat()
+        return Pair(pivot.first+((point.first-pivot.first)*cos(dTheta)-(point.second-pivot.second)*sin(dTheta)),
+            pivot.second+((point.first-pivot.first)*sin(dTheta)+(point.second-pivot.second)*cos(dTheta)))
+    }
+    protected fun rotateBox(degree: Float){
+        setPoint(rotatePoint(degree,upperLPoint,midPoint),
+                rotatePoint(degree,upperRPoint,midPoint),
+                rotatePoint(degree,underLPoint,midPoint),
+                rotatePoint(degree,underRPoint,midPoint))
+        deletePoint=rotatePoint(degree,deletePoint,midPoint)
+        rotationPoint=rotatePoint(degree,rotationPoint,midPoint)
+    }
+    fun isClicked(posX:Float,posY:Float):Boolean{
+        val ulX=rotatePoint(-degree,upperLPoint,midPoint).first
+        val ulY=rotatePoint(-degree,upperLPoint,midPoint).second
+        val urX=rotatePoint(-degree,upperRPoint,midPoint).first
+        val unlY=rotatePoint(-degree,underLPoint,midPoint).second
+        val posX2=rotatePoint(-degree,Pair(posX,posY),midPoint).first
+        val posY2=rotatePoint(-degree,Pair(posX,posY),midPoint).second
+        if(posX2 in ulX..urX &&posY2 in ulY..unlY){
+            return true
+        }
+        return false
+    }
     open fun setBox(){
 
     }

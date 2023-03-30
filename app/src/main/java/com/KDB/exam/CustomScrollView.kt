@@ -2,10 +2,8 @@ package com.KDB.exam
 
 import android.content.Context
 import android.util.AttributeSet
-import android.util.Log
 import android.view.Gravity
 import android.view.MotionEvent
-import android.view.View
 import android.view.ViewGroup
 import android.widget.LinearLayout
 import android.widget.ScrollView
@@ -91,7 +89,9 @@ class CustomScrollView: ScrollView {
         return 0
     }
     private fun getDP(value:Int):Int{ return (value*resources.displayMetrics.density).roundToInt() }
-    private fun focusedIdCheck(){ focusedPageId=(scrollY.toFloat()/resources.displayMetrics.heightPixels.toFloat()).roundToInt() }
+    private fun focusedIdCheck(){
+        focusedPageId=(scrollY.toFloat()/resources.displayMetrics.heightPixels.toFloat()).roundToInt()+1
+    }
     override fun onScrollChanged(l: Int, t: Int, oldl: Int, oldt: Int) {
         super.onScrollChanged(l, t, oldl, oldt)
 //        if(!canScrollVertically(1)){
