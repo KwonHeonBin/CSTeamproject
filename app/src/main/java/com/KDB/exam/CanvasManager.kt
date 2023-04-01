@@ -301,7 +301,7 @@ class CanvasManager:LinearLayout {
     fun stretchWrapAreaBox(dst:Pair<Float,Float>,pos:Pair<Float,Float>){// 올가미 상자 크기 조정
         if(sqrt(dst.first.pow(2)+dst.second.pow(2))>3f){// 특정 거리(3) 이상 이동 시 실행
             if(wrapAreaBox.checkedStroke.isNotEmpty()){
-                wrapAreaBox.moveBox(dst,pos)
+                wrapAreaBox.moveBox(dst)
                 wrapAreaBox.applyScale()// 배울 적용
             }
             else if(focusedImg !=null){

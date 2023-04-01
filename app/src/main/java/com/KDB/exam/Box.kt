@@ -129,9 +129,7 @@ open class Box {
         }        // None
     }
 
-    open fun moveBox(dst:Pair<Float,Float>,pos:Pair<Float,Float>){// 박스 조정
-        val dx=dst.first*cos(degree)
-        val dy=dst.second*sin(degree)
+    fun moveBox(dst:Pair<Float,Float>){// 박스 조정
         when(clickedPoint){
             1->{    // set size of XY upperL
                 upperLPoint=Pair(upperLPoint.first+dst.first,upperLPoint.second+dst.second)
@@ -174,11 +172,6 @@ open class Box {
                 upperRPoint=Pair(upperRPoint.first+dst.first,upperRPoint.second+dst.second)
                 underLPoint=Pair(underLPoint.first+dst.first,underLPoint.second+dst.second)
                 underRPoint=Pair(underRPoint.first+dst.first,underRPoint.second+dst.second)
-            }
-            10->{   // set degree
-                degree=90+(Math.toDegrees(atan2(pos.second-midPoint.second,pos.first-midPoint.first).toDouble())).toFloat()
-                //degree+=((dst.first*cos(degree))+(dst.second*sin(degree)))*0.35f
-                //Log.d("asd",degree.toString())
             }
         }
         setMidPoint()

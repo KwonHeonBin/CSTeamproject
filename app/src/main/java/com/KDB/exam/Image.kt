@@ -77,16 +77,10 @@ class Image:Box {
     override fun setMidPoint() {
         super.setMidPoint()
         if(clickedPoint!=10){
-            deletePoint=rotatePoint(degree,Pair(midPoint.first+(((bitmapImg.width*0.5f)-25f)),midPoint.second-((bitmapImg.height*0.5f)-25f)),midPoint)
-            rotationPoint=rotatePoint(degree,Pair(midPoint.first,midPoint.second-(((bitmapImg.height*0.5f)+50f))),midPoint)
-//            if(degree!=matrixDegree){
-//
-//                matrixDegree=degree
-//            }
-
-
-//            deletePoint=Pair(midPoint.first-(25f),midPoint.second+(25f))
-//            rotationPoint=Pair(upperMPoint.first+(50f*sin(degree)),upperMPoint.second-(50f*cos(degree)))
+            rotationPoint=Pair(upperMPoint.first+50*sin(Math.toRadians(degree.toDouble()).toFloat()),
+                                upperMPoint.second-50*cos(Math.toRadians(degree.toDouble()).toFloat()))
+            deletePoint=Pair(upperRPoint.first-30*cos(Math.toRadians(degree.toDouble()).toFloat()),
+                            upperRPoint.second+30*cos(Math.toRadians(degree.toDouble()).toFloat()))
         }
     }
 
@@ -111,6 +105,74 @@ class Image:Box {
     override fun clearBox() {
         isFocused=false
     }
+
+    fun moveBox(dst: Pair<Float, Float>, pos: Pair<Float, Float>) {
+        val wx=bitmapImg.width*cos(Math.toRadians(degree.toDouble())).toFloat()
+        val wy=bitmapImg.width*sin(Math.toRadians(degree.toDouble())).toFloat()
+        val hx=bitmapImg.height*sin(Math.toRadians(degree.toDouble())).toFloat()
+        val hy=bitmapImg.height*cos(Math.toRadians(degree.toDouble())).toFloat()
+        when(clickedPoint){
+            1->{    // set size of XY upperL
+                upperLPoint=Pair(upperLPoint.first+dst.first,upperLPoint.second+dst.second)
+                upperRPoint=Pair(upperLPoint.first+wx,upperLPoint.second+wy)
+                underLPoint=Pair(upperLPoint.first-hx,upperLPoint.second+hy)
+            }
+            2->{    // set size of XY upperR
+                upperRPoint=Pair(upperRPoint.first+dst.first,upperRPoint.second+dst.second)
+                upperLPoint=Pair(upperRPoint.first-wx,upperRPoint.second-wy)
+                underRPoint=Pair(upperRPoint.first-hx,upperRPoint.second+hy)
+            }
+            3->{    // set size of XY underL
+                underLPoint=Pair(underLPoint.first+dst.first,underLPoint.second+dst.second)
+                underRPoint=Pair(underLPoint.first+wx,underLPoint.second+wy)
+                upperLPoint=Pair(underLPoint.first+hx,underLPoint.second-hy)
+            }
+            4->{    // set size of XY underR
+                underRPoint=Pair(underRPoint.first+dst.first,underRPoint.second+dst.second)
+                underLPoint=Pair(underRPoint.first-wx,underRPoint.second-wy)
+                upperRPoint=Pair(underRPoint.first+hx,underRPoint.second-hy)
+            }
+            5->{    // set size of X midL
+                val gapDegree=Math.toRadians((getDegree(pos,midLPoint,false)-degree).toDouble()).toFloat()// 각도와 dst각도의 차이
+                val dx=getDst(midLPoint,pos)*sin(gapDegree)*cos(Math.toRadians(degree.toDouble())).toFloat()
+                val dy=getDst(midLPoint,pos) *sin(gapDegree)*sin(Math.toRadians(degree.toDouble())).toFloat()
+                upperLPoint=Pair(upperLPoint.first+dx,upperLPoint.second+dy)
+                underLPoint=Pair(underLPoint.first+dx,underLPoint.second+dy)
+            }
+            6->{    // set size of X midR
+                val gapDegree=Math.toRadians((getDegree(pos,midRPoint,false)-degree).toDouble()).toFloat()// 각도와 dst각도의 차이
+                val dx=getDst(midRPoint,pos)*sin(gapDegree)*cos(Math.toRadians(degree.toDouble())).toFloat()
+                val dy=getDst(midRPoint,pos) *sin(gapDegree)*sin(Math.toRadians(degree.toDouble())).toFloat()
+                underRPoint=Pair(underRPoint.first+dx,underRPoint.second+dy)
+                upperRPoint=Pair(upperRPoint.first+dx,upperRPoint.second+dy)
+            }
+            7->{    //set size of Y underM
+                val gapDegree=Math.toRadians((getDegree(pos,underMPoint,false)-degree).toDouble()).toFloat()// 각도와 dst각도의 차이
+                val dx=getDst(underMPoint,pos)*cos(gapDegree)*sin(Math.toRadians(degree.toDouble())).toFloat()
+                val dy=getDst(underMPoint,pos) *cos(gapDegree)*cos(Math.toRadians(degree.toDouble())).toFloat()
+                underRPoint=Pair(underRPoint.first+dx,underRPoint.second-dy)
+                underLPoint=Pair(underLPoint.first+dx,underLPoint.second-dy)
+            }
+            8->{    // set size of Y upperM
+                val gapDegree=Math.toRadians((getDegree(pos,upperMPoint,false)-degree).toDouble()).toFloat()// 각도와 dst각도의 차이
+                val dx=getDst(upperMPoint,pos)*cos(gapDegree)*sin(Math.toRadians(degree.toDouble())).toFloat()
+                val dy=getDst(upperMPoint,pos) *cos(gapDegree)*cos(Math.toRadians(degree.toDouble())).toFloat()
+                upperRPoint=Pair(upperRPoint.first+dx,upperRPoint.second-dy)
+                upperLPoint=Pair(upperLPoint.first+dx,upperLPoint.second-dy)
+            }
+            9->{    // set pos
+                upperLPoint=Pair(upperLPoint.first+dst.first,upperLPoint.second+dst.second)
+                upperRPoint=Pair(upperRPoint.first+dst.first,upperRPoint.second+dst.second)
+                underLPoint=Pair(underLPoint.first+dst.first,underLPoint.second+dst.second)
+                underRPoint=Pair(underRPoint.first+dst.first,underRPoint.second+dst.second)
+            }
+            10->{   // set degree
+                //degree=90+(Math.toDegrees(atan2(pos.second-midPoint.second,pos.first-midPoint.first).toDouble())).toFloat()
+                degree=getDegree(pos,midPoint,false)
+            }
+        }
+        setMidPoint()
+    }
     private fun setMatrix(){ // 이미지 매트릭스 설정
         var values=matrix.values()
         if(upperRPoint.first<upperLPoint.first){// 좌우 x좌표 매트릭스상 스왑
@@ -122,6 +184,10 @@ class Image:Box {
             else{ values[4]=-1f }
         }
         matrix.setValues(values)
+    }
+    private fun getDegree(p1:Pair<Float,Float>,p2:Pair<Float,Float>,isRad:Boolean):Float{
+        return if(isRad)atan2(p1.second-p2.second,p1.first-p2.first)+(Math.PI/2).toFloat()
+                else 90+Math.toDegrees(atan2(p1.second-p2.second,p1.first-p2.first).toDouble()).toFloat()
     }
     private fun swapPoints(){
         if(upperRPoint.first<upperLPoint.first){// 좌우 x좌표 스왑
@@ -138,6 +204,4 @@ class Image:Box {
         }
 
     }
-
-
 }
