@@ -240,3 +240,19 @@
     }
    
    ```
+   
+ - 페이지 추가기능은 다음과 같이 구현했다.(CustomScrollView)
+   - 스크롤이 끝에 닿았을 시 일정 시간동안 터치를 유지할 시 페이지 추가
+   - 터치 시 스크롤 뷰 터치와 캔버스 터치가 동시에 되면 안되기 때문에 제어 변수 추가
+   ```Kotlin
+    override fun onInterceptTouchEvent(ev: MotionEvent?): Boolean {
+        return isScrollable && super.onInterceptTouchEvent(ev)// isScrollable가 true일 시 스크롤 뷰 터치 가능
+    }
+   ```
+   
+ - 현제 화면에 출력되는 페이지id는 스크롤의 위치를 기준으로 정한다.
+ ```Kotlin
+ private fun focusedIdCheck(){
+        focusedPageId=(scrollY.toFloat()/resources.displayMetrics.heightPixels.toFloat()).roundToInt()+1
+    }
+ ```
