@@ -34,6 +34,7 @@
     var maxDistPerPoint:Float=30f// 좌표들 사이 최대 거리
     var id:Int=0// 펜들의 페이지 id
  ```
+ - 캔버스 터치 시 stroke 클래스를 생성하고 드래그 중 클래스에 터치 좌표를 추가한다.
  - 선 출력 중 선의 좌표가 바뀌게 될 경우 생기는 오류를 방지하기 위해 선을 그리기위한 함수는 읽기 전용으로 접근한다.
  ```Kotlin
  private fun drawStroke(){   // 선 그리기
@@ -179,7 +180,7 @@
         return points
         }
      ```
-   - 올가미 내부에 선이 포함되는지 확인하는 방법은 다음과 같다.
+   - 올가미 내부에 선이 포함되는지 확인하는 방법은 다음과 같다.(CanvasManager.isIn())
      - 선을 이루는 점들을 기준으로 아래 방향으로 선을 긋는다.
      - 선과 올가미 사이에 접점이 홀수개라면 내부, 짝수개라면 내부에 있다.
      - 접점을 구하는 원리는 다음과 같다.
@@ -222,7 +223,7 @@
     }
    
    ```
- - 이미지 크기 조정 시 회질 열화를 방지하기 위해 이미지 클래스에 오리지널 이미지 uri를 저장
+ - 이미지 크기 조정 시 화질 열화를 방지하기 위해 이미지 클래스에 오리지널 이미지 uri를 저장
  - 이미지를 회전하기 위해 다음과 같은 과정을 거친다.
    - 회전점을 드래그 하여 이미지를 회전한다. 회전 각도는 다음과 같이 구한다.
    ```Kotlin
@@ -231,7 +232,7 @@
                 else 90+Math.toDegrees(atan2(p1.second-p2.second,p1.first-p2.first).toDouble()).toFloat()// degree값
     }
    ```
-   - 이때 박스를 이루는 점들도 회전을 해야하기때문에 다음과 같은 과정을 거친다.
+   - 이때 박스를 이루는 점들도 회전을 해야하기 때문에 다음과 같은 과정을 거친다.
    ```Kotlin
        fun rotatePoint(degree:Float,point:Pair<Float,Float>,pivot:Pair<Float,Float>):Pair<Float,Float>{// 이미지의 가운데 점(pivot)을 기준으로 회전
             val dTheta=Math.toRadians(degree.toDouble()).toFloat()// 회전하는 각도
@@ -253,6 +254,6 @@
  - 현제 화면에 출력되는 페이지id는 스크롤의 위치를 기준으로 정한다.
  ```Kotlin
  private fun focusedIdCheck(){
-        focusedPageId=(scrollY.toFloat()/resources.displayMetrics.heightPixels.toFloat()).roundToInt()+1
+        focusedPageId=(scrollY.toFloat()/resources.displayMetrics.heightPixels.toFloat()).roundToInt()+1// 스크롤의 전체 높이에 화면 크기를 나눠 현재 페이지id 가늠
     }
  ```
