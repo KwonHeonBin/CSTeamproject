@@ -2,6 +2,12 @@
 
 #### drawingPart
 
+<p>
+<img width="30%" src="https://user-images.githubusercontent.com/33209821/231759037-4e833781-3dd8-4ae4-a6e5-9a5ee45fbc3b.png"/>
+<img width="30%" src="https://user-images.githubusercontent.com/33209821/231759041-5208a426-4a29-4daf-be40-e6e7b184326a.png"/>
+</p>
+
+
 #### 주요 기능
 - 펜
   - 버튼 터치로 색깔 변경 가능
@@ -38,6 +44,8 @@
     var maxDistPerPoint:Float=30f// 좌표들 사이 최대 거리
     var id:Int=0// 펜들의 페이지 id
  ```
+ <img width="30%" src="https://user-images.githubusercontent.com/33209821/231762069-643b7c71-837e-4573-babe-95c29a4bba38.gif"/>
+ 
  - 캔버스 터치 시 stroke 클래스를 생성하고 드래그 중 클래스에 터치 좌표를 추가한다.
  - 선 출력 중 선의 좌표가 바뀌게 될 경우 생기는 오류를 방지하기 위해 선을 그리기위한 함수는 읽기 전용으로 접근한다.
  ```Kotlin
@@ -99,6 +107,9 @@
    ```
    - 지우개 기본 위치는 (-100,-100)으로 하여 터치 중이 아닐 시 캔버스에 영향이 없도록 한다. 
    - 영역 지우개는 지우개와 충돌한 점을 기점으로 선이 2개로 나뉜다. 여기서 나뉜 선의 점의 갯수가 1개 이하라면 선을 삭제한다.
+   
+<img width="30%" src="https://user-images.githubusercontent.com/33209821/231762083-9b2bbdfc-46e2-41b1-9891-81086b9fccf0.gif"/>
+   
  - 백그라운드의 격자 및 밑줄 간격은 설정 가능하다.(canvasView.drawBackGround())
  -  도형그리기는 도형의 꼭지점들을 먼저 계산한 뒤 interpolation을 통해 꼭지점들 사이에 점들을 보충한다.
  -  모두 지우기 기능은 모든 선들을 지운다.
@@ -116,6 +127,9 @@
    ```
    - 되돌리기 취소 버튼이 이와 유사하게 구현되었다.
      - 선을 그을 시 취소 할 내용이 없어지므로 reStroke를 초기화
+     
+<img width="30%" src="https://user-images.githubusercontent.com/33209821/231762077-6279c808-3fda-4b87-8ea5-5087b4aa3b46.gif"/>
+
  - 자석 기능은 격자무늬 배경일때 도형그리기를 해야 적용된다.
  ```Kotlin
      private fun magnetic(point:Float, isForced:Boolean=false, degree:Float=0.2f):Float{// isForced-> 모든 영역 자석효과 degree-> 자셕효과 범위
@@ -130,6 +144,7 @@
         return magX
     }
  ```
+ <img width="30%" src="https://user-images.githubusercontent.com/33209821/231762087-41082503-11aa-4ecc-bfed-e0a9404d42a8.gif"/>
  
  - 커서 기능은 다음과 같이 구현했다.
    - 클릭위치와 선을 이루는 점과의 거리가 일정 거리 이하일 시 그 점이 포함된 선을 포커스(CanvasManager.strokeClick())
@@ -178,7 +193,6 @@
                 }
             }
         ```
-        
  - 올가미 기능은 커서 기능의 확장판이다.
    - 올가미 영역은 점선으로 그려진다.
    ```Kotlin
@@ -205,10 +219,11 @@
        - 올가미를 이루는 두 점을 포함하는 직선 방정식에 선에서 나온 직선의 x좌표 또는 y좌표를 대입하여 <br> 그 값이 올가미를 이루는 두 점 사이에 있다면 접점이 존재한다.
      - 최적화를 위해 선의 홀수번째 점들만 선을 긋는다.
      - 정확도 향상을 위해 더블체크를 한다.(아래, 왼쪽)  
+     
+<img width="30%" src="https://user-images.githubusercontent.com/33209821/231762092-0f86ed11-02d6-45cb-ad18-37de2f656a34.gif"/>
 
  - 이미지 추가는 갤러리에 접근한다.
    ```Kotlin
-   
        private val imageResult=registerForActivityResult(ActivityResultContracts.StartActivityForResult()){// 갤러리에서 이미지를 선택하여 결과값이 존재할 시 
             result->
             if(result.resultCode== RESULT_OK){
@@ -271,6 +286,7 @@
     }
    
    ```
+   <img width="30%" src="https://user-images.githubusercontent.com/33209821/231762102-b197db71-ac73-4e32-acc8-367f6353cea7.gif"/>  
    
  - 페이지 추가기능은 다음과 같이 구현했다.(CustomScrollView)
    - 스크롤이 끝에 닿았을 시 일정 시간동안 터치를 유지할 시 페이지 추가
@@ -287,3 +303,4 @@
         focusedPageId=(scrollY.toFloat()/resources.displayMetrics.heightPixels.toFloat()).roundToInt()+1// 스크롤의 전체 높이에 화면 크기를 나눠 현재 페이지id 가늠
     }
  ```
+<img width="30%" src="https://user-images.githubusercontent.com/33209821/231762106-e5afd110-2ec1-4638-bf6c-00ae34f1ccb4.gif"/>  
