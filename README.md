@@ -89,6 +89,7 @@
  - 지우개 기능을 다음과 같이 구현했다.(Eraser.erase() 구현)
    - 획 지우개는 선의 어떤 점과 지우개의 거리가 일정 이하 시 점이 포함된 선을 전부 지움
    ```Kotlin
+   // 두 점들(p1,p2) 사이 거리
    fun getDst(p1: Pair<Float, Float>, p2: Pair<Float, Float>): Float {// companion object에 정의 
             return sqrt(
                 abs(p1.first - p2.first).pow(2)// 피타고라스 정리
