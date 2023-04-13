@@ -27,6 +27,7 @@
 
 
 #### 설명
+ - 하단 메뉴버튼을 클릭하여 모드 변경 가능
  - 펜 선을 그리기 위한 클래스 변수는 다음과 같다.
  ```Kotlin
     var brush:Paint=Paint()// 펜을 그리기 위한 브러쉬
@@ -84,6 +85,14 @@
  
  - 지우개 기능을 다음과 같이 구현했다.(Eraser.erase() 구현)
    - 획 지우개는 선의 어떤 점과 지우개의 거리가 일정 이하 시 점이 포함된 선을 전부 지움
+   ```Kotlin
+   fun getDst(p1: Pair<Float, Float>, p2: Pair<Float, Float>): Float {// companion object에 정의 
+            return sqrt(
+                abs(p1.first - p2.first).pow(2)// 피타고라스 정리
+                + abs(p1.second - p2.second).pow(2))
+        }
+   
+   ```
    - 영역 지우개는 지우개와 충돌한 점을 기점으로 선이 2개로 나뉜다. 여기서 나뉜 선의 점의 갯수가 1개 이하라면 선을 삭제한다.
  - 백그라운드의 격자 및 밑줄 간격은 설정 가능하다.(canvasView.drawBackGround())
  -  도형그리기는 도형의 꼭지점들을 먼저 계산한 뒤 interpolation을 통해 꼭지점들 사이에 점들을 보충한다.
@@ -104,7 +113,7 @@
      - 선을 그을 시 취소 할 내용이 없어지므로 reStroke를 초기화
  - 자석 기능은 격자무늬 배경일때 도형그리기를 해야 적용된다.
  ```Kotlin
-     private fun magnetic(point:Float, isForced:Boolean=false, degree:Float=0.2f):Float{// isForced-> 모든 영역 자석효과 degree-> 자셕효과 범
+     private fun magnetic(point:Float, isForced:Boolean=false, degree:Float=0.2f):Float{// isForced-> 모든 영역 자석효과 degree-> 자셕효과 범위
         val degree:Float=if(isForced){0.5f}else{degree}
         val magX:Float = if(abs(point% bgGap) <= bgGap *degree) {// point의 좌표가 자석범위 내에 있을 시 bgGap단위로 변환 
             ((point/ bgGap).toInt()* bgGap).toFloat()
