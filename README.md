@@ -2,6 +2,8 @@
 
 #### drawingPart
 
+역할: 전반적인 그리기 기능과 이미지 편집
+
 <p>
 <img width="30%" src="https://user-images.githubusercontent.com/33209821/231759037-4e833781-3dd8-4ae4-a6e5-9a5ee45fbc3b.png"/>
 <img width="30%" src="https://user-images.githubusercontent.com/33209821/231759041-5208a426-4a29-4daf-be40-e6e7b184326a.png"/>
