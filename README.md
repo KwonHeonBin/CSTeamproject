@@ -96,6 +96,7 @@
         }
    
    ```
+   - 지우개 기본 위치는 (-100,-100)으로 하여 터치 중이 아닐 시 캔버스에 영향이 없도록 한다. 
    - 영역 지우개는 지우개와 충돌한 점을 기점으로 선이 2개로 나뉜다. 여기서 나뉜 선의 점의 갯수가 1개 이하라면 선을 삭제한다.
  - 백그라운드의 격자 및 밑줄 간격은 설정 가능하다.(canvasView.drawBackGround())
  -  도형그리기는 도형의 꼭지점들을 먼저 계산한 뒤 interpolation을 통해 꼭지점들 사이에 점들을 보충한다.
@@ -256,14 +257,14 @@
    
  - 페이지 추가기능은 다음과 같이 구현했다.(CustomScrollView)
    - 스크롤이 끝에 닿았을 시 일정 시간동안 터치를 유지할 시 페이지 추가
-   - 터치 시 스크롤 뷰 터치와 캔버스 터치가 동시에 되면 안되기 때문에 제어 변수 추가
+ - 터치 시 스크롤 뷰 터치와 캔버스 터치가 동시에 되면 안되기 때문에 제어 변수 추가
    ```Kotlin
     override fun onInterceptTouchEvent(ev: MotionEvent?): Boolean {
         return isScrollable && super.onInterceptTouchEvent(ev)// isScrollable가 true일 시 스크롤 뷰 터치 가능
     }
    ```
    
- - 현제 화면에 출력되는 페이지id는 스크롤의 위치를 기준으로 정한다.
+ - 현재 화면에 출력되는 페이지id는 스크롤의 위치를 기준으로 가늠한다.
  ```Kotlin
  private fun focusedIdCheck(){
         focusedPageId=(scrollY.toFloat()/resources.displayMetrics.heightPixels.toFloat()).roundToInt()+1// 스크롤의 전체 높이에 화면 크기를 나눠 현재 페이지id 가늠
