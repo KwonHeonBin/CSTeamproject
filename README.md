@@ -180,6 +180,10 @@
         ```
         
  - 올가미 기능은 커서 기능의 확장판이다.
+   - 올가미 영역은 점선으로 그려진다.
+   ```Kotlin
+   pathEffect= DashPathEffect(floatArrayOf(10f, 20f), 0f)// 점선
+   ```
    - 올가미로 그린 점선은 최적화를 위해 일정 거리 이하인 점들은 지우는 uninterpolation과정을 거친다.
      ```Kotlin
        private fun unInterpolation(points: ArrayList<Pair<Float,Float>>, gap:Float=40f):ArrayList<Pair<Float,Float>> {
@@ -239,6 +243,18 @@
    ```
  - 이미지 크기 조정 시 화질 열화를 방지하기 위해 이미지 클래스에 오리지널 이미지 uri를 저장
  - 이미지를 회전하기 위해 다음과 같은 과정을 거친다.
+   - 이미지 회전은 이미지 매트릭스의 postRotate를 사용하였다.
+   ```Kotlin
+   fun setImageRotate(degree:Float){
+        if(degree!=matrixDegree&&abs(degree-matrixDegree)>0.1f){/// 각도 변화량이 0.1 이상일 시
+            matrix.postRotate((degree-matrixDegree),midPoint.first,midPoint.second)// 이미지의 가운데 점을 기준으로 회전
+            rotateBox(degree-matrixDegree)// 이미지가 회전한 만큼 박스도 회전
+            matrixDegree=degree
+        }
+        applyImageSize()
+    }
+   
+   ```
    - 회전점을 드래그 하여 이미지를 회전한다. 회전 각도는 다음과 같이 구한다.
    ```Kotlin
        private fun getDegree(p1:Pair<Float,Float>,p2:Pair<Float,Float>,isRad:Boolean):Float{
