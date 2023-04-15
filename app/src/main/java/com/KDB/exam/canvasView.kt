@@ -202,6 +202,7 @@ class canvasView : View {
     }
     private fun drawOutline(stroke:ArrayList<Stroke>){ // 선택된 선 바깥선 그리기
         for (i in stroke){
+            if(wrapAreaBox.id!=i.id)wrapAreaBox.id= i.id
             val path= Path()
             if(i.point.isNotEmpty()){
                 path.moveTo(i.point.first().first,i.point.first().second)

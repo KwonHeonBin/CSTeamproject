@@ -177,7 +177,7 @@ open class Box {
         setMidPoint()
     }
 
-    fun rotatePoint(degree:Float,point:Pair<Float,Float>,pivot:Pair<Float,Float>):Pair<Float,Float>{
+    protected fun rotatePoint(degree:Float, point:Pair<Float,Float>, pivot:Pair<Float,Float>):Pair<Float,Float>{
         val dTheta=Math.toRadians(degree.toDouble()).toFloat()
         return Pair(pivot.first+((point.first-pivot.first)*cos(dTheta)-(point.second-pivot.second)*sin(dTheta)),
             pivot.second+((point.first-pivot.first)*sin(dTheta)+(point.second-pivot.second)*cos(dTheta)))
