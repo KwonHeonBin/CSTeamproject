@@ -83,18 +83,18 @@ class canvasView : View {
                     1->{ canvasManager.penDrawing(MotionEvent.ACTION_DOWN,this) }  // penMode
                     2->{ canvasManager.eraserDrawing(MotionEvent.ACTION_DOWN) }   // eraseMode
                     3->{ canvasManager.shapeDrawing(MotionEvent.ACTION_DOWN,this) }    // shapeMode
-                    4->{                                            // cursorMode
+                    4->{ // cursorMode
                         if(wrapAreaBox.checkedStroke.isEmpty()&&focusedImg==null){ // 현재 포커스 된 객체가 없을 시
                             canvasManager.imgClick()    // 이미지 클릭 여부 확인
                             if(focusedImg==null){canvasManager.strokeClick(MotionEvent.ACTION_DOWN)} // 선 클릭 여부 확인
                             else{ focusedImg!!.clickedPoint= focusedImg!!.clickPosCheck(canvasManager.startPosX,canvasManager.startPosY)}// 이미지 박스 중 클릭한 점 확인
                         }
                         else{
-                            if(focusedImg!=null){// 선이 포커스 됐을 시
+                            if(focusedImg!=null){// 이미지가 포커스 됐을 시
                                 focusedImg!!.clickedPoint= focusedImg!!.clickPosCheck(canvasManager.startPosX,canvasManager.startPosY) // 이미지 박스 중 클릭한 점 확인
                                 if(focusedImg!!.clickedPoint!=0){ return true}
                             }
-                            else{// 이미지가 포커스 됐을 시
+                            else{// 선이 포커스 됐을 시
                                 wrapAreaBox.clickedPoint=wrapAreaBox.clickPosCheck(canvasManager.startPosX,canvasManager.startPosY) // 선 박스 중 클릭한 점 확인
                                 if(wrapAreaBox.clickedPoint!=0){ return true }
                             }
@@ -135,11 +135,7 @@ class canvasView : View {
                     1->{ canvasManager.penDrawing(MotionEvent.ACTION_UP,this) }
                     2->{ canvasManager.eraserDrawing(MotionEvent.ACTION_UP) }
                     3->{ canvasManager.shapeDrawing(MotionEvent.ACTION_UP,this) }
-                    4->{
-                        canvasManager.setPointForCheckedStroke() // stroke의 vertex 최적화
-                        canvasManager.setImageScale()           // 이미지 크기 조정
-                        canvasManager.setImagePosRange()        // 이미지 위치 조정
-                    }
+                    4->{ imgManaging()}
                     5->{
                         if(wrapAreaBox.checkedStroke.isNotEmpty()&& wrapAreaBox.clickedPoint!=0){canvasManager.setPointForCheckedStroke()}
                         else{canvasManager.wrapDrawing(MotionEvent.ACTION_UP)}
@@ -168,7 +164,12 @@ class canvasView : View {
             }
         }
     }
-
+    private fun imgManaging(){
+        canvasManager.setPointForCheckedStroke() // stroke의 vertex 최적화
+        canvasManager.setImageScale()           // 이미지 크기 조정
+        canvasManager.setImagePosRange()        // 이미지 위치 조정
+        canvasManager.deleteImage()             // 이미지 삭제 확인
+    }
     private fun wrapAreaDrawing(){
         val list= wrapArea.iterator()
         val path= Path()
@@ -210,7 +211,7 @@ class canvasView : View {
                     path.lineTo(i.point[j].first,i.point[j].second)
                 }
                 canvasManager.outLineBrush.strokeWidth=(i.brush.strokeWidth+5f)// 선택된 선보다 굵은 굵기로 그림
-                if(i.id==page){canvas.drawPath(path,canvasManager.outLineBrush)}
+                if(i.id==page){canvas.drawPath(path,canvasManager.outLineBrush)}// 박스 그리기
             }
         }
         if(stroke.isNotEmpty()&&wrapAreaBox.id==page){

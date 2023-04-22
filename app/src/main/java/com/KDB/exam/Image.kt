@@ -8,7 +8,6 @@ import android.graphics.Matrix
 import android.net.Uri
 import android.os.Build
 import android.util.Log
-import androidx.core.graphics.values
 import androidx.core.math.MathUtils.clamp
 import com.KDB.exam.CanvasManager.Companion.getDst
 import com.KDB.exam.CanvasManager.Companion.posX
@@ -24,7 +23,9 @@ class Image:Box {
     var isFocused=false
     private var contentResolver:ContentResolver
     var matrix=Matrix()
-    var matrixDegree:Float=0f;
+    var matrixDegree:Float=0f
+    private var isXFlip:Boolean =false
+    private var isYFlip:Boolean =false
     // 이미지의 중간 지점
 
 
@@ -49,11 +50,10 @@ class Image:Box {
         setBox()
     }
     fun applyImageSize(){ // 이미지 사이즈 적용
-        //setMatrix()
-//        swapPoints()
+        swapPoints()
         if(degree==0f){
             pos=Pair(upperLPoint.first,upperLPoint.second)
-            matrix.setTranslate(pos.first,pos.second)
+            setMatrix()
         }
         bitmapImg=Bitmap.createBitmap(oriBitmapImg,0,0,     // apply matrix
             oriBitmapImg.width, oriBitmapImg.height,null,false)
@@ -72,7 +72,6 @@ class Image:Box {
         }
         applyImageSize()
     }
-
     override fun setMidPoint() {
         super.setMidPoint()
         if(clickedPoint!=10){
@@ -82,9 +81,7 @@ class Image:Box {
                             upperRPoint.second-50*sin(toRad(degree-45)))
         }
     }
-
     override fun setBox(){// 박스를 설정(이미지를 움직일 때 실행)
-
         if(degree==0f){// 회전하지 않았다면
             pos=Pair(clamp(pos.first,0f,1080f-bitmapImg.width),clamp(pos.second,0f,1806f-bitmapImg.height ))
             setPoint(Pair(pos.first,pos.second),
@@ -93,20 +90,15 @@ class Image:Box {
                 Pair(pos.first+bitmapImg.width,pos.second+bitmapImg.height))
         }
         else{pos=rotatePoint(-degree,upperLPoint,midPoint)}// 회전 했다면
-        matrix.setTranslate(pos.first,pos.second)// 매트릭스 위치 설정
-        matrix.postRotate(degree,midPoint.first,midPoint.second)// 매트릭스 회전 설정
+        setMatrix()
     }
-
-    fun moveImg(dst:Pair<Float,Float>){
+    fun moveImg(dst:Pair<Float,Float>){// 이미지 이동
         pos= Pair(pos.first+dst.first,pos.second+dst.second)
-        matrix.setTranslate(pos.first,pos.second)
-        matrix.postRotate(degree,midPoint.first,midPoint.second)
+        setMatrix()
     }
-
     override fun clearBox() {
         isFocused=false
     }
-
     fun moveBox(dst: Pair<Float, Float>, pos: Pair<Float, Float>) {
         var wx: Float// 가로의 x성분
         var wy: Float// 가로의 y성분
@@ -192,27 +184,36 @@ class Image:Box {
                 underRPoint=Pair(underRPoint.first+dst.first,underRPoint.second+dst.second)
             }
             10->{   // set degree
-                degree=if(getDegree(pos,midPoint,false,90f)>0)getDegree(pos,midPoint,false,90f)
-                       else getDegree(pos,midPoint,false,90f)+360
+                degree= if(getDegree(pos,midPoint,false,90f)>0)getDegree(pos,midPoint,false,90f)
+                        else getDegree(pos,midPoint,false,90f)+360
+                degree=magDegree(degree,10)
             }
         }
         setMidPoint()
     }
     private fun setMatrix(){ // 이미지 매트릭스 설정
-        var values=matrix.values()
-        if(upperRPoint.first<upperLPoint.first){// 좌우 x좌표 매트릭스상 스왑
-            if(values[0]==-1f){ values[0]=1f }
-            else{ values[0]=-1f }
+        matrix.setTranslate(pos.first,pos.second)// 매트릭스 위치 설정
+        if(isXFlip){// 매트릭스 플립 설정
+            matrix.postScale(-1f,1f,midPoint.first,midPoint.second)
+
         }
-        if(underLPoint.second<upperLPoint.second){// 좌우 y좌표 매트릭스상 스왑
-            if(values[4]==-1f){ values[4]=1f }
-            else{ values[4]=-1f }
+        else{matrix.postScale(1f,1f,midPoint.first,midPoint.second)}
+        if(isYFlip){
+            matrix.postScale(1f,-1f,midPoint.first,midPoint.second)
+
         }
-        matrix.setValues(values)
+        else{matrix.postScale(1f,1f,midPoint.first,midPoint.second)}
+        matrix.postRotate(degree,midPoint.first,midPoint.second)// 매트릭스 회전 설정
     }
     private fun getDegree(p1:Pair<Float,Float>,p2:Pair<Float,Float>,isRad:Boolean,offSet:Float=0f):Float{
         return if(isRad)atan2(p1.second-p2.second,p1.first-p2.first)+toRad(offSet)
                 else offSet+Math.toDegrees(atan2(p1.second-p2.second,p1.first-p2.first).toDouble()).toFloat()
+    }
+    private fun magDegree(degree: Float, magArea: Int = 5, section: Int = 8): Float {
+        val gap: Int = 360 / section
+        return if ((degree % gap) <= magArea) (((degree / gap).toInt()) * gap).toFloat()
+        else if ((degree % gap) >= gap - magArea) (((degree / gap).toInt() + 1) * gap).toFloat()
+        else degree
     }
     private fun toRad(deg:Float):Float{
         return Math.toRadians(deg.toDouble()).toFloat()
@@ -221,17 +222,19 @@ class Image:Box {
         return Math.toDegrees(rad.toDouble()).toFloat()
     }
     private fun swapPoints(){
-        if(upperRPoint.first<upperLPoint.first){// 좌우 x좌표 스왑
+        if(rotatePoint(-degree,upperRPoint,midPoint).first<rotatePoint(-degree,upperLPoint,midPoint).first){// 좌우 x좌표 스왑
             upperLPoint=upperRPoint.also { upperRPoint=upperLPoint }
             underLPoint=underRPoint.also { underRPoint=underLPoint }
             setMidPoint()
             clickedPoint=clickPosCheck(posX, posY)
+            isXFlip=!isXFlip
         }
-        if(underLPoint.second<upperLPoint.second){// 좌우 y좌표 스왑
+        if(rotatePoint(-degree,underLPoint,midPoint).second<rotatePoint(-degree,upperLPoint,midPoint).second){// y좌표 스왑
             upperLPoint=underLPoint.also { underLPoint=upperLPoint }
             upperRPoint=underRPoint.also { underRPoint=upperRPoint }
             setMidPoint()
             clickedPoint=clickPosCheck(posX, posY)
+            isYFlip=!isYFlip
         }
 
     }

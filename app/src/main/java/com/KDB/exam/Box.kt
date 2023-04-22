@@ -120,13 +120,15 @@ open class Box {
         else if(isImgBox && getDst(rotationPoint,pos)<=20f){
             10
         } // set rotation
-        else if(isClicked(pos.first,pos.second)){
-            9    // set pos
-        }
-
+        else if(isImgBox && getDst(deletePoint,pos)<=20f){
+            11
+        }// delete
+        else if(isClicked(pos.first,pos.second)){// 가장 마지막에 클릭 여부 확인
+            9
+        } // set pos
         else {
             0
-        }        // None
+        }  // None
     }
 
     fun moveBox(dst:Pair<Float,Float>){// 박스 조정

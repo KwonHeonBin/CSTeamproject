@@ -307,9 +307,9 @@ class CanvasManager:LinearLayout {
             else if(focusedImg !=null){
                 focusedImg!!.moveBox(dst,pos)
                 when(focusedImg!!.clickedPoint){
-                    9->{ focusedImg!!.moveImg(dst)}
-                    10->{ focusedImg!!.setImageRotate(focusedImg!!.degree)}
-                    0->{}
+                    9->{ focusedImg!!.moveImg(dst)}// 이미지 이동
+                    10->{ focusedImg!!.setImageRotate(focusedImg!!.degree)}// 이미지 회전
+                    0->{}// 이미지 범위 벗어남
                     else->{}
                 }
             }
@@ -319,6 +319,12 @@ class CanvasManager:LinearLayout {
         if(focusedImg !=null && focusedImg!!.clickedPoint!=0&& focusedImg!!.clickedPoint!=9){ focusedImg!!.applyImageSize() }
     }
     fun setImagePosRange(){focusedImg?.setBox()}
+    fun deleteImage(){
+        if(focusedImg!=null&& focusedImg!!.clickedPoint==11){
+            imgList.remove(focusedImg!!)
+            focusedImg=null
+        }
+    }
     private fun magnetic(point:Float, isForced:Boolean=false, degree:Float=0.2f):Float{// 자석 효과
         val degree:Float=if(isForced){0.5f}else{degree}
         val magX:Float = if(abs(point% bgGap) <= bgGap *degree) {
