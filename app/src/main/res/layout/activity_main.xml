@@ -1,0 +1,128 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:gravity="center_horizontal"
+    android:orientation="vertical"
+    tools:context=".MainActivity">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center">
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:gravity="center_horizontal"
+            android:orientation="horizontal">
+
+            <Button
+                android:id="@+id/boldBtn"
+                android:layout_width="40dp"
+                android:layout_height="wrap_content"
+                android:text="굵" />
+
+            <Button
+                android:id="@+id/italicBtn"
+                android:layout_width="40dp"
+                android:layout_height="wrap_content"
+                android:text="기" />
+
+            <Button
+                android:id="@+id/underlineBtn"
+                android:layout_width="40dp"
+                android:layout_height="wrap_content"
+                android:text="밑" />
+
+            <Button
+                android:id="@+id/lineBtn"
+                android:layout_width="40dp"
+                android:layout_height="wrap_content"
+                android:text="취" />
+
+        </LinearLayout>
+
+        <Space
+            android:layout_width="40dp"
+            android:layout_height="40dp" />
+
+        <LinearLayout
+
+            android:layout_width="wrap_content"
+            android:layout_height="50dp"
+            android:gravity="center_horizontal"
+            android:orientation="horizontal">
+
+            <Button
+                android:id="@+id/alignLeft"
+                android:layout_width="40dp"
+                android:layout_height="wrap_content"
+                android:text="왼" />
+
+            <Button
+                android:id="@+id/alignCenter"
+                android:layout_width="40dp"
+                android:layout_height="wrap_content"
+                android:text="가" />
+
+            <Button
+                android:id="@+id/alignRight"
+                android:layout_width="40dp"
+                android:layout_height="wrap_content"
+                android:text="오" />
+
+        </LinearLayout>
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center">
+
+        <Spinner
+            android:id="@+id/colorSpin"
+            android:layout_width="wrap_content"
+            android:layout_height="50dp" />
+
+        <Spinner
+            android:id="@+id/fontSpin"
+            android:layout_width="wrap_content"
+            android:layout_height="50dp" />
+
+        <Spinner
+            android:id="@+id/sizeSpin"
+            android:layout_width="wrap_content"
+            android:layout_height="50dp" />
+
+        <Spinner
+            android:id="@+id/bgSpin"
+            android:layout_width="wrap_content"
+            android:layout_height="50dp" />
+
+    </LinearLayout>
+
+    <TextView
+        android:id="@+id/test"
+        android:layout_width="match_parent"
+        android:layout_height="30dp" />
+
+    <LinearLayout
+        android:id="@+id/tl"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <EditText
+            android:id="@+id/memo"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:gravity="top" />
+
+
+
+    </LinearLayout>
+
+</LinearLayout>
