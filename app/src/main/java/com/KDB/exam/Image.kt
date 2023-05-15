@@ -12,6 +12,8 @@ import androidx.core.math.MathUtils.clamp
 import com.KDB.exam.CanvasManager.Companion.getDst
 import com.KDB.exam.CanvasManager.Companion.posX
 import com.KDB.exam.CanvasManager.Companion.posY
+import com.KDB.exam.DrawCanvas.Companion.height
+import com.KDB.exam.DrawCanvas.Companion.width
 import kotlin.math.*
 
 class Image:Box {
@@ -19,14 +21,13 @@ class Image:Box {
     private lateinit var oriBitmapImg:Bitmap
     private var context:Context
     private var imgURI:Uri
-    var pos=Pair(0f,0f)
+    private var pos=Pair(0f,0f)
     var isFocused=false
     private var contentResolver:ContentResolver
     var matrix=Matrix()
     var matrixDegree:Float=0f
     private var isXFlip:Boolean =false
     private var isYFlip:Boolean =false
-    // 이미지의 중간 지점
 
 
     constructor(uri:Uri?, context: Context, focused:Boolean,contentResolver:ContentResolver,pos:Pair<Float,Float>,isImg:Boolean=true){
@@ -83,14 +84,35 @@ class Image:Box {
     }
     override fun setBox(){// 박스를 설정(이미지를 움직일 때 실행)
         if(degree==0f){// 회전하지 않았다면
-            pos=Pair(clamp(pos.first,0f,1080f-bitmapImg.width),clamp(pos.second,0f,1806f-bitmapImg.height ))
+            pos=Pair(clamp(pos.first,0f,width-bitmapImg.width),clamp(pos.second,0f, height-bitmapImg.height ))// 수정 필요
             setPoint(Pair(pos.first,pos.second),
                 Pair(pos.first+bitmapImg.width,pos.second),
                 Pair(pos.first,pos.second+bitmapImg.height),
                 Pair(pos.first+bitmapImg.width,pos.second+bitmapImg.height))
         }
-        else{pos=rotatePoint(-degree,upperLPoint,midPoint)}// 회전 했다면
+        else{
+            setPos()
+            pos=rotatePoint(-degree,upperLPoint,midPoint)
+        }// 회전 했다면
         setMatrix()
+    }
+    private fun setPos(){// 이미지가 화면 밖을 나갈 시 위치를 화면 안으로 조정
+        val pointIndex= arrayOf(upperLPoint,upperRPoint,underLPoint,underRPoint)// 자주 사용하지 않는다면 전역변수보단 지역번수가 더 나을듯?
+        val minX=pointIndex.minOf { it.first }// 꼭지점들 중 가장 작은 값과 큰 값을 기준으로 조정 범위를 정함
+        val maxX=pointIndex.maxOf { it.first }
+        val minY=pointIndex.minOf { it.second }
+        val maxY=pointIndex.maxOf { it.second }
+        val xGap:Float = if(minX<0){ -minX } // 조정 값
+                        else if(maxX>width){ width - maxX }
+                        else { 0f }
+        val yGap:Float=if(minY<0){-minY}
+                        else if(maxY> height){ height - maxY }
+                        else{0f}
+        upperLPoint=Pair(upperLPoint.first+xGap,upperLPoint.second+yGap)// 실제 조정
+        upperRPoint=Pair(upperRPoint.first+xGap,upperRPoint.second+yGap)
+        underLPoint=Pair(underLPoint.first+xGap,underLPoint.second+yGap)
+        underRPoint=Pair(underRPoint.first+xGap,underRPoint.second+yGap)
+        setMidPoint()// 중간 점 지정
     }
     fun moveImg(dst:Pair<Float,Float>){// 이미지 이동
         pos= Pair(pos.first+dst.first,pos.second+dst.second)
@@ -100,12 +122,12 @@ class Image:Box {
         isFocused=false
     }
     fun moveBox(dst: Pair<Float, Float>, pos: Pair<Float, Float>) {
-        var wx: Float// 가로의 x성분
-        var wy: Float// 가로의 y성분
-        var hx: Float// 세로의 x성분
-        var hy: Float// 세로의 y성분
-        var dx: Float// x 변화량
-        var dy: Float// y 변화량
+        val wx: Float// 가로의 x성분
+        val wy: Float// 가로의 y성분
+        val hx: Float// 세로의 x성분
+        val hy: Float// 세로의 y성분
+        val dx: Float// x 변화량
+        val dy: Float// y 변화량
         var gapDegree: Float// 드래그 각도와 이미지 회전 각도의 차이
         when(clickedPoint){
             1->{    // set size of XY upperL
@@ -184,9 +206,11 @@ class Image:Box {
                 underRPoint=Pair(underRPoint.first+dst.first,underRPoint.second+dst.second)
             }
             10->{   // set degree
-                degree= if(getDegree(pos,midPoint,false,90f)>0)getDegree(pos,midPoint,false,90f)
-                        else getDegree(pos,midPoint,false,90f)+360
-                degree=magDegree(degree,10)
+                degree=magDegree(
+                    if(getDegree(pos,midPoint,false,90f)>0)getDegree(pos,midPoint,false,90f)
+                    else getDegree(pos,midPoint,false,90f)+360
+                    ,10)
+                if(degree==360f){degree=0f}
             }
         }
         setMidPoint()
@@ -205,11 +229,11 @@ class Image:Box {
         else{matrix.postScale(1f,1f,midPoint.first,midPoint.second)}
         matrix.postRotate(degree,midPoint.first,midPoint.second)// 매트릭스 회전 설정
     }
-    private fun getDegree(p1:Pair<Float,Float>,p2:Pair<Float,Float>,isRad:Boolean,offSet:Float=0f):Float{
+    private fun getDegree(p1:Pair<Float,Float>,p2:Pair<Float,Float>,isRad:Boolean,offSet:Float=0f):Float{// 두 점이 이루는 각도 리턴
         return if(isRad)atan2(p1.second-p2.second,p1.first-p2.first)+toRad(offSet)
                 else offSet+Math.toDegrees(atan2(p1.second-p2.second,p1.first-p2.first).toDouble()).toFloat()
     }
-    private fun magDegree(degree: Float, magArea: Int = 5, section: Int = 8): Float {
+    private fun magDegree(degree: Float, magArea: Int = 5, section: Int = 8): Float {// 각도 자석효과
         val gap: Int = 360 / section
         return if ((degree % gap) <= magArea) (((degree / gap).toInt()) * gap).toFloat()
         else if ((degree % gap) >= gap - magArea) (((degree / gap).toInt() + 1) * gap).toFloat()
@@ -221,7 +245,7 @@ class Image:Box {
     private fun toDeg(rad:Float):Float{
         return Math.toDegrees(rad.toDouble()).toFloat()
     }
-    private fun swapPoints(){
+    private fun swapPoints(){// 박스가 뒤집어 졌을 시 점들의 위치를 스왑
         if(rotatePoint(-degree,upperRPoint,midPoint).first<rotatePoint(-degree,upperLPoint,midPoint).first){// 좌우 x좌표 스왑
             upperLPoint=upperRPoint.also { upperRPoint=upperLPoint }
             underLPoint=underRPoint.also { underRPoint=underLPoint }

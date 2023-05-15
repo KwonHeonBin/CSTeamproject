@@ -8,7 +8,7 @@ import android.util.Log
 import com.KDB.exam.CanvasManager.Companion.getDst
 import kotlin.math.*
 
-open class Box {
+open class Box:Cloneable {
 
     protected var upperLPoint=Pair(0f,0f)// 박스의 좌표
     protected var upperRPoint=Pair(0f,0f)
@@ -20,7 +20,7 @@ open class Box {
     protected var midRPoint=Pair(0f,0f)
     protected var rotationPoint=Pair(-100f,-100f)
     protected var deletePoint=Pair(-100f,-100f)
-    public var midPoint=Pair(0f,0f)
+    var midPoint=Pair(0f,0f)
     protected var isImgBox=false
     var clickedPoint:Int=0// 클릭된 포인트
     var degree:Float=0f
@@ -218,5 +218,9 @@ open class Box {
         underMPoint=Pair(0f,0f)
         midLPoint=Pair(0f,0f)
         midRPoint=Pair(0f,0f)
+    }
+
+    public override fun clone(): Any {
+        return super.clone() as Box
     }
 }

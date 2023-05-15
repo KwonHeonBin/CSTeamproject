@@ -7,12 +7,15 @@ import android.util.Log
 import android.view.MotionEvent
 import android.view.View
 import com.KDB.exam.CanvasManager.Companion.focusedImg
+import com.KDB.exam.CanvasManager.Companion.getDst
 import com.KDB.exam.CanvasManager.Companion.imgList
 import com.KDB.exam.CanvasManager.Companion.mode
+import com.KDB.exam.CanvasManager.Companion.pages
 import com.KDB.exam.CanvasManager.Companion.pathList
 import com.KDB.exam.CanvasManager.Companion.posX
 import com.KDB.exam.CanvasManager.Companion.posY
 import com.KDB.exam.CanvasManager.Companion.wrapAreaBox
+import com.KDB.exam.DrawCanvas.Companion.basicMode
 import com.KDB.exam.DrawCanvas.Companion.drawCanvasBinding
 import com.samsung.android.sdk.penremote.SpenUnitManager
 
@@ -30,6 +33,8 @@ class canvasView : View {
     }
     private var canvas:Canvas= Canvas()
     var page:Int=1
+    private var deletePoint=Pair<Float,Float>(-100f,-100f)// 삭제 버튼, 클릭 시작과 끝 좌표가 모두 삭제버튼 범위 안에 있어야 삭제
+    var isDelete:Boolean=false
     private var canvasManager:CanvasManager= drawCanvasBinding.scrollView.canvasManager
     //private var params:ViewGroup.LayoutParams?=null
     private var eraser=canvasManager.eraser
@@ -67,18 +72,25 @@ class canvasView : View {
                 drawOutline(wrapAreaBox.checkedStroke)
             }
         }
+        printDeletePoint()
         invalidate()    // 업데이트
     }
     override fun onTouchEvent(event: MotionEvent): Boolean {
+        if(!basicMode){return false}
         val dx:Float=event.x-posX   // x,y 좌표의 변화률
         val dy:Float=event.y-posY
         posX=event.x    // x,y 좌표
         posY=event.y
         when(event.action){
             MotionEvent.ACTION_DOWN->{
+                //Log.d("asd", pages.size.toString())
                 canvasManager.focusedCanvas=this.canvas // 현재 클릭중인 캔버스 번호 저장
                 canvasManager.startPosX=event.x         // 클릭 좌표 저장
                 canvasManager.startPosY=event.y
+                if(getDst(deletePoint,Pair(posX,posY))<=10f){
+                    isDelete=true // 클릭 시 삭제 버튼을 눌렀다면 트리거 발동
+                    return true
+                }
                 when(mode){
                     1->{ canvasManager.penDrawing(MotionEvent.ACTION_DOWN,this) }  // penMode
                     2->{ canvasManager.eraserDrawing(MotionEvent.ACTION_DOWN) }   // eraseMode
@@ -131,6 +143,14 @@ class canvasView : View {
                 }
             }
             MotionEvent.ACTION_UP->{
+                if(getDst(deletePoint,Pair(posX,posY))<=10f&&isDelete){// 페이지 삭제
+                    canvasManager.deletePage(page)
+                    return false
+                }
+                else if(isDelete){// 좌표가 삭제 버튼을 클릭하고 있지 않지만 isDelete가 true라면 false로 설정
+                    isDelete=false
+                    return false
+                }
                 when(mode){
                     1->{ canvasManager.penDrawing(MotionEvent.ACTION_UP,this) }
                     2->{ canvasManager.eraserDrawing(MotionEvent.ACTION_UP) }
@@ -148,7 +168,15 @@ class canvasView : View {
         postInvalidate()            // UI thread call invalidate()
         return false
     }
-
+    private fun printDeletePoint(){
+        if(pages.size>1){
+            deletePoint= Pair(width-50f,50f)
+            canvas.drawCircle(deletePoint.first,deletePoint.second,15f,canvasManager.backgroundBrush)
+        }
+        else{
+            if(deletePoint.first!=-100f){deletePoint=Pair(-100f,-100f)}
+        }
+    }
     private fun drawStroke(){   // 선 그리시
         val list= pathList.iterator()   // 읽기 전용
         while (list.hasNext()){

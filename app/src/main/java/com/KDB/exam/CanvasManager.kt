@@ -7,6 +7,8 @@ import android.util.AttributeSet
 import android.util.Log
 import android.view.MotionEvent
 import android.widget.LinearLayout
+import com.KDB.exam.DrawCanvas.Companion.drawCanvasBinding
+import com.KDB.exam.DrawCanvas.Companion.scrollView
 import com.samsung.android.sdk.penremote.SpenUnitManager
 import kotlin.math.*
 
@@ -14,7 +16,7 @@ class CanvasManager:LinearLayout {
     constructor(context: Context?) : super(context)
     constructor(context: Context?, attrs: AttributeSet?) : super(context, attrs)
     constructor(context: Context?, attrs: AttributeSet?, defStyleAttr: Int) : super(context, attrs, defStyleAttr)
-    var pages= ArrayList<canvasView>()
+
     var focusedCanvas:Canvas?=null
     var startPosX=-100f
     var startPosY=-100f
@@ -48,10 +50,15 @@ class CanvasManager:LinearLayout {
     }
     companion object{
         var mode:Int=1      // 1-> penMode  2-> eraser  3-> shape  4-> cursor  5-> wrap  6-> image 7-> hand
+        var pages= ArrayList<canvasView>()
         var pathList=ArrayList<Stroke>()
         var imgList=ArrayList<Image>()
         var unStroke=ArrayList<ArrayList<Stroke>>()
         var reStroke=ArrayList<ArrayList<Stroke>>()
+        var unPage=ArrayList<Int>()
+        var rePage=ArrayList<Int>()
+        var unImg=ArrayList<Image>()
+        var reImg=ArrayList<Image>()
         var penManager: SpenUnitManager? = null
         var shapeMode=1     // 1-> line 2-> circle 3-> filledCircle 4-> rect 5-> filledRect 6-> triangle 7-> filledTriangle
         var backgroundMode=1    // 1-> none 2-> grid 3-> underBar 3
@@ -69,7 +76,12 @@ class CanvasManager:LinearLayout {
         fun getSize(p1:Pair<Float,Float>):Float{
             return sqrt(p1.first.pow(2)+p1.second.pow(2))
         }
-        fun saveCanvas(){ unStroke.add(pathList.clone() as ArrayList<Stroke>) }
+        fun saveCanvas(){
+            if(unStroke.size>=20){ unStroke.removeAt(0)}
+            unStroke.add(pathList.clone() as ArrayList<Stroke>)
+            if(unPage.size>=20){ unPage.removeAt(0)}
+            unPage.add(pages.size)
+        }
     }
 
 
@@ -87,8 +99,9 @@ class CanvasManager:LinearLayout {
                 stroke.point.add(Pair(posX, posY))
             }
             1->{    // up 땠을 시 선형보간 후 저장
-                unStroke.add(box.clone() as ArrayList<Stroke>)
-                if(reStroke.isNotEmpty()){ reStroke.clear()}
+                addUnState(box.clone() as ArrayList<Stroke>,pages.clone() as ArrayList<canvasView>)
+                //unStroke.add(box.clone() as ArrayList<Stroke>)
+                if(reStroke.isNotEmpty()){ clearReState()}
                 box.clear()
                 stroke.point.add(Pair(posX, posY))
                 stroke.point=interpolation(stroke.point,stroke.maxDistPerPoint)
@@ -119,8 +132,9 @@ class CanvasManager:LinearLayout {
                 resetPos()
                 eraser.pos=Pair(posX, posY)
                 if(box!= pathList){// 되돌리기 초기화
-                    unStroke.add(box.clone() as ArrayList<Stroke>)
-                    if(reStroke.isNotEmpty()){ reStroke.clear()}
+                    addUnState(box.clone() as ArrayList<Stroke>,pages.clone() as ArrayList<canvasView>)
+                    //unStroke.add(box.clone() as ArrayList<Stroke>)
+                    if(reStroke.isNotEmpty()){ clearReState()}
                 }
                 box.clear()
             }
@@ -197,8 +211,9 @@ class CanvasManager:LinearLayout {
             }
             1->{
                 if(stroke.point[0]!=stroke.point[1]){
-                    unStroke.add(box.clone() as ArrayList<Stroke>)
-                    if(reStroke.isNotEmpty()){ reStroke.clear()}
+                    addUnState(box.clone() as ArrayList<Stroke>,pages.clone() as ArrayList<canvasView>)
+                    //unStroke.add(box.clone() as ArrayList<Stroke>)
+                    if(reStroke.isNotEmpty()){ clearReState()}
                     box.clear()
                     stroke.point=interpolation(stroke.point,stroke.maxDistPerPoint)
                     resetPos()
@@ -280,12 +295,13 @@ class CanvasManager:LinearLayout {
         }
         for (i in 0 until box.size){// 크기 바꾸기 이전 선들 되돌리기로 저장
             if(box[i].point != pathList[i].point){
-                unStroke.add(box.clone() as ArrayList<Stroke>)
+                addUnState(box.clone() as ArrayList<Stroke>,pages.clone() as ArrayList<canvasView>)
+                //unStroke.add(box.clone() as ArrayList<Stroke>)
                 break
             }
         }
         box.clear()
-        if(reStroke.isNotEmpty()){ reStroke.clear()}
+        if(reStroke.isNotEmpty()){ clearReState()}
     }
     fun imgClick(){
         for (i in imgList){
@@ -319,11 +335,66 @@ class CanvasManager:LinearLayout {
         if(focusedImg !=null && focusedImg!!.clickedPoint!=0&& focusedImg!!.clickedPoint!=9){ focusedImg!!.applyImageSize() }
     }
     fun setImagePosRange(){focusedImg?.setBox()}
+    fun addPage(page:canvasView){
+        if(pages.isNotEmpty()){
+            addUnState(pathList.clone() as ArrayList<Stroke>,pages.clone() as ArrayList<canvasView>)// 되돌리기용 저장
+        }
+        pages.add(page)
+    }
     fun deleteImage(){
         if(focusedImg!=null&& focusedImg!!.clickedPoint==11){
             imgList.remove(focusedImg!!)
             focusedImg=null
         }
+    }
+    fun deletePage(id:Int){
+        addUnState(pathList,pages.clone() as ArrayList<canvasView>)// 되돌리기용 저장
+        var pathListForCompare= pathList.clone() as ArrayList<Stroke>
+        var imgListForCompare= imgList.clone() as ArrayList<Image>
+        for(path in pathListForCompare){
+            if(path.id==id){ pathList.remove(path) }// 삭제 페이지에 있는 선 삭제
+            else if(path.id>id){ pathList[pathList.indexOf(path)].id--}//삭제된 페이지보다 큰 id 값을 가지는 선의 id를 앞으로 당김 }
+        }
+        for(img in imgListForCompare){
+            if(img.id==id){ imgList.remove(img) } // 삭제 페이지에 있는 이미지 삭제
+            else if(img.id>id){ imgList[imgList.indexOf(img)].id--}//삭제된 페이지보다 큰 id 값을 가지는 이미지의 id를 앞으로 당김
+        }
+        for(i in id until pages.size){pages[i].page-- }// 삭제된 페이지보다 큰 id 값을 가진 페이지들의 id를 앞으로 당김
+        scrollView.deleteView(pages[id-1])// 뷰 삭제
+        pages.removeAt(id-1)// 페이지 배열에서 삭제
+   }
+
+    fun addUnState(stroke:ArrayList<Stroke>,page:ArrayList<canvasView>){// 되돌리기 추가
+        val st=strokeDeepCopy(stroke)
+        if(unStroke.size>=20){ unStroke.removeAt(0)}
+        if(unPage.size>=20){ unPage.removeAt(0)}
+        if(st.isEmpty()){
+            st.add(Stroke())
+            unStroke.add(st)
+            if(!drawCanvasBinding.undo.isEnabled){drawCanvasBinding.undo.isEnabled=true}
+        }
+        else{ unStroke.add(st)}
+        unPage.add(pages.size)
+    }
+    fun addReState(stroke:ArrayList<Stroke>,page:ArrayList<canvasView>){// 되돌리기 취소 추가
+        val st=strokeDeepCopy(stroke)
+        if(reStroke.size>=20){ reStroke.removeAt(0)}
+        if(rePage.size>=20){ rePage.removeAt(0)}
+        if(st.isEmpty()){
+            st.add(Stroke())
+            reStroke.add(st)
+            if(!drawCanvasBinding.redo.isEnabled){ drawCanvasBinding.redo.isEnabled=true}
+        }
+        else{reStroke.add(st)}
+        rePage.add(pages.size)
+    }
+    fun clearUnState(){
+        unStroke.clear()
+        unPage.clear()
+    }
+    private fun clearReState(){
+        reStroke.clear()
+        rePage.clear()
     }
     private fun magnetic(point:Float, isForced:Boolean=false, degree:Float=0.2f):Float{// 자석 효과
         val degree:Float=if(isForced){0.5f}else{degree}
@@ -405,4 +476,26 @@ class CanvasManager:LinearLayout {
     private fun init(){
 
     }
+
+    private fun strokeDeepCopy(source:ArrayList<Stroke>):ArrayList<Stroke>{
+        val out=ArrayList<Stroke>()
+        for(i in source){
+            out.add(i.clone())
+        }
+        return out
+    }
+    private fun imageDeepCopy(source:ArrayList<Image>):ArrayList<Image>{
+        val out=ArrayList<Image>()
+        for(i in source){
+            out.add(i.clone() as Image)
+        }
+        return out
+    }
+//    private fun<T> deepCopy(source:ArrayList<T>):ArrayList<T>{
+//        val out=ArrayList<T>()
+//        for(i in source){
+//            out.add(i)
+//        }
+//        return out
+//    }
 }

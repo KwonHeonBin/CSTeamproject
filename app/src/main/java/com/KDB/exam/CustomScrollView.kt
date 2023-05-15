@@ -2,20 +2,23 @@ package com.KDB.exam
 
 import android.content.Context
 import android.util.AttributeSet
+import android.util.Log
 import android.view.Gravity
 import android.view.MotionEvent
 import android.view.ViewGroup
+import android.widget.EditText
+import android.widget.FrameLayout
 import android.widget.LinearLayout
 import android.widget.ScrollView
 import android.widget.TextView
 import android.widget.Toast
+import androidx.appcompat.widget.AppCompatEditText
 import androidx.core.view.setMargins
+import com.KDB.exam.CanvasManager.Companion.pages
+import com.KDB.exam.CanvasManager.Companion.pathList
 import kotlin.math.roundToInt
 
 class CustomScrollView: ScrollView {
-    constructor(context: Context?) : super(context)
-    constructor(context: Context?, attrs: AttributeSet?) : super(context, attrs)
-    constructor(context: Context?, attrs: AttributeSet?, defStyleAttr: Int) : super(context, attrs, defStyleAttr)
 
     var isScrollable:Boolean=false
     var isAddingCanvas:Boolean=false
@@ -24,6 +27,12 @@ class CustomScrollView: ScrollView {
     var endTime:Long=0
     var focusedPageId:Int=1
     lateinit var canvasManager:CanvasManager
+
+    constructor(context: Context?) : super(context){
+
+    }
+    constructor(context: Context?, attrs: AttributeSet?) : super(context, attrs)
+    constructor(context: Context?, attrs: AttributeSet?, defStyleAttr: Int) : super(context, attrs, defStyleAttr)
 
     private val addBox:TextView= TextView(context).apply {
         text="Add Screen"
@@ -56,7 +65,7 @@ class CustomScrollView: ScrollView {
                 focusedIdCheck()
                 if(!canScrollVertically(1)&&isAddingCanvas){
                     endTime=System.currentTimeMillis()
-                    if(endTime-startTime>1000f){
+                    if(endTime-startTime>500f){
                         Toast.makeText(context, "addView", Toast.LENGTH_SHORT).show()
                         addView()
                     }
@@ -68,15 +77,31 @@ class CustomScrollView: ScrollView {
         return isScrollable && super.onTouchEvent(ev)
     }
     fun addView(){
+        val frame:FrameLayout=FrameLayout(context).apply {
+            val layoutBox=LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,resources.displayMetrics.heightPixels-getDP(52))
+            layoutParams=layoutBox
+
+        }
+        val textBox:CustomEditText=CustomEditText(context).apply {
+            val layoutBox=LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,ViewGroup.LayoutParams.MATCH_PARENT)
+            layoutBox.setMargins(getDP(10))
+            layoutParams=layoutBox
+            background=null
+        }
+        textBox.gravity=Gravity.TOP
+        DrawCanvas.focusedEditText=textBox
         val view:canvasView=canvasView(context).apply {
-            val layoutBox=LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, resources.displayMetrics.heightPixels)
+            val layoutBox=LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT)
             layoutBox.setMargins(getDP(5))
             layoutParams = layoutBox
             background=resources.getDrawable(R.color.white,null)
         }
-        layout!!.addView(view)
-        canvasManager.pages.add(view)
-        view.page=canvasManager.pages.size
+        frame.addView(view)
+        frame.addView(textBox)
+        canvasManager.addPage(view)
+        layout!!.addView(frame)
+        view.page=pages.size
+        //Log.d("asd",canvasManager.pages.size.toString())
 //        Log.d("asd", canvasManager.pages.size.toString())
 //        if(canvasManager.pages.size==2){
 //            if(canvasManager.pages[0].canvas==canvasManager.pages[1].canvas){
@@ -84,6 +109,19 @@ class CustomScrollView: ScrollView {
 //            }
 //            else{Log.d("asd", "diff");}
 //        }
+    }
+    private fun addView(page:canvasView){
+        layout!!.addView(page)
+    }
+    fun deleteView(canvasView: canvasView){
+        layout!!.removeView(canvasView)
+    }
+    fun refreshView(page: Int){// 특정 페이지로 레이아웃을 모두 교체
+        pages.clear()
+        layout!!.removeAllViews()
+        for(i in 0 until page){
+            addView()
+        }
     }
     private fun setPage():Int{
         return 0
@@ -94,29 +132,6 @@ class CustomScrollView: ScrollView {
     }
     override fun onScrollChanged(l: Int, t: Int, oldl: Int, oldt: Int) {
         super.onScrollChanged(l, t, oldl, oldt)
-//        if(!canScrollVertically(1)){
-//
-//        }
-//        else if(!canScrollVertically(-1)){
-//            //Toast.makeText(context, "Scroll View top reached", Toast.LENGTH_SHORT).show()
-//            Log.d("asd", "first")
-//        }
-//        else{
-//            if(isAddingCanvas){
-//                isAddingCanvas=false
-//            }
-//        }
-
-
-//    val view = getChildAt(childCount - 1)
-//    val topDetector = scrollY
-//    val bottomDetector: Int = (view.bottom) - (height + scrollY)
-//    if (bottomDetector == 0) {
-//
-//    }
-//    if (topDetector <= 0) {
-//
-//    }
     }
 
 }

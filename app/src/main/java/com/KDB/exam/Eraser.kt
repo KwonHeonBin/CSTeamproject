@@ -7,6 +7,7 @@ import android.util.Log
 import com.KDB.exam.CanvasManager.Companion.getDst
 import com.KDB.exam.CanvasManager.Companion.pathList
 import com.KDB.exam.CanvasManager.Companion.saveCanvas
+import com.KDB.exam.CanvasManager.Companion.unStroke
 
 class Eraser {
     var radius:Float =5f
