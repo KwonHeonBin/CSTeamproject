@@ -1,0 +1,49 @@
+<resources>
+    <string name="app_name">TimeTableTest</string>
+
+    <string name="월">월</string>
+    <string name="화">화</string>
+    <string name="수">수</string>
+    <string name="목">목</string>
+    <string name="금">금</string>
+
+    <string name="_9">9</string>
+    <string name="_10">10</string>
+    <string name="_11">11</string>
+    <string name="_12">12</string>
+    <string name="_13">13</string>
+    <string name="_14">14</string>
+    <string name="_15">15</string>
+    <string name="_16">16</string>
+    <string name="_17">17</string>
+    <string name="_18">18</string>
+
+    <string name="ok">Ok</string>
+    <string name="cancel">Cancel</string>
+    <string name="deleteText">정말 삭제 하시겠습니까?</string>
+    <string name="lecture">강의명</string>
+    <string name="classroom">강의실</string>
+    <string name="professor">교수명</string>
+    <string name="backgroundSelect">배경 색상 선택(기본) ▼</string>
+    <string name="popupDelete">삭제</string>
+    <string name="popupOk">확인</string>
+    <string name="popupCancel">취소</string>
+    <string name="popupChange">수정</string>
+
+    <string name="backgroundRed">빨간색</string>
+    <string name="backgroundGreen">연두색</string>
+    <string name="backgroundYellow">노란색</string>
+    <string name="backgroundGray">회색</string>
+    <string name="backgroundBlue">파란색</string>
+
+    <string name="startTimeSelect">시작 시간 ▼</string>
+    <string name="daySelect">월요일 ▼</string>
+    <string name="endTimeSelect">종료 시간 ▼</string>
+    <string name="monday">월요일</string>
+    <string name="tuesday">화요일</string>
+    <string name="wednesday">수요일</string>
+    <string name="thursday">목요일</string>
+    <string name="friday">금요일</string>
+    <string name="textview">TextView</string>
+
+</resources>
