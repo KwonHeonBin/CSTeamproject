@@ -34,7 +34,6 @@ class Eraser {
                     when (mode) {
                         0 -> {    // stroke delete
                             saveCanvas()
-                            Log.d("asd","delete1")
                             pathList.remove(st)
                             return
                         }

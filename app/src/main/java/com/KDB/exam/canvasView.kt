@@ -83,7 +83,6 @@ class canvasView : View {
         posY=event.y
         when(event.action){
             MotionEvent.ACTION_DOWN->{
-                //Log.d("asd", pages.size.toString())
                 canvasManager.focusedCanvas=this.canvas // 현재 클릭중인 캔버스 번호 저장
                 canvasManager.startPosX=event.x         // 클릭 좌표 저장
                 canvasManager.startPosY=event.y

@@ -6,17 +6,12 @@ import android.util.Log
 import android.view.Gravity
 import android.view.MotionEvent
 import android.view.ViewGroup
-import android.widget.EditText
-import android.widget.FrameLayout
-import android.widget.LinearLayout
-import android.widget.ScrollView
-import android.widget.TextView
-import android.widget.Toast
-import androidx.appcompat.widget.AppCompatEditText
+import android.widget.*
 import androidx.core.view.setMargins
 import com.KDB.exam.CanvasManager.Companion.pages
-import com.KDB.exam.CanvasManager.Companion.pathList
+import com.google.android.material.datepicker.MaterialDatePicker.Builder.datePicker
 import kotlin.math.roundToInt
+
 
 class CustomScrollView: ScrollView {
 
@@ -26,6 +21,7 @@ class CustomScrollView: ScrollView {
     var startTime:Long=0
     var endTime:Long=0
     var focusedPageId:Int=1
+    private var FL=ArrayList<FrameLayout>()
     lateinit var canvasManager:CanvasManager
 
     constructor(context: Context?) : super(context){
@@ -80,7 +76,6 @@ class CustomScrollView: ScrollView {
         val frame:FrameLayout=FrameLayout(context).apply {
             val layoutBox=LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,resources.displayMetrics.heightPixels-getDP(52))
             layoutParams=layoutBox
-
         }
         val textBox:CustomEditText=CustomEditText(context).apply {
             val layoutBox=LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,ViewGroup.LayoutParams.MATCH_PARENT)
@@ -98,29 +93,41 @@ class CustomScrollView: ScrollView {
         }
         frame.addView(view)
         frame.addView(textBox)
-        canvasManager.addPage(view)
+        FL.add(frame)// 05.20 추가
+        canvasManager.addPage(view,textBox)
         layout!!.addView(frame)
         view.page=pages.size
-        //Log.d("asd",canvasManager.pages.size.toString())
-//        Log.d("asd", canvasManager.pages.size.toString())
-//        if(canvasManager.pages.size==2){
-//            if(canvasManager.pages[0].canvas==canvasManager.pages[1].canvas){
-//                Log.d("asd", "same");
-//            }
-//            else{Log.d("asd", "diff");}
-//        }
     }
-    private fun addView(page:canvasView){
-        layout!!.addView(page)
+    private fun addView(editText: CustomEditText){// 05.20 추가
+        val frame:FrameLayout=FrameLayout(context).apply {
+            val layoutBox=LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,resources.displayMetrics.heightPixels-getDP(52))
+            layoutParams=layoutBox
+        }
+        DrawCanvas.focusedEditText=editText
+        val view:canvasView=canvasView(context).apply {
+            val layoutBox=LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT)
+            layoutBox.setMargins(getDP(5))
+            layoutParams = layoutBox
+            background=resources.getDrawable(R.color.white,null)
+        }
+        if(editText.parent!=null){ (editText.parent as ViewGroup).removeView(editText)}// editText의 부모를 리셋 05.20 추가
+        frame.addView(view)
+        frame.addView(editText)
+        FL.add(frame)// 05.20 추가
+        canvasManager.addPage(view, editText)// 05.20 추가
+        layout!!.addView(frame)
+        view.page=pages.size
     }
-    fun deleteView(canvasView: canvasView){
-        layout!!.removeView(canvasView)
+    fun deleteView(id:Int){// 05.20 추가
+        layout!!.removeView(FL[id-1])
+        FL.removeAt(id - 1)
     }
-    fun refreshView(page: Int){// 특정 페이지로 레이아웃을 모두 교체
+    fun refreshView(page: Int, editText: ArrayList<CustomEditText>){// 특정 페이지로 레이아웃을 모두 교체
         pages.clear()
+        FL.clear()// 05.20 추가
         layout!!.removeAllViews()
         for(i in 0 until page){
-            addView()
+            addView(editText[i])
         }
     }
     private fun setPage():Int{

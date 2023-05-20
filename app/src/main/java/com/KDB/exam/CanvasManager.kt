@@ -51,14 +51,17 @@ class CanvasManager:LinearLayout {
     companion object{
         var mode:Int=1      // 1-> penMode  2-> eraser  3-> shape  4-> cursor  5-> wrap  6-> image 7-> hand
         var pages= ArrayList<canvasView>()
+        var textList=ArrayList<CustomEditText>()// 05.20 추가
         var pathList=ArrayList<Stroke>()
         var imgList=ArrayList<Image>()
         var unStroke=ArrayList<ArrayList<Stroke>>()
         var reStroke=ArrayList<ArrayList<Stroke>>()
         var unPage=ArrayList<Int>()
         var rePage=ArrayList<Int>()
-        var unImg=ArrayList<Image>()
-        var reImg=ArrayList<Image>()
+        var unImg=ArrayList<ArrayList<Image>>()// 05.20 추가
+        var reImg=ArrayList<ArrayList<Image>>()// 05.20 추가
+        var unText=ArrayList<ArrayList<CustomEditText>>()// 05.20 추가
+        var reText=ArrayList<ArrayList<CustomEditText>>()// 05.20 추가
         var penManager: SpenUnitManager? = null
         var shapeMode=1     // 1-> line 2-> circle 3-> filledCircle 4-> rect 5-> filledRect 6-> triangle 7-> filledTriangle
         var backgroundMode=1    // 1-> none 2-> grid 3-> underBar 3
@@ -81,6 +84,20 @@ class CanvasManager:LinearLayout {
             unStroke.add(pathList.clone() as ArrayList<Stroke>)
             if(unPage.size>=20){ unPage.removeAt(0)}
             unPage.add(pages.size)
+        }
+        fun strokeDeepCopy(source:ArrayList<Stroke>):ArrayList<Stroke>{
+            val out=ArrayList<Stroke>()
+            for(i in source){
+                out.add(i.clone())
+            }
+            return out
+        }
+        fun imageDeepCopy(source:ArrayList<Image>):ArrayList<Image>{
+            val out=ArrayList<Image>()
+            for(i in source){
+                out.add(i.clone() as Image)
+            }
+            return out
         }
     }
 
@@ -335,11 +352,12 @@ class CanvasManager:LinearLayout {
         if(focusedImg !=null && focusedImg!!.clickedPoint!=0&& focusedImg!!.clickedPoint!=9){ focusedImg!!.applyImageSize() }
     }
     fun setImagePosRange(){focusedImg?.setBox()}
-    fun addPage(page:canvasView){
+    fun addPage(page:canvasView,editText: CustomEditText){
         if(pages.isNotEmpty()){
             addUnState(pathList.clone() as ArrayList<Stroke>,pages.clone() as ArrayList<canvasView>)// 되돌리기용 저장
         }
         pages.add(page)
+        textList.add(editText)// 05.20 추가
     }
     fun deleteImage(){
         if(focusedImg!=null&& focusedImg!!.clickedPoint==11){
@@ -360,14 +378,20 @@ class CanvasManager:LinearLayout {
             else if(img.id>id){ imgList[imgList.indexOf(img)].id--}//삭제된 페이지보다 큰 id 값을 가지는 이미지의 id를 앞으로 당김
         }
         for(i in id until pages.size){pages[i].page-- }// 삭제된 페이지보다 큰 id 값을 가진 페이지들의 id를 앞으로 당김
-        scrollView.deleteView(pages[id-1])// 뷰 삭제
         pages.removeAt(id-1)// 페이지 배열에서 삭제
+        textList.removeAt(id-1)// 텍스트 배열에서 삭제  05.20 추가
+        scrollView.deleteView(id)// 뷰 삭제
    }
 
-    fun addUnState(stroke:ArrayList<Stroke>,page:ArrayList<canvasView>){// 되돌리기 추가
+    fun addUnState(stroke:ArrayList<Stroke>,page:ArrayList<canvasView>){// 되돌리기 추가 // 05.20 추가
         val st=strokeDeepCopy(stroke)
+        for (i in stroke){
+            Log.d("asd",i.id.toString())
+        }
         if(unStroke.size>=20){ unStroke.removeAt(0)}
         if(unPage.size>=20){ unPage.removeAt(0)}
+        if(unImg.size>=20){ unImg.removeAt(0)}
+        if(unText.size>=20){ unText.removeAt(0)}
         if(st.isEmpty()){
             st.add(Stroke())
             unStroke.add(st)
@@ -375,11 +399,15 @@ class CanvasManager:LinearLayout {
         }
         else{ unStroke.add(st)}
         unPage.add(pages.size)
+        unImg.add(imgList.clone() as ArrayList<Image>)
+        unText.add(textList.clone() as ArrayList<CustomEditText>)
     }
-    fun addReState(stroke:ArrayList<Stroke>,page:ArrayList<canvasView>){// 되돌리기 취소 추가
+    fun addReState(stroke:ArrayList<Stroke>,page:ArrayList<canvasView>){// 되돌리기 취소 추가 // 05.20 추가
         val st=strokeDeepCopy(stroke)
         if(reStroke.size>=20){ reStroke.removeAt(0)}
         if(rePage.size>=20){ rePage.removeAt(0)}
+        if(reImg.size>=20){ reImg.removeAt(0)}
+        if(reText.size>=20){ reText.removeAt(0)}
         if(st.isEmpty()){
             st.add(Stroke())
             reStroke.add(st)
@@ -387,14 +415,20 @@ class CanvasManager:LinearLayout {
         }
         else{reStroke.add(st)}
         rePage.add(pages.size)
+        reImg.add(imgList.clone() as ArrayList<Image>)
+        reText.add(textList.clone() as ArrayList<CustomEditText>)
     }
-    fun clearUnState(){
+    fun clearUnState(){// 05.20 추가
         unStroke.clear()
         unPage.clear()
+        unText.clear()
+        unImg.clear()
     }
-    private fun clearReState(){
+    private fun clearReState(){// 05.20 추가
         reStroke.clear()
         rePage.clear()
+        reText.clear()
+        reImg.clear()
     }
     private fun magnetic(point:Float, isForced:Boolean=false, degree:Float=0.2f):Float{// 자석 효과
         val degree:Float=if(isForced){0.5f}else{degree}
@@ -477,14 +511,7 @@ class CanvasManager:LinearLayout {
 
     }
 
-    private fun strokeDeepCopy(source:ArrayList<Stroke>):ArrayList<Stroke>{
-        val out=ArrayList<Stroke>()
-        for(i in source){
-            out.add(i.clone())
-        }
-        return out
-    }
-    private fun imageDeepCopy(source:ArrayList<Image>):ArrayList<Image>{
+   fun imageDeepCopy(source:ArrayList<Image>):ArrayList<Image>{
         val out=ArrayList<Image>()
         for(i in source){
             out.add(i.clone() as Image)

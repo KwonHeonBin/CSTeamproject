@@ -31,16 +31,23 @@ import androidx.core.content.ContextCompat
 import com.KDB.exam.CanvasManager.Companion.backgroundMode
 import com.KDB.exam.CanvasManager.Companion.currentBrush
 import com.KDB.exam.CanvasManager.Companion.focusedImg
+import com.KDB.exam.CanvasManager.Companion.imageDeepCopy
 import com.KDB.exam.CanvasManager.Companion.imgList
 import com.KDB.exam.CanvasManager.Companion.isMagnetMode
 import com.KDB.exam.CanvasManager.Companion.mode
 import com.KDB.exam.CanvasManager.Companion.pages
 import com.KDB.exam.CanvasManager.Companion.pathList
+import com.KDB.exam.CanvasManager.Companion.reImg
 import com.KDB.exam.CanvasManager.Companion.rePage
 import com.KDB.exam.CanvasManager.Companion.reStroke
+import com.KDB.exam.CanvasManager.Companion.reText
 import com.KDB.exam.CanvasManager.Companion.shapeMode
+import com.KDB.exam.CanvasManager.Companion.strokeDeepCopy
+import com.KDB.exam.CanvasManager.Companion.textList
+import com.KDB.exam.CanvasManager.Companion.unImg
 import com.KDB.exam.CanvasManager.Companion.unPage
 import com.KDB.exam.CanvasManager.Companion.unStroke
+import com.KDB.exam.CanvasManager.Companion.unText
 import com.KDB.exam.CanvasManager.Companion.wrapAreaBox
 import com.KDB.exam.databinding.DrawCanvasBinding
 import kotlin.math.min
@@ -410,6 +417,7 @@ class DrawCanvas : AppCompatActivity() {
                                 false
                         } else{// change to penMode
                                 drawCanvasBinding.mode.setBackgroundResource(R.drawable.pen)
+                                mode=1// 05.20 추가
                                 if(!scrollView.isScrollable){ scrollView.isScrollable=true}
                                 true
                 }
@@ -446,9 +454,7 @@ class DrawCanvas : AppCompatActivity() {
             }
             drawCanvasBinding.clear->{        // reset list
                 Toast.makeText(this,"clear",Toast.LENGTH_SHORT).show()
-                //var box=pathList.clone() as ArrayList<Stroke>
-                scrollView.canvasManager.addUnState(pathList.clone() as ArrayList<Stroke>, pages)
-                //unStroke.add(pathList.clone() as ArrayList<Stroke>)
+                scrollView.canvasManager.addUnState(pathList, pages)// 05.20 추가
                 btnActiveCheck()
                 pathList.clear()
             }
@@ -507,19 +513,13 @@ class DrawCanvas : AppCompatActivity() {
             }
             drawCanvasBinding.undo->{
                 if(unStroke.isNotEmpty()){
-                    scrollView.canvasManager.addReState(pathList.clone() as ArrayList<Stroke>, pages.clone() as ArrayList<canvasView>)
-                    pathList.clear()
-                    pathList=unStroke.removeLast().clone() as ArrayList<Stroke>
-                    scrollView.refreshView(unPage.removeLast())
+                    setList(true)// 05.20 추가
                     btnActiveCheck()
                 }
             }
             drawCanvasBinding.redo->{
                 if (reStroke.isNotEmpty()) {
-                    scrollView.canvasManager.addUnState(pathList.clone() as ArrayList<Stroke>, pages.clone() as ArrayList<canvasView>)
-                    pathList.clear()
-                    pathList=reStroke.removeLast().clone() as ArrayList<Stroke>
-                    scrollView.refreshView(rePage.removeLast())
+                    setList(false)// 05.20 추가
                     btnActiveCheck()
                 }
             }
@@ -569,6 +569,29 @@ class DrawCanvas : AppCompatActivity() {
             }
         }
         refreshState()
+    }
+
+    private fun setList(isUn:Boolean){// 05.20 추가
+        if(isUn){
+            scrollView.canvasManager.addReState(pathList, pages.clone() as ArrayList<canvasView>)
+            pathList.clear()
+            imgList.clear()
+            textList.clear()
+            pathList= strokeDeepCopy(unStroke.removeLast())
+            imgList= imageDeepCopy(unImg.removeLast())
+            textList= unText.removeLast().clone() as ArrayList<CustomEditText>
+            scrollView.refreshView(unPage.removeLast(), textList)
+        }
+        else{
+            scrollView.canvasManager.addUnState(pathList, pages.clone() as ArrayList<canvasView>)
+            pathList.clear()
+            imgList.clear()
+            textList.clear()
+            pathList= strokeDeepCopy(reStroke.removeLast())
+            imgList= imageDeepCopy(reImg.removeLast())
+            textList= reText.removeLast().clone() as ArrayList<CustomEditText>
+            scrollView.refreshView(rePage.removeLast(), textList)
+        }
     }
 
     private fun refreshState(){

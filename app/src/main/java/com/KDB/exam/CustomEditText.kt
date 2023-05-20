@@ -23,7 +23,4 @@ class CustomEditText: AppCompatEditText{
         DrawCanvas.focusedEditText=this
         return super.onTouchEvent(event)
     }
-
-
-
 }
