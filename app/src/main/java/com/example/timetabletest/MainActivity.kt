@@ -67,8 +67,13 @@ class MainActivity : AppCompatActivity() {
                             // 시간 선택 시 동작
                             //val time = String.format("%02d:%02d", hourOfDay1, minute1)
                             //Toast.makeText(this@MainActivity, time, Toast.LENGTH_SHORT).show()
-                            startTimeSelect.text = String.format("%02d:%02d ▼", hourOfDay1, minute1)
-                            startTime = (hourOfDay1 * 60 + minute1) / 60 // 강의 시작 시간
+                            if(minute1 != 0){
+                                Toast.makeText(this@MainActivity, "죄송합니다. 분은 0만 선택 가능합니다.", Toast.LENGTH_SHORT).show()
+                            }
+                            else{
+                                startTimeSelect.text = String.format("%02d:%02d ▼", hourOfDay1, minute1)
+                                startTime = (hourOfDay1 * 60 + minute1) / 60 // 강의 시작 시간
+                            }
                         },
                         hour,
                         minute,
@@ -86,8 +91,13 @@ class MainActivity : AppCompatActivity() {
                             // 시간 선택 시 동작
                             //val time = String.format("%02d:%02d", hourOfDay2, minute2)
                             //Toast.makeText(this@MainActivity, time, Toast.LENGTH_SHORT).show()
-                            endTimeSelect.text = String.format("%02d:%02d ▼", hourOfDay2, minute2)
-                            endTime = (hourOfDay2 * 60 + minute2) / 60 // 강의 종료 시간
+                            if(minute2 != 0){
+                                Toast.makeText(this@MainActivity, "죄송합니다. 분은 0만 선택 가능합니다.", Toast.LENGTH_SHORT).show()
+                            }
+                            else{
+                                endTimeSelect.text = String.format("%02d:%02d ▼", hourOfDay2, minute2)
+                                endTime = (hourOfDay2 * 60 + minute2) / 60 // 강의 종료 시간
+                            }
                         },
                         hour,
                         minute,
@@ -224,7 +234,7 @@ class MainActivity : AppCompatActivity() {
                     }
                 }
 
-                popupDelete.setOnClickListener {
+                popupDelete.setOnClickListener { // 삭제 버튼
                     val popupDeleteLayout = inflater.inflate(R.layout.popup_delete_layout, null)
                     val deleteOk = popupDeleteLayout.findViewById<Button>(R.id.delete_ok)
                     val deleteCancel = popupDeleteLayout.findViewById<Button>(R.id.delete_cancel)
@@ -233,9 +243,9 @@ class MainActivity : AppCompatActivity() {
                         .setView(popupDeleteLayout)
                         .create()
 
-                    //수정해야함
-                    deleteOk.setOnClickListener{
+                    deleteOk.setOnClickListener {
                         val clickedTextViewBackgroundColorInt = (clickedTextViewBackgroundColor as ColorDrawable).color // 배경색상을 Int 형으로 변환
+
                         for (i in startIndex until dayList.size) {
                             val textView = dayList[i]
                             if (textView.background is ColorDrawable && (textView.background as ColorDrawable).color == clickedTextViewBackgroundColorInt) {
@@ -243,7 +253,15 @@ class MainActivity : AppCompatActivity() {
                                 dayList[startIndex].text = ""
                                 Toast.makeText(this, "삭제 되었습니다.", Toast.LENGTH_SHORT).show()
                             }
+
+                            if (i + 1 < dayList.size && dayList[i + 1].background is ColorDrawable &&
+                                (dayList[i + 1].background as ColorDrawable).color == clickedTextViewBackgroundColorInt &&
+                                dayList[i + 1].text.isNotEmpty()) {
+                                // 다음 인덱스가 같은 색상이고 값이 있는 경우 반복문을 즉시 종료
+                                break
+                            }
                         }
+
                         clickLayoutDialog.dismiss()
                         popupDeleteDialog.dismiss()
                     }
@@ -300,21 +318,11 @@ class MainActivity : AppCompatActivity() {
             )
             for ((index, view) in mondayList.withIndex()) {
                 if (index == startTime - 9) {
-                    val text = lecture + "\n" + classroom + "\n" + professor + "\n" + startTime + endTime
+                    val text = lecture + "\n" + classroom + "\n" + professor + "\n"
                     val spannable = SpannableStringBuilder(text)
                     spannable.setSpan(
                         ForegroundColorSpan(Color.parseColor(backgroundColor)),
                         text.indexOf(professor), text.indexOf(professor) + professor.length,
-                        Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
-                    )
-                    spannable.setSpan(
-                        ForegroundColorSpan(Color.parseColor(backgroundColor)),
-                        text.indexOf(startTime.toString()), text.indexOf(startTime.toString()) + startTime.toString().length,
-                        Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
-                    )
-                    spannable.setSpan(
-                        ForegroundColorSpan(Color.parseColor(backgroundColor)),
-                        text.indexOf(endTime.toString()), text.indexOf(endTime.toString()) + endTime.toString().length,
                         Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
                     )
                     view.text = spannable
@@ -340,21 +348,11 @@ class MainActivity : AppCompatActivity() {
             )
             for ((index, view) in tuesdayList.withIndex()) {
                 if (index == startTime - 9) {
-                    val text = lecture + "\n" + classroom + "\n" + professor + "\n" + startTime + endTime
+                    val text = lecture + "\n" + classroom + "\n" + professor + "\n"
                     val spannable = SpannableStringBuilder(text)
                     spannable.setSpan(
                         ForegroundColorSpan(Color.parseColor(backgroundColor)),
                         text.indexOf(professor), text.indexOf(professor) + professor.length,
-                        Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
-                    )
-                    spannable.setSpan(
-                        ForegroundColorSpan(Color.parseColor(backgroundColor)),
-                        text.indexOf(startTime.toString()), text.indexOf(startTime.toString()) + startTime.toString().length,
-                        Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
-                    )
-                    spannable.setSpan(
-                        ForegroundColorSpan(Color.parseColor(backgroundColor)),
-                        text.indexOf(endTime.toString()), text.indexOf(endTime.toString()) + endTime.toString().length,
                         Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
                     )
                     view.text = spannable
@@ -380,21 +378,11 @@ class MainActivity : AppCompatActivity() {
             )
             for ((index, view) in wednesdayList.withIndex()) {
                 if (index == startTime - 9) {
-                    val text = lecture + "\n" + classroom + "\n" + professor + "\n" + startTime + endTime
+                    val text = lecture + "\n" + classroom + "\n" + professor + "\n"
                     val spannable = SpannableStringBuilder(text)
                     spannable.setSpan(
                         ForegroundColorSpan(Color.parseColor(backgroundColor)),
                         text.indexOf(professor), text.indexOf(professor) + professor.length,
-                        Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
-                    )
-                    spannable.setSpan(
-                        ForegroundColorSpan(Color.parseColor(backgroundColor)),
-                        text.indexOf(startTime.toString()), text.indexOf(startTime.toString()) + startTime.toString().length,
-                        Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
-                    )
-                    spannable.setSpan(
-                        ForegroundColorSpan(Color.parseColor(backgroundColor)),
-                        text.indexOf(endTime.toString()), text.indexOf(endTime.toString()) + endTime.toString().length,
                         Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
                     )
                     view.text = spannable
@@ -420,21 +408,11 @@ class MainActivity : AppCompatActivity() {
             )
             for ((index, view) in thursdayList.withIndex()) {
                 if (index == startTime - 9) {
-                    val text = lecture + "\n" + classroom + "\n" + professor + "\n" + startTime + endTime
+                    val text = lecture + "\n" + classroom + "\n" + professor + "\n"
                     val spannable = SpannableStringBuilder(text)
                     spannable.setSpan(
                         ForegroundColorSpan(Color.parseColor(backgroundColor)),
                         text.indexOf(professor), text.indexOf(professor) + professor.length,
-                        Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
-                    )
-                    spannable.setSpan(
-                        ForegroundColorSpan(Color.parseColor(backgroundColor)),
-                        text.indexOf(startTime.toString()), text.indexOf(startTime.toString()) + startTime.toString().length,
-                        Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
-                    )
-                    spannable.setSpan(
-                        ForegroundColorSpan(Color.parseColor(backgroundColor)),
-                        text.indexOf(endTime.toString()), text.indexOf(endTime.toString()) + endTime.toString().length,
                         Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
                     )
                     view.text = spannable
@@ -460,21 +438,11 @@ class MainActivity : AppCompatActivity() {
             )
             for ((index, view) in fridayList.withIndex()) {
                 if (index == startTime - 9) {
-                    val text = lecture + "\n" + classroom + "\n" + professor + "\n" + startTime + endTime
+                    val text = lecture + "\n" + classroom + "\n" + professor + "\n"
                     val spannable = SpannableStringBuilder(text)
                     spannable.setSpan(
                         ForegroundColorSpan(Color.parseColor(backgroundColor)),
                         text.indexOf(professor), text.indexOf(professor) + professor.length,
-                        Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
-                    )
-                    spannable.setSpan(
-                        ForegroundColorSpan(Color.parseColor(backgroundColor)),
-                        text.indexOf(startTime.toString()), text.indexOf(startTime.toString()) + startTime.toString().length,
-                        Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
-                    )
-                    spannable.setSpan(
-                        ForegroundColorSpan(Color.parseColor(backgroundColor)),
-                        text.indexOf(endTime.toString()), text.indexOf(endTime.toString()) + endTime.toString().length,
                         Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
                     )
                     view.text = spannable
@@ -486,3 +454,10 @@ class MainActivity : AppCompatActivity() {
         }
     }
 }
+
+
+
+
+
+
+
