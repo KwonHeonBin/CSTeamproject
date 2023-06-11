@@ -964,7 +964,6 @@ class DrawCanvas : AppCompatActivity() {
             note = intent.getParcelableExtra(editNoteExtra)!!
             drawCanvasBinding.title.setText(note.title)
             //focusedEditText.setText()
-
             for(page: Int in 0 until note.pageSize!!){
                 scrollView.addView(note.span[page], note.gravity[page])
             }

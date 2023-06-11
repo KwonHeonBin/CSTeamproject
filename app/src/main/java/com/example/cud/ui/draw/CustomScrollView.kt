@@ -81,7 +81,7 @@ class CustomScrollView: ScrollView {
     }
     fun addView(text : String = "", textgravity: Int = 3){
         val frame:FrameLayout=FrameLayout(context).apply {
-            val layoutBox=LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,resources.displayMetrics.heightPixels-getDP(100))
+            val layoutBox=LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,resources.displayMetrics.heightPixels-getDP(52))
             layoutBox.gravity=Gravity.BOTTOM
             layoutParams=layoutBox
 
