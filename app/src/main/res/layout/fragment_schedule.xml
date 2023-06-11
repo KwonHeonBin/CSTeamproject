@@ -1,0 +1,663 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".ui.schedule.ScheduleFragment"
+    android:theme="@style/AppTheme">
+
+    <LinearLayout
+        android:id="@+id/linearlayout"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:layout_weight="1">
+
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="0.3"
+            android:orientation="horizontal"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent">
+
+            <TextView
+                android:layout_width="20dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:background="@color/D3D3D3"/>
+
+            <TextView
+                android:layout_width="55dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:text="@string/월"
+                android:gravity="center"
+                android:background="@color/D3D3D3"/>
+
+            <TextView
+                android:layout_width="55dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:background="@color/D3D3D3"
+                android:gravity="center"
+                android:text="@string/화" />
+
+            <TextView
+                android:layout_width="55dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:gravity="center"
+                android:text="@string/수"
+                android:background="@color/D3D3D3"/>
+
+            <TextView
+                android:layout_width="55dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:text="@string/목"
+                android:gravity="center"
+                android:background="@color/D3D3D3"/>
+
+            <TextView
+                android:layout_width="55dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:text="@string/금"
+                android:gravity="center"
+                android:background="@color/D3D3D3"/>
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:orientation="horizontal">
+
+
+            <TextView
+                android:layout_width="20dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:text="@string/_9"
+                android:gravity="end"
+                android:background="@color/D3D3D3"/>
+
+            <TextView
+                android:id="@+id/monday1"
+                android:layout_width="55dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:background="#FFFFFF"
+                android:longClickable="true"
+                android:text="" />
+
+            <TextView
+                android:id="@+id/tuesday1"
+                android:layout_width="55dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:text=""
+                android:background="#FFFFFF"/>
+
+            <TextView
+                android:id="@+id/wednesday1"
+                android:layout_width="55dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:text=""
+                android:background="#FFFFFF"/>
+
+            <TextView
+                android:id="@+id/thursday1"
+                android:layout_width="55dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:text=""
+                android:background="#FFFFFF"/>
+
+            <TextView
+                android:id="@+id/friday1"
+                android:layout_width="55dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:text=""
+                android:background="#FFFFFF"/>
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:orientation="horizontal">
+
+            <TextView
+                android:layout_width="20dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:text="@string/_10"
+                android:gravity="end"
+                android:background="@color/D3D3D3"/>
+
+            <TextView
+                android:id="@+id/monday2"
+                android:layout_width="55dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:background="#FFFFFF"
+                android:text="" />
+
+            <TextView
+                android:id="@+id/tuesday2"
+                android:layout_width="55dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:text=""
+                android:background="#FFFFFF"
+                />
+
+            <TextView
+                android:id="@+id/wednesday2"
+                android:layout_width="55dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:text=""
+                android:background="#FFFFFF"/>
+
+            <TextView
+                android:id="@+id/thursday2"
+                android:layout_width="55dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:text=""
+                android:background="#FFFFFF"/>
+
+            <TextView
+                android:id="@+id/friday2"
+                android:layout_width="55dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:text=""
+                android:background="#FFFFFF"/>
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:orientation="horizontal">
+
+            <TextView
+                android:layout_width="20dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:text="@string/_11"
+                android:gravity="end"
+                android:background="@color/D3D3D3"/>
+
+            <TextView
+                android:id="@+id/monday3"
+                android:layout_width="55dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:text=""
+                android:background="#FFFFFF"/>
+
+            <TextView
+                android:id="@+id/tuesday3"
+                android:layout_width="55dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:text=""
+                android:background="#FFFFFF"
+                />
+
+            <TextView
+                android:id="@+id/wednesday3"
+                android:layout_width="55dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:text=""
+                android:background="#FFFFFF"/>
+
+            <TextView
+                android:id="@+id/thursday3"
+                android:layout_width="55dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:text=""
+                android:background="#FFFFFF"/>
+
+            <TextView
+                android:id="@+id/friday3"
+                android:layout_width="55dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:text=""
+                android:background="#FFFFFF"/>
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:orientation="horizontal">
+
+            <TextView
+                android:layout_width="20dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:text="@string/_12"
+                android:gravity="end"
+                android:background="@color/D3D3D3"/>
+
+            <TextView
+                android:id="@+id/monday4"
+                android:layout_width="55dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:text=""
+                android:background="#FFFFFF"
+                />
+
+            <TextView
+                android:id="@+id/tuesday4"
+                android:layout_width="55dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:text=""
+                android:background="#FFFFFF"/>
+
+            <TextView
+                android:id="@+id/wednesday4"
+                android:layout_width="55dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:text=""
+                android:background="#FFFFFF"/>
+
+            <TextView
+                android:id="@+id/thursday4"
+                android:layout_width="55dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:text=""
+                android:background="#FFFFFF"/>
+
+            <TextView
+                android:id="@+id/friday4"
+                android:layout_width="55dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:text=""
+                android:background="#FFFFFF"/>
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:orientation="horizontal">
+
+            <TextView
+                android:layout_width="20dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:text="@string/_13"
+                android:gravity="end"
+                android:background="@color/D3D3D3"/>
+
+            <TextView
+                android:id="@+id/monday5"
+                android:layout_width="55dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:text=""
+                android:background="#FFFFFF"
+                />
+
+            <TextView
+                android:id="@+id/tuesday5"
+                android:layout_width="55dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:text=""
+                android:background="#FFFFFF"/>
+
+            <TextView
+                android:id="@+id/wednesday5"
+                android:layout_width="55dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:text=""
+                android:background="#FFFFFF"/>
+
+            <TextView
+                android:id="@+id/thursday5"
+                android:layout_width="55dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:text=""
+                android:background="#FFFFFF"/>
+
+            <TextView
+                android:id="@+id/friday5"
+                android:layout_width="55dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:text=""
+                android:background="#FFFFFF"/>
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:orientation="horizontal">
+
+            <TextView
+                android:layout_width="20dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:text="@string/_14"
+                android:gravity="end"
+                android:background="@color/D3D3D3"/>
+
+            <TextView
+                android:id="@+id/monday6"
+                android:layout_width="55dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:background="#FFFFFF"
+                android:text="" />
+
+            <TextView
+                android:id="@+id/tuesday6"
+                android:layout_width="55dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:text=""
+                android:background="#FFFFFF"/>
+
+            <TextView
+                android:id="@+id/wednesday6"
+                android:layout_width="55dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:text=""
+                android:background="#FFFFFF"/>
+
+            <TextView
+                android:id="@+id/thursday6"
+                android:layout_width="55dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:text=""
+                android:background="#FFFFFF"/>
+
+            <TextView
+                android:id="@+id/friday6"
+                android:layout_width="55dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:text=""
+                android:background="#FFFFFF"/>
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:orientation="horizontal">
+
+            <TextView
+                android:layout_width="20dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:text="@string/_15"
+                android:gravity="end"
+                android:background="@color/D3D3D3"/>
+
+            <TextView
+                android:id="@+id/monday7"
+                android:layout_width="55dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:text=""
+                android:background="#FFFFFF"
+                />
+
+            <TextView
+                android:id="@+id/tuesday7"
+                android:layout_width="55dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:text=""
+                android:background="#FFFFFF"/>
+
+            <TextView
+                android:id="@+id/wednesday7"
+                android:layout_width="55dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:text=""
+                android:background="#FFFFFF"/>
+
+            <TextView
+                android:id="@+id/thursday7"
+                android:layout_width="55dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:text=""
+                android:background="#FFFFFF"/>
+
+            <TextView
+                android:id="@+id/friday7"
+                android:layout_width="55dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:text=""
+                android:background="#FFFFFF"/>
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:orientation="horizontal">
+
+            <TextView
+                android:layout_width="20dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:text="@string/_16"
+                android:gravity="end"
+                android:background="@color/D3D3D3"/>
+
+            <TextView
+                android:id="@+id/monday8"
+                android:layout_width="55dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:text=""
+                android:background="#FFFFFF"
+                />
+
+            <TextView
+                android:id="@+id/tuesday8"
+                android:layout_width="55dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:text=""
+                android:background="#FFFFFF"/>
+
+            <TextView
+                android:id="@+id/wednesday8"
+                android:layout_width="55dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:text=""
+                android:background="#FFFFFF"/>
+
+            <TextView
+                android:id="@+id/thursday8"
+                android:layout_width="55dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:text=""
+                android:background="#FFFFFF"/>
+
+            <TextView
+                android:id="@+id/friday8"
+                android:layout_width="55dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:text=""
+                android:background="#FFFFFF"/>
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:orientation="horizontal">
+
+            <TextView
+                android:layout_width="20dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:text="@string/_17"
+                android:gravity="end"
+                android:background="@color/D3D3D3"/>
+
+            <TextView
+                android:id="@+id/monday9"
+                android:layout_width="55dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:text=""
+                android:background="#FFFFFF"
+                />
+
+            <TextView
+                android:id="@+id/tuesday9"
+                android:layout_width="55dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:text=""
+                android:background="#FFFFFF"/>
+
+            <TextView
+                android:id="@+id/wednesday9"
+                android:layout_width="55dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:text=""
+                android:background="#FFFFFF"/>
+
+            <TextView
+                android:id="@+id/thursday9"
+                android:layout_width="55dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:text=""
+                android:background="#FFFFFF"/>
+
+            <TextView
+                android:id="@+id/friday9"
+                android:layout_width="55dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:text=""
+                android:background="#FFFFFF"/>
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:orientation="horizontal">
+
+            <TextView
+                android:layout_width="20dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:text="@string/_18"
+                android:gravity="end"
+                android:background="@color/D3D3D3"/>
+
+            <TextView
+                android:id="@+id/monday10"
+                android:layout_width="55dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:text=""
+                android:background="#FFFFFF"/>
+
+            <TextView
+                android:id="@+id/tuesday10"
+                android:layout_width="55dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:text=""
+                android:background="#FFFFFF"/>
+
+            <TextView
+                android:id="@+id/wednesday10"
+                android:layout_width="55dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:text=""
+                android:background="#FFFFFF"/>
+
+            <TextView
+                android:id="@+id/thursday10"
+                android:layout_width="55dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:text=""
+                android:background="#FFFFFF"/>
+
+            <TextView
+                android:id="@+id/friday10"
+                android:layout_width="55dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:text=""
+                android:background="#FFFFFF"/>
+
+        </LinearLayout>
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="0.8"
+            tools:ignore="TooManyViews">
+
+            <Button
+                android:id="@+id/plus_btn"
+                android:layout_width="50dp"
+                android:layout_height="50dp"
+                android:layout_marginTop="3dp"
+                android:layout_marginBottom="3dp"
+                android:layout_alignParentBottom="true"
+                android:layout_alignParentEnd="true"
+                android:background="@drawable/plusicon"
+                android:backgroundTint="@color/D3D3D3" />
+
+        </RelativeLayout>
+
+    </LinearLayout>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

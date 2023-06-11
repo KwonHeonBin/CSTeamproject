@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <item
+        android:title="@string/backgroundRed"
+        android:id="@+id/background_red"
+        />
+    <item
+        android:title="@string/backgroundGreen"
+        android:id="@+id/background_green"
+        />
+    <item
+        android:title="@string/backgroundYellow"
+        android:id="@+id/background_yellow"/>
+    <item
+        android:title="@string/backgroundGray"
+        android:id="@+id/background_gray"/>
+    <item
+        android:title="@string/backgroundBlue"
+        android:id="@+id/background_blue"/>
+
+    <item
+        android:title="기본 색상"
+        android:id="@+id/background_default"
+        />
+
+</menu>

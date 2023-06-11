@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <item
+        android:title="@string/monday"
+        android:id="@+id/daySelect_mon" />
+    <item
+        android:title="@string/tuesday"
+        android:id="@+id/daySelect_tue" />
+    <item
+        android:title="@string/wednesday"
+        android:id="@+id/daySelect_wed" />
+    <item
+        android:title="@string/thursday"
+        android:id="@+id/daySelect_thu" />
+    <item
+        android:title="@string/friday"
+        android:id="@+id/daySelect_fri" />
+
+</menu>

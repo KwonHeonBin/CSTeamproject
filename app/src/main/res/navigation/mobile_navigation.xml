@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/mobile_navigation"
+    app:startDestination="@+id/nav_home">
+
+    <fragment
+        android:id="@+id/nav_home"
+        android:name="com.example.cud.ui.home.HomeFragment"
+        android:label="모든 노트"
+        tools:layout="@layout/fragment_home" />
+
+    <fragment
+        android:id="@+id/nav_schedule"
+        android:name="com.example.cud.ui.schedule.ScheduleFragment"
+        android:label="시간표"
+        tools:layout="@layout/fragment_schedule" />
+
+    <fragment
+        android:id="@+id/nav_trash"
+        android:name="com.example.cud.ui.trash.TrashFragment"
+        android:label="쓰레기통"
+        tools:layout="@layout/fragment_trash" />
+
+    <fragment
+        android:id="@+id/nav_settings"
+        android:name="com.example.cud.ui.settings.SettingsFragment"
+        android:label="환경설정"
+        tools:layout="@layout/fragment_settings" />
+
+</navigation>

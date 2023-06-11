@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.appcompat.widget.LinearLayoutCompat xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="200dp"
+    android:layout_height="wrap_content"
+    android:layout_weight="0.6"
+    android:orientation="vertical"
+    android:background="@drawable/round"
+    android:layout_gravity="center_horizontal">
+    <androidx.appcompat.widget.AppCompatButton
+        android:id="@+id/pageButton"
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:paddingStart="20dp"
+        android:background="@drawable/roundoutline"
+        android:drawableStart="@drawable/grid"
+        android:text="페이지 격자"
+        android:textStyle="bold"/>
+
+    <Space
+        android:layout_width="wrap_content"
+        android:layout_height="10dp"
+        android:layout_weight="1"/>
+
+    <androidx.appcompat.widget.AppCompatButton
+        android:id="@+id/broomButton"
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:paddingStart="20dp"
+        android:background="@drawable/roundoutline"
+        android:drawableStart="@drawable/broom"
+        android:text="초기화"
+        android:textStyle="bold"/>
+
+    <Space
+        android:layout_width="wrap_content"
+        android:layout_height="10dp"
+        android:layout_weight="1"/>
+
+    <ImageView
+        android:src="@drawable/draw_dash_line"
+        android:layout_width="match_parent"
+        android:layout_height="2dp"
+        />
+
+    <Space
+        android:layout_width="wrap_content"
+        android:layout_height="10dp"
+        android:layout_weight="1"/>
+
+    <androidx.appcompat.widget.LinearLayoutCompat
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <androidx.appcompat.widget.AppCompatButton
+            android:id="@+id/dosavebt"
+            android:layout_width="wrap_content"
+            android:layout_height="50dp"
+            android:background="@drawable/round"
+            android:drawableTop="@drawable/save_as"
+            android:text=""/>
+
+        <androidx.appcompat.widget.AppCompatButton
+            android:id="@+id/dodeletebt"
+            android:layout_width="wrap_content"
+            android:layout_height="50dp"
+            android:background="@drawable/round"
+            android:drawableTop="@drawable/delete"
+            android:clickable="false"
+            android:text=""/>
+
+    </androidx.appcompat.widget.LinearLayoutCompat>
+
+
+
+
+</androidx.appcompat.widget.LinearLayoutCompat>
