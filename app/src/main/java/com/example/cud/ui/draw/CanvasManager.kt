@@ -81,10 +81,15 @@ class CanvasManager:LinearLayout {
             return sqrt(p1.first.pow(2)+p1.second.pow(2))
         }
         fun saveCanvas(){
+
             if(unStroke.size>=20){ unStroke.removeAt(0)}
             unStroke.add(pathList.clone() as ArrayList<Stroke>)
             if(unPage.size>=20){ unPage.removeAt(0)}
             unPage.add(pages.size)
+            if(unImg.size>=20){ unImg.removeAt(0)}
+            reImg.add(imgList.clone() as ArrayList<Image>)
+            if(unText.size>=20){ unText.removeAt(0)}
+            reText.add(textList.clone() as ArrayList<CustomEditText>)
         }
         fun strokeDeepCopy(source:ArrayList<Stroke>):ArrayList<Stroke>{
             val out=ArrayList<Stroke>()
@@ -397,6 +402,7 @@ class CanvasManager:LinearLayout {
         unPage.add(pages.size)
         unImg.add(imgList.clone() as ArrayList<Image>)
         unText.add(textList.clone() as ArrayList<CustomEditText>)
+        Log.d("asd", "Img: "+unImg.size.toString()+"  stroke:  "+ unStroke.size.toString())
     }
     fun addReState(stroke:ArrayList<Stroke>,page:ArrayList<canvasView>){// 되돌리기 취소 추가 // 05.20 추가
         val st=strokeDeepCopy(stroke)
@@ -506,20 +512,6 @@ class CanvasManager:LinearLayout {
 
     }
 
-    private fun strokeDeepCopy(source:ArrayList<Stroke>):ArrayList<Stroke>{
-        val out=ArrayList<Stroke>()
-        for(i in source){
-            out.add(i.clone())
-        }
-        return out
-    }
-    private fun imageDeepCopy(source:ArrayList<Image>):ArrayList<Image>{
-        val out=ArrayList<Image>()
-        for(i in source){
-            out.add(i.clone() as Image)
-        }
-        return out
-    }
 //    private fun<T> deepCopy(source:ArrayList<T>):ArrayList<T>{
 //        val out=ArrayList<T>()
 //        for(i in source){

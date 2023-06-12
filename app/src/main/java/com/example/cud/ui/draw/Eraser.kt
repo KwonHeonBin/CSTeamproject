@@ -32,12 +32,11 @@ class Eraser {
                 if (distance <= radius) {
                     when (mode) {
                         0 -> {    // stroke delete
-                            saveCanvas()
-                            Log.d("asd","delete1")
                             pathList.remove(st)
                             return
                         }
                         1 -> {    // point delete
+
                             var index=st.point.indexOf(i)
                             if(index in 1..st.point.size-2){ // 점이 중간 지점에 있을 때
                                 var path1= Stroke()// 선을 2개로 나눔

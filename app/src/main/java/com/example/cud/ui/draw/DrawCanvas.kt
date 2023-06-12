@@ -199,11 +199,6 @@ class DrawCanvas : AppCompatActivity() {
         initViewModel()
         initListener()
 
-        // do while문을 이용해서 받은 page 수만큼 반복
-        // note는 사용하면 안됨
-
-        val test = focusedEditText?.text
-
         drawCanvasBinding.drawView.apply {
             setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
             setContent {
@@ -328,6 +323,7 @@ class DrawCanvas : AppCompatActivity() {
                                 IconButton(onClick = {
                                     if(mode!=1){
                                         mode=1
+                                        refreshState()// 스크롤 불가능 설정
                                     }else{
                                         basicMode = if (basicMode) {// change to textMode
                                             toolCheck.value = true
@@ -657,15 +653,17 @@ class DrawCanvas : AppCompatActivity() {
                                     }
                                 }else{
                                     IconButton(onClick = {
+                                        refreshState()
                                         if(mode!=2){
                                             mode=2
                                             scrollView.canvasManager.eraser.mode=0
-                                            scrollView.isScrollable=false
                                         }
                                         if(scrollView.canvasManager.eraser.mode == 0){
                                             scrollView.canvasManager.eraser.mode=1
+                                            Toast.makeText(ctx,"영역지우개",Toast.LENGTH_SHORT).show()
                                         }else if(scrollView.canvasManager.eraser.mode == 1){
                                             scrollView.canvasManager.eraser.mode=0
+                                            Toast.makeText(ctx,"획지우개",Toast.LENGTH_SHORT).show()
                                         }
                                     },Modifier.pointerInput(Unit){
                                         detectTapGestures(onDoubleTap = {
@@ -819,6 +817,7 @@ class DrawCanvas : AppCompatActivity() {
                                         }
                                     ){
                                         IconButton(onClick = {
+                                            refreshState()
                                             if(mode==1||mode==3){
                                                 if(offsetY > (screenHeight/2))
                                                 {
@@ -839,6 +838,7 @@ class DrawCanvas : AppCompatActivity() {
                                         }
                                     }
                                     IconButton(onClick = {
+                                        refreshState()
                                         if(mode == 4){
                                             when(scrollView.isScrollable){
                                                 false->{
@@ -872,10 +872,12 @@ class DrawCanvas : AppCompatActivity() {
                                         }
                                     }
                                     ToolButton(image = R.drawable.border_none_variant) {
+                                        refreshState()
                                         mode=5
                                         Toast.makeText(ctx,"wrap",Toast.LENGTH_SHORT).show()
                                     }
-                                    ToolButton(image = R.drawable.folder_image) { // 왠지 안됨
+                                    ToolButton(image = R.drawable.folder_image) {
+                                        refreshState()
                                         openGallery()
                                         Toast.makeText(ctx,"image",Toast.LENGTH_SHORT).show()
                                         mode=4
@@ -883,11 +885,13 @@ class DrawCanvas : AppCompatActivity() {
                                     // 도형
                                     ToolButton(image = R.drawable.arrow_u_left_top) {
                                         if(unStroke.isNotEmpty()){
+                                            refreshState()
                                             setList(true)// 05.20 추가
                                         }
                                     }
                                     ToolButton(image = R.drawable.arrow_u_right_top) {
                                         if (reStroke.isNotEmpty()) {
+                                            refreshState()
                                             setList(false)// 05.20 추가
                                         }
                                     }
@@ -1634,8 +1638,7 @@ class DrawCanvas : AppCompatActivity() {
     }
 
     private fun refreshState(){
-        if(mode!=7){
-            scrollView.isScrollable=false}
+        if(mode!=7){ scrollView.isScrollable=false }
         wrapAreaBox.clearBox()
         focusedImg?.clearBox()
         focusedImg=null
@@ -1684,7 +1687,7 @@ class DrawCanvas : AppCompatActivity() {
         return super.onOptionsItemSelected(item)
     }
 
-    fun getPathDateClass(){
+    private fun getPathDateClass(){
         for(stroke in pathList){
             var x=ArrayList<Float>()
             var y=ArrayList<Float>()
@@ -1701,7 +1704,7 @@ class DrawCanvas : AppCompatActivity() {
         //Log.v("path","path : "+ PathData!![0].pos_X[0].toString())
     }
 
-    fun getImgDateClass(){
+    private fun getImgDateClass(){
         for(img in imgList){
             NoteData.uri.add(img.imgURI.toString())
             NoteData.iPos_X.add(img.pos.first)
@@ -1714,14 +1717,14 @@ class DrawCanvas : AppCompatActivity() {
             NoteData.iId.add(img.id)
         }
     }
-    fun getTextDateClass(){
+    private fun getTextDateClass(){
         for(text in textList){
             NoteData.span.add(HtmlCompat.toHtml(text.text!!.toSpanned(), HtmlCompat.TO_HTML_PARAGRAPH_LINES_INDIVIDUAL))
             NoteData.gravity.add(text.gravity)
         }
     }
 
-    fun clearCompanion(){
+    private fun clearCompanion(){
         paintBrush = Paint().apply {
             isAntiAlias=true // set paintBrush
             color= currentBrush
@@ -1753,7 +1756,7 @@ class DrawCanvas : AppCompatActivity() {
         posY=-100f
     }
 
-    fun addPathData(){
+    private fun addPathData(){
         for (i in 0 until note.pId.size) {
             val pos:ArrayList<Pair<Float,Float>> = ArrayList()
             for(j in 0 until note.pPos_X[i].size){
@@ -1768,7 +1771,7 @@ class DrawCanvas : AppCompatActivity() {
         }
     }
 
-    fun addImgData(){
+    private fun addImgData(){
         for (i in 0 until note.iId.size) {
             imgList.add(
                 Image(
@@ -1789,7 +1792,7 @@ class DrawCanvas : AppCompatActivity() {
         }
     }
 
-    fun addTextData(){
+    private fun addTextData(){
 
     }
 }
