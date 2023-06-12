@@ -402,7 +402,6 @@ class CanvasManager:LinearLayout {
         unPage.add(pages.size)
         unImg.add(imgList.clone() as ArrayList<Image>)
         unText.add(textList.clone() as ArrayList<CustomEditText>)
-        Log.d("asd", "Img: "+unImg.size.toString()+"  stroke:  "+ unStroke.size.toString())
     }
     fun addReState(stroke:ArrayList<Stroke>,page:ArrayList<canvasView>){// 되돌리기 취소 추가 // 05.20 추가
         val st=strokeDeepCopy(stroke)
